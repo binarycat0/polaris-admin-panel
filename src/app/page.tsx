@@ -1,7 +1,44 @@
+'use client'
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
+import { checkAuthStatus, type AuthStatus } from "@/utils/auth";
 
 export default function Home() {
+  const [authStatus, setAuthStatus] = useState<AuthStatus>({
+    isAuthenticated: false,
+    isExpired: false
+  });
+
+  useEffect(() => {
+    // Check authentication status when component mounts
+    const status = checkAuthStatus();
+    setAuthStatus(status);
+
+    // Also check when the page becomes visible (user returns to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const newStatus = checkAuthStatus();
+        setAuthStatus(newStatus);
+      }
+    };
+
+    // Check when window gains focus (user returns from auth page)
+    const handleFocus = () => {
+      const newStatus = checkAuthStatus();
+      setAuthStatus(newStatus);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
   return (
       <div className={styles.page}>
         <main className={styles.main}>
@@ -36,42 +73,56 @@ export default function Home() {
             gap: '16px',
             alignItems: 'center'
           }}>
-            <li>
-              <Link href="/auth" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px 24px',
-                backgroundColor: 'var(--gray-alpha-100)',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'inherit',
-                fontSize: '18px',
-                fontWeight: '500',
-                transition: 'background-color 0.2s',
-                minWidth: '200px'
-              }}>
-                🔐 Authentication
-              </Link>
-            </li>
-            <li>
-              <Link href="/catalog" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px 24px',
-                backgroundColor: 'var(--gray-alpha-100)',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'inherit',
-                fontSize: '18px',
-                fontWeight: '500',
-                transition: 'background-color 0.2s',
-                minWidth: '200px'
-              }}>
-                📊 Catalogs
-              </Link>
-            </li>
+            {!authStatus.isAuthenticated ? (
+              <li>
+                <Link href="/auth" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '16px 24px',
+                  backgroundColor: 'var(--gray-alpha-100)',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s',
+                  minWidth: '200px'
+                }}>
+                  🔐 {authStatus.isExpired ? 'Re-authenticate' : 'Authenticate'}
+                </Link>
+                {authStatus.isExpired && (
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#ff6b6b',
+                    textAlign: 'center',
+                    margin: '8px 0 0 0',
+                    fontStyle: 'italic'
+                  }}>
+                    Your session has expired. Please authenticate again.
+                  </p>
+                )}
+              </li>
+            ) : (
+              <li>
+                <Link href="/catalog" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '16px 24px',
+                  backgroundColor: 'var(--gray-alpha-100)',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s',
+                  minWidth: '200px'
+                }}>
+                  📊 Catalogs
+                </Link>
+              </li>
+            )}
           </ul>
 
         </main>

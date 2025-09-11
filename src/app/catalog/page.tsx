@@ -7,6 +7,7 @@ import Grants, {Grant} from "@/app/ui/grants"
 import {useEffect, useState} from 'react'
 import {message, Spin} from 'antd';
 import {useRouter} from 'next/navigation';
+import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 
 export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
@@ -20,50 +21,16 @@ export default function Page() {
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const router = useRouter();
+  const { authenticatedFetch } = useAuthenticatedFetch();
 
   async function getCatalogs(): Promise<CatalogEntity[]> {
-    const accessToken = localStorage.getItem('access_token');
-    const tokenType = localStorage.getItem('token_type') || 'Bearer';
-
-    if (!accessToken) {
-      message.error('No access token found. Please authenticate first.');
-      router.push('/auth');
-      return [];
-    }
-
-    // Check if token is expired
-    const expiresAt = localStorage.getItem('token_expires_at');
-    if (expiresAt && Date.now() > parseInt(expiresAt)) {
-      message.error('Access token has expired. Please authenticate again.');
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('token_type');
-      localStorage.removeItem('token_expires_at');
-      router.push('/auth');
-      return [];
-    }
-
     try {
-      const res = await fetch('/api/catalogs', {
-        cache: 'no-store',
-        headers: {
-          'Authorization': `${tokenType} ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const data = await authenticatedFetch('/api/catalogs');
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          message.error('Authentication failed. Please login again.');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('token_type');
-          localStorage.removeItem('token_expires_at');
-          router.push('/auth');
-          return [];
-        }
-        throw new Error(`HTTP error! status: ${res.status}`);
+      if (!data) {
+        return []; // Authentication failed, user redirected
       }
 
-      const data = await res.json();
       console.log('API Response:', data); // Debug log to see the response structure
 
       // Handle different possible response structures
@@ -78,44 +45,19 @@ export default function Page() {
         return [];
       }
     } catch (error) {
-      console.error('Error fetching catalogs:', error);
-      message.error('Failed to fetch catalogs. Please try again.');
+      // Error handling is done in authenticatedFetch
       return [];
     }
   }
 
   async function getCatalogRoles(catalogName: string): Promise<CatalogRole[]> {
-    const accessToken = localStorage.getItem('access_token');
-    const tokenType = localStorage.getItem('token_type') || 'Bearer';
-
-    if (!accessToken) {
-      message.error('No access token found. Please authenticate first.');
-      router.push('/auth');
-      return [];
-    }
-
     try {
-      const res = await fetch(`/api/catalog-roles/${catalogName}`, {
-        cache: 'no-store',
-        headers: {
-          'Authorization': `${tokenType} ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const data = await authenticatedFetch(`/api/catalog-roles/${catalogName}`);
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          message.error('Authentication failed. Please login again.');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('token_type');
-          localStorage.removeItem('token_expires_at');
-          router.push('/auth');
-          return [];
-        }
-        throw new Error(`HTTP error! status: ${res.status}`);
+      if (!data) {
+        return []; // Authentication failed, user redirected
       }
 
-      const data = await res.json();
       console.log('Catalog Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
@@ -126,44 +68,19 @@ export default function Page() {
         return [];
       }
     } catch (error) {
-      console.error('Error fetching catalog roles:', error);
-      message.error('Failed to fetch catalog roles. Please try again.');
+      // Error handling is done in authenticatedFetch
       return [];
     }
   }
 
   async function getPrincipalRoles(catalogName: string, catalogRoleName: string): Promise<PrincipalRole[]> {
-    const accessToken = localStorage.getItem('access_token');
-    const tokenType = localStorage.getItem('token_type') || 'Bearer';
-
-    if (!accessToken) {
-      message.error('No access token found. Please authenticate first.');
-      router.push('/auth');
-      return [];
-    }
-
     try {
-      const res = await fetch(`/api/principal-roles/${catalogName}/${catalogRoleName}`, {
-        cache: 'no-store',
-        headers: {
-          'Authorization': `${tokenType} ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const data = await authenticatedFetch(`/api/principal-roles/${catalogName}/${catalogRoleName}`);
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          message.error('Authentication failed. Please login again.');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('token_type');
-          localStorage.removeItem('token_expires_at');
-          router.push('/auth');
-          return [];
-        }
-        throw new Error(`HTTP error! status: ${res.status}`);
+      if (!data) {
+        return []; // Authentication failed, user redirected
       }
 
-      const data = await res.json();
       console.log('Principal Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
@@ -174,8 +91,7 @@ export default function Page() {
         return [];
       }
     } catch (error) {
-      console.error('Error fetching principal roles:', error);
-      message.error('Failed to fetch principal roles. Please try again.');
+      // Error handling is done in authenticatedFetch
       return [];
     }
   }
@@ -196,37 +112,13 @@ export default function Page() {
   };
 
   async function getGrants(catalogName: string, catalogRoleName: string): Promise<Grant[]> {
-    const accessToken = localStorage.getItem('access_token');
-    const tokenType = localStorage.getItem('token_type') || 'Bearer';
-
-    if (!accessToken) {
-      message.error('No access token found. Please authenticate first.');
-      router.push('/auth');
-      return [];
-    }
-
     try {
-      const res = await fetch(`/api/grants/${catalogName}/${catalogRoleName}`, {
-        cache: 'no-store',
-        headers: {
-          'Authorization': `${tokenType} ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const data = await authenticatedFetch(`/api/grants/${catalogName}/${catalogRoleName}`);
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          message.error('Authentication failed. Please login again.');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('token_type');
-          localStorage.removeItem('token_expires_at');
-          router.push('/auth');
-          return [];
-        }
-        throw new Error(`HTTP error! status: ${res.status}`);
+      if (!data) {
+        return []; // Authentication failed, user redirected
       }
 
-      const data = await res.json();
       console.log('Grants API Response:', data);
 
       // Handle different possible response structures
@@ -241,8 +133,7 @@ export default function Page() {
         return [];
       }
     } catch (error) {
-      console.error('Error fetching grants:', error);
-      message.error('Failed to fetch grants. Please try again.');
+      // Error handling is done in authenticatedFetch
       return [];
     }
   }

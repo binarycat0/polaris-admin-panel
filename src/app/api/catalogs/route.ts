@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('Fetching catalogs from:', apiManagementCatalogUrl);
+
     const response = await fetch(apiManagementCatalogUrl, {
       method: 'GET',
       headers: {
@@ -28,15 +30,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    console.log('Backend response status:', response.status);
+
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Backend error response:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
     return NextResponse.json(data);
   } catch (error) {
     console.error('Catalogs proxy error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      apiUrl: apiManagementCatalogUrl
+    });
     return NextResponse.json(
         {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
         {status: 500}
