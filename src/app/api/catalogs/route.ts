@@ -42,11 +42,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Catalogs proxy error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      apiUrl: apiManagementCatalogUrl
-    });
     return NextResponse.json(
         {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
         {status: 500}

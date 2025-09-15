@@ -2,9 +2,9 @@
  * Custom hook for making authenticated API requests with automatic 401 handling
  */
 
-import { useRouter } from 'next/navigation';
-import { message } from 'antd';
-import { checkAuthStatus, handleAuthFailure, getAuthHeaders } from '@/utils/auth';
+import {useRouter} from 'next/navigation';
+import {message} from 'antd';
+import {checkAuthStatus, getAuthHeaders, handleAuthFailure} from '@/utils/auth';
 
 export function useAuthenticatedFetch() {
   const router = useRouter();
@@ -16,12 +16,12 @@ export function useAuthenticatedFetch() {
    * @returns Promise with the response data or null if authentication failed
    */
   const authenticatedFetch = async (
-    url: string, 
-    options: RequestInit = {}
+      url: string,
+      options: RequestInit = {}
   ): Promise<any> => {
     // Check authentication status first
     const authStatus = checkAuthStatus();
-    
+
     if (!authStatus.isAuthenticated) {
       if (authStatus.isExpired) {
         message.error('Your session has expired. Please authenticate again.');
@@ -51,39 +51,25 @@ export function useAuthenticatedFetch() {
       });
 
       // Handle 401 responses
-      if (response.status === 401) {
+      if (!response.ok) {
+        const errorText = await response.json().catch(() => {
+          return {"error": {"message": "Unknown error"}}
+        });
+        console.error(`HTTP ${response.status} error for ${url}:`, errorText.error.message);
+        message.error('An unexpected error occurred. Please try again.');
+
         handleAuthFailure(router, 'Authentication failed. Please login again.');
         return null;
-      }
-
-      // Handle other error responses
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`HTTP ${response.status} error for ${url}:`, errorText);
-
-        if (response.status >= 500) {
-          message.error('Server error occurred. Please try again later.');
-        } else {
-          message.error(`Request failed with status ${response.status}`);
-        }
-
-        return null; // Return null instead of throwing for non-auth errors
       }
 
       return await response.json();
     } catch (error) {
       console.error(`Error fetching ${url}:`, error);
+      message.error('An unexpected error occurred. Please try again.');
 
-      // Only show user-facing error if it's not already handled above
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        message.error('Network error. Please check your connection.');
-      } else if (!error.message.includes('HTTP error')) {
-        message.error('An unexpected error occurred. Please try again.');
-      }
-
-      return null; // Return null instead of throwing
+      return null;
     }
   };
 
-  return { authenticatedFetch };
+  return {authenticatedFetch};
 }
