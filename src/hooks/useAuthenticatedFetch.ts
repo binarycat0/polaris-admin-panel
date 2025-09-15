@@ -5,6 +5,7 @@
 import {useRouter} from 'next/navigation';
 import {message} from 'antd';
 import {checkAuthStatus, getAuthHeaders, handleAuthFailure} from '@/utils/auth';
+import {useCallback} from 'react';
 
 export function useAuthenticatedFetch() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export function useAuthenticatedFetch() {
    * @param options - Fetch options (method, body, etc.)
    * @returns Promise with the response data or null if authentication failed
    */
-  const authenticatedFetch = async (
+  const authenticatedFetch = useCallback(async (
       url: string,
       options: RequestInit = {}
   ): Promise<unknown> => {
@@ -69,7 +70,7 @@ export function useAuthenticatedFetch() {
 
       return null;
     }
-  };
+  }, [router]);
 
   return {authenticatedFetch};
 }
