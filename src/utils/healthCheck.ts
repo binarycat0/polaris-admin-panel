@@ -60,7 +60,7 @@ export async function checkManagementApiHealth(): Promise<HealthCheckResult> {
 }
 
 /**
- * Check if the Polaris catalog API is reachable
+ * Check if the Polaris catalogs API is reachable
  */
 export async function checkCatalogApiHealth(): Promise<HealthCheckResult> {
   const startTime = Date.now();

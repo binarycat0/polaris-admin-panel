@@ -56,8 +56,8 @@ export default function Page() {
 
         message.success('Authentication successful!');
 
-        // Redirect to catalog page or dashboard
-        window.location.href = '/catalog';
+        // Redirect to catalogs page or dashboard
+        window.location.href = '/catalogs';
 
       } else {
         const errorData = await response.json().catch(() => ({}));

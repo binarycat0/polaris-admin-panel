@@ -8,6 +8,7 @@ import {useEffect, useState} from 'react'
 import {message, Spin} from 'antd';
 import {useRouter} from 'next/navigation';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+import styles from './page.module.css';
 
 export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
@@ -64,7 +65,7 @@ export default function Page() {
       if (data && Array.isArray(data.roles)) {
         return data.roles;
       } else {
-        console.error('Unexpected catalog roles response structure:', data);
+        console.error('Unexpected catalogs roles response structure:', data);
         return [];
       }
     } catch (error) {
@@ -98,7 +99,7 @@ export default function Page() {
 
   const handleCatalogRowClick = async (catalogName: string) => {
     setSelectedCatalog(catalogName);
-    setSelectedCatalogRole(null); // Clear selected catalog role
+    setSelectedCatalogRole(null); // Clear selected catalogs role
     setPrincipalRoles([]); // Clear principal roles
     setGrants([]); // Clear grants
     setRolesLoading(true);
@@ -173,39 +174,16 @@ export default function Page() {
 
   if (loading) {
     return (
-      <div style={{
-        padding: '24px',
-        minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
+      <div className={styles.loadingContainer}>
         <Spin size="large"/>
       </div>
     );
   }
 
   return (
-    <div style={{
-      padding: '24px',
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <div style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        padding: '32px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{
-          marginBottom: 32,
-          fontSize: '28px',
-          fontWeight: 600,
-          color: '#262626'
-        }}>
+    <div className={styles.pageContainer}>
+      <div className={styles.contentWrapper}>
+        <h1 className={styles.title}>
           Catalogs
         </h1>
         <Catalogs

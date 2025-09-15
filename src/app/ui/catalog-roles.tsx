@@ -160,7 +160,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
           },
         })}
         rowClassName={(record) =>
-          selectedCatalogRole === record.name ? 'selected-catalog-role-row' : ''
+          selectedCatalogRole === record.name ? 'selected-catalogs-role-row' : ''
         }
         pagination={{
           pageSize: 5,

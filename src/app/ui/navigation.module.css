@@ -1,0 +1,95 @@
+/* Navigation container */
+.nav {
+  background-color: #001529;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Navigation inner container */
+.navContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+/* Brand/Logo link */
+.brand {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand:hover {
+  opacity: 0.8;
+}
+
+/* Navigation links container */
+.navLinks {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+/* Navigation link base styles */
+.navLink {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover {
+  opacity: 0.8;
+}
+
+/* Active navigation link */
+.navLink.active {
+  color: #1890ff;
+  font-weight: 600;
+  background-color: rgba(24, 144, 255, 0.1);
+}
+
+/* Auth status container */
+.authStatus {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Sign in button */
+.signInButton {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 1px solid #ffffff;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.signInButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Authenticated status */
+.authenticatedStatus {
+  color: #52c41a;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

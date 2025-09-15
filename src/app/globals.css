@@ -40,3 +40,8 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Ensure main content doesn't overlap with sticky nav */
+main {
+  min-height: calc(100vh - 64px);
+}
