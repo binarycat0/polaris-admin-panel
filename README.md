@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Setup ENV variables
+
+Create .env file and add the following variables:
+
+```
+# Polaris Management API
+POLARIS_MANAGEMENT_API_URL="http://localhost:8181/api/management/v1"
+
+# Polaris Catalog API
+POLARIS_CATALOG_API_URL="http://localhost:8181/api/catalog/v1"
+```
+
 ## Getting Started
 
 First, run the development server:
