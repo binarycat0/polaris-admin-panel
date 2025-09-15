@@ -4,7 +4,7 @@ import {apiManagementCatalogRolesUrl} from "@/app/constants";
 
 export async function GET(
     request: NextRequest,
-    {params}: { params: { catalogName: string } }
+    {params}: { params: Promise<{ catalogName: string }> }
 ) {
   try {
     // Get the Authorization header from the incoming request
@@ -23,7 +23,7 @@ export async function GET(
       );
     }
 
-    const {catalogName} = params;
+    const {catalogName} = await params;
 
     const response = await fetch(apiManagementCatalogRolesUrl(catalogName), {
       method: 'GET',

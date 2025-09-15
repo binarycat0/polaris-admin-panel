@@ -6,12 +6,21 @@ import type { ColumnsType } from 'antd/es/table'
 const { Text, Title } = Typography;
 
 export interface Grant {
-  [key: string]: any; // Flexible interface since schema wasn't provided
-}
-
-interface GrantsResponse {
-  grants?: Grant[];
-  [key: string]: any; // Flexible response structure
+  id?: string;
+  name?: string;
+  type?: string;
+  privilege?: string;
+  resource?: string;
+  grantee?: string;
+  grantor?: string;
+  createTimestamp?: number;
+  lastUpdateTimestamp?: number;
+  createdAt?: number;
+  updatedAt?: number;
+  version?: number;
+  entityVersion?: number;
+  properties?: Record<string, unknown>;
+  [key: string]: unknown; // Allow additional properties
 }
 
 interface GrantsProps {
@@ -48,7 +57,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
     const versionFields = ['version', 'entityVersion'];
 
     // Add special columns first
-    Object.keys(sampleGrant).forEach((key, index) => {
+    Object.keys(sampleGrant).forEach((key) => {
       if (specialFields.includes(key)) {
         if (key === 'name' || key === 'id') {
           columns.push({
@@ -61,7 +70,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
             dataIndex: key,
             key: key,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: any) => (
+            render: (value: unknown) => (
               <Text strong style={{ color: '#fa8c16' }}>{String(value || 'N/A')}</Text>
             ),
           });
@@ -72,7 +81,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
             key: key,
             width: 120,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: any) => (
+            render: (value: unknown) => (
               <Tag color="orange">{String(value || 'N/A')}</Tag>
             ),
           });
@@ -82,7 +91,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
             dataIndex: key,
             key: key,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: any) => (
+            render: (value: unknown) => (
               <Text>{String(value || 'N/A')}</Text>
             ),
           });
@@ -98,9 +107,9 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
           dataIndex: key,
           key: key,
           width: 100,
-          sorter: (a, b) => (a[key] || 0) - (b[key] || 0),
-          render: (value: any) => (
-            <Tag color="orange">v{value || 0}</Tag>
+          sorter: (a, b) => (Number(a[key]) || 0) - (Number(b[key]) || 0),
+          render: (value: unknown) => (
+            <Tag color="orange">v{Number(value) || 0}</Tag>
           ),
         });
       }
@@ -119,9 +128,9 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
           dataIndex: key,
           key: key,
           width: 180,
-          sorter: (a, b) => (a[key] || 0) - (b[key] || 0),
-          render: (value: any) => (
-            <Text type="secondary">{formatDate(value)}</Text>
+          sorter: (a, b) => (Number(a[key]) || 0) - (Number(b[key]) || 0),
+          render: (value: unknown) => (
+            <Text type="secondary">{formatDate(Number(value))}</Text>
           ),
         });
       }
@@ -147,14 +156,14 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
         key: 'additionalData',
         width: 250,
         render: (_, record) => {
-          const additionalData: Array<[string, any]> = [];
-          
+          const additionalData: Array<[string, unknown]> = [];
+
           remainingFields.forEach(field => {
             if (record[field] && typeof record[field] === 'object') {
               if (Array.isArray(record[field])) {
-                additionalData.push([field, `Array(${record[field].length})`]);
+                additionalData.push([field, `Array(${(record[field] as unknown[]).length})`]);
               } else {
-                Object.entries(record[field]).forEach(([key, value]) => {
+                Object.entries(record[field] as Record<string, unknown>).forEach(([key, value]) => {
                   additionalData.push([`${field}.${key}`, value]);
                 });
               }
@@ -200,7 +209,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
     <div style={{ marginTop: 24 }}>
       <Title level={5} style={{ marginBottom: 16 }}>
         <KeyOutlined style={{ marginRight: 8, color: '#fa8c16' }} />
-        Grants for Catalog Role "{catalogRoleName}" in "{catalogName}"
+        Grants for Catalog Role &quot;{catalogRoleName}&quot; in &quot;{catalogName}&quot;
       </Title>
       
       <Table

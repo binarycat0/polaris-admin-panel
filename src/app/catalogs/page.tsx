@@ -4,9 +4,8 @@ import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
 import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
-import {useEffect, useState} from 'react'
-import {message, Spin} from 'antd';
-import {useRouter} from 'next/navigation';
+import {useEffect, useState, useCallback} from 'react'
+import {Spin} from 'antd';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import styles from './page.module.css';
 
@@ -21,10 +20,9 @@ export default function Page() {
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
-  const router = useRouter();
   const { authenticatedFetch } = useAuthenticatedFetch();
 
-  async function getCatalogs(): Promise<CatalogEntity[]> {
+  const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
     try {
       const data = await authenticatedFetch('/api/catalogs');
 
@@ -37,19 +35,19 @@ export default function Page() {
       // Handle different possible response structures
       if (Array.isArray(data)) {
         return data;
-      } else if (data && Array.isArray(data.catalogs)) {
-        return data.catalogs;
-      } else if (data && Array.isArray(data.data)) {
-        return data.data;
+      } else if (data && typeof data === 'object' && 'catalogs' in data && Array.isArray((data as { catalogs: unknown }).catalogs)) {
+        return (data as { catalogs: CatalogEntity[] }).catalogs;
+      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as { data: unknown }).data)) {
+        return (data as { data: CatalogEntity[] }).data;
       } else {
         console.error('Unexpected API response structure:', data);
         return [];
       }
-    } catch (error) {
+    } catch {
       // Error handling is done in authenticatedFetch
       return [];
     }
-  }
+  }, [authenticatedFetch]);
 
   async function getCatalogRoles(catalogName: string): Promise<CatalogRole[]> {
     try {
@@ -62,13 +60,13 @@ export default function Page() {
       console.log('Catalog Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
-      if (data && Array.isArray(data.roles)) {
-        return data.roles;
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+        return (data as { roles: CatalogRole[] }).roles;
       } else {
         console.error('Unexpected catalogs roles response structure:', data);
         return [];
       }
-    } catch (error) {
+    } catch {
       // Error handling is done in authenticatedFetch
       return [];
     }
@@ -85,13 +83,13 @@ export default function Page() {
       console.log('Principal Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
-      if (data && Array.isArray(data.roles)) {
-        return data.roles;
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+        return (data as { roles: PrincipalRole[] }).roles;
       } else {
         console.error('Unexpected principal roles response structure:', data);
         return [];
       }
-    } catch (error) {
+    } catch {
       // Error handling is done in authenticatedFetch
       return [];
     }
@@ -125,15 +123,15 @@ export default function Page() {
       // Handle different possible response structures
       if (Array.isArray(data)) {
         return data;
-      } else if (data && Array.isArray(data.grants)) {
-        return data.grants;
-      } else if (data && Array.isArray(data.data)) {
-        return data.data;
+      } else if (data && typeof data === 'object' && 'grants' in data && Array.isArray((data as { grants: unknown }).grants)) {
+        return (data as { grants: Grant[] }).grants;
+      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as { data: unknown }).data)) {
+        return (data as { data: Grant[] }).data;
       } else {
         console.error('Unexpected grants response structure:', data);
         return [];
       }
-    } catch (error) {
+    } catch {
       // Error handling is done in authenticatedFetch
       return [];
     }
@@ -170,7 +168,7 @@ export default function Page() {
     };
 
     fetchCatalogs();
-  }, []);
+  }, [getCatalogs]);
 
   if (loading) {
     return (

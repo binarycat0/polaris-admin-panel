@@ -79,7 +79,7 @@ export function isAuthenticated(): boolean {
  * @param router - Next.js router instance
  * @param message - Optional custom error message
  */
-export function handleAuthFailure(router: any, customMessage?: string): void {
+export function handleAuthFailure(router: { push: (url: string) => void }, customMessage?: string): void {
   clearAuthData();
 
   // Import message dynamically to avoid SSR issues

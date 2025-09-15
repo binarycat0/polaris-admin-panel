@@ -16,10 +16,6 @@ export interface PrincipalRole {
   entityVersion: number;
 }
 
-interface PrincipalRolesResponse {
-  roles: PrincipalRole[];
-}
-
 interface PrincipalRolesProps {
   catalogName: string;
   catalogRoleName: string;
@@ -166,7 +162,7 @@ export default function PrincipalRoles({ catalogName, catalogRoleName, roles, lo
     <div style={{ marginTop: 24 }}>
       <Title level={5} style={{ marginBottom: 16 }}>
         <TeamOutlined style={{ marginRight: 8, color: '#722ed1' }} />
-        Principal Roles for Catalog Role "{catalogRoleName}" in "{catalogName}"
+        Principal Roles for Catalog Role &quot;{catalogRoleName}&quot; in &quot;{catalogName}&quot;
       </Title>
       
       <Table

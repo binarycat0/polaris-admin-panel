@@ -18,7 +18,7 @@ export function useAuthenticatedFetch() {
   const authenticatedFetch = async (
       url: string,
       options: RequestInit = {}
-  ): Promise<any> => {
+  ): Promise<unknown> => {
     // Check authentication status first
     const authStatus = checkAuthStatus();
 

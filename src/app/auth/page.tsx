@@ -1,11 +1,11 @@
-
 'use client'
 
-import { Form, Input, Button, Card, Typography, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import {Form, Input, Button, Card, Typography, message} from 'antd';
+import {UserOutlined, LockOutlined} from '@ant-design/icons';
+import {useState} from 'react';
+import type { ValidateErrorEntity } from 'rc-field-form/lib/interface';
 
-const { Title } = Typography;
+const {Title} = Typography;
 
 interface LoginFormValues {
   username: string; // client_id
@@ -56,8 +56,7 @@ export default function Page() {
 
         message.success('Authentication successful!');
 
-        // Redirect to catalogs page or dashboard
-        window.location.href = '/catalogs';
+        window.location.href = '/';
 
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -71,90 +70,91 @@ export default function Page() {
     }
   };
 
-  const onFinishFailed = (errorInfo: any) => {
+  const onFinishFailed = (errorInfo: ValidateErrorEntity<LoginFormValues>) => {
     console.log('Failed:', errorInfo);
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f0f2f5'
-    }}>
-      <Card
-        style={{
-          width: 400,
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <Title level={2}>Polaris Authentication</Title>
-          <p style={{ color: '#666', marginTop: 8 }}>
-            Enter your OAuth2 client credentials
-          </p>
-        </div>
-
-        <Form
-          form={form}
-          name="login"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          layout="vertical"
-          initialValues={{
-            username: "root",
-            password: "s3cr3t"
-          }}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: 'calc(100vh - 64px)',
+        backgroundColor: '#f0f2f5',
+        padding: '20px 0'
+      }}>
+        <Card
+            style={{
+              width: 400,
+              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+            }}
         >
-          <Form.Item
-            label="Client ID"
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your client ID!'
-              }
-            ]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="Enter your OAuth2 client ID"
-              size="large"
-            />
-          </Form.Item>
+          <div style={{textAlign: 'center', marginBottom: 24}}>
+            <Title level={2}>Polaris Authentication</Title>
+            <p style={{color: '#666', marginTop: 8}}>
+              Enter your OAuth2 client credentials
+            </p>
+          </div>
 
-          <Form.Item
-            label="Client Secret"
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your client secret!'
-              }
-            ]}
+          <Form
+              form={form}
+              name="login"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              layout="vertical"
+              initialValues={{
+                username: "root",
+                password: "s3cr3t"
+              }}
           >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Enter your OAuth2 client secret"
-              size="large"
-            />
-          </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              size="large"
-              loading={loading}
-              style={{ width: '100%' }}
+            <Form.Item
+                label="Client ID"
+                name="username"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your client ID!'
+                  }
+                ]}
             >
-              Authenticate
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
+              <Input
+                  prefix={<UserOutlined/>}
+                  placeholder="Enter your OAuth2 client ID"
+                  size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+                label="Client Secret"
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your client secret!'
+                  }
+                ]}
+            >
+              <Input.Password
+                  prefix={<LockOutlined/>}
+                  placeholder="Enter your OAuth2 client secret"
+                  size="large"
+              />
+            </Form.Item>
+
+            <Form.Item style={{marginBottom: 0}}>
+              <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  loading={loading}
+                  style={{width: '100%'}}
+              >
+                Authenticate
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
   );
 }

@@ -8,6 +8,7 @@ import styles from './page.module.css';
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { authenticatedFetch } = useAuthenticatedFetch();
 
   useEffect(() => {

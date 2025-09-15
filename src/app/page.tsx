@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import styles from "./page.module.css";
 import {type AuthStatus, checkAuthStatus} from "@/utils/auth";
+import Link from 'next/link';
 
 export default function Home() {
   const [authStatus, setAuthStatus] = useState<AuthStatus>({
@@ -48,8 +49,16 @@ export default function Home() {
             <p className={styles.subtitle}>
               Manage your Apache Polaris Instance
             </p>
+
+            {
+                !authStatus.isAuthenticated && (
+                    <p className={styles.authSuccess}>
+                      Please <Link href="/auth"
+                                   className={styles.authLink}><b>Authenticate</b></Link> to continue.
+                    </p>
+                )
+            }
           </div>
-          
         </main>
       </div>
   );

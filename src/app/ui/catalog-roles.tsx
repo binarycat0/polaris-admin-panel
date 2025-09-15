@@ -1,10 +1,9 @@
 'use client'
-import { Table, Typography, Tag, Tooltip, Collapse } from 'antd'
+import { Table, Typography, Tag, Tooltip } from 'antd'
 import { UserOutlined, CalendarOutlined, SettingOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
 const { Text, Title } = Typography;
-const { Panel } = Collapse;
 
 export interface CatalogRole {
   name: string;
@@ -14,10 +13,6 @@ export interface CatalogRole {
   createTimestamp: number;
   lastUpdateTimestamp: number;
   entityVersion: number;
-}
-
-interface CatalogRolesResponse {
-  roles: CatalogRole[];
 }
 
 interface CatalogRolesProps {
@@ -140,7 +135,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
     <div style={{ marginTop: 24 }}>
       <Title level={4} style={{ marginBottom: 16 }}>
         <UserOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-        Catalog Roles for "{catalogName}"
+        Catalog Roles for &quot;{catalogName}&quot;
       </Title>
       
       <Table

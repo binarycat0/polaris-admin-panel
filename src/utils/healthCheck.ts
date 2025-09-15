@@ -42,18 +42,18 @@ export async function checkManagementApiHealth(): Promise<HealthCheckResult> {
     }
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    
-    if (error.name === 'TimeoutError') {
+
+    if (error instanceof Error && error.name === 'TimeoutError') {
       return {
         isHealthy: false,
         error: 'Request timeout - backend may be down',
         responseTime
       };
     }
-    
+
     return {
       isHealthy: false,
-      error: error.message || 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error',
       responseTime
     };
   }
@@ -98,18 +98,18 @@ export async function checkCatalogApiHealth(): Promise<HealthCheckResult> {
     }
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    
-    if (error.name === 'TimeoutError') {
+
+    if (error instanceof Error && error.name === 'TimeoutError') {
       return {
         isHealthy: false,
         error: 'Request timeout - backend may be down',
         responseTime
       };
     }
-    
+
     return {
       isHealthy: false,
-      error: error.message || 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error',
       responseTime
     };
   }
