@@ -1,14 +1,22 @@
 'use client'
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Layout, Menu, Typography, message } from 'antd';
-import { DatabaseOutlined, TeamOutlined, HomeOutlined, LoginOutlined, LogoutOutlined } from '@ant-design/icons';
-import { checkAuthStatus, clearAuthData, type AuthStatus } from '@/utils/auth';
+import {usePathname, useRouter} from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {Layout, Menu, Typography, message} from 'antd';
+import {
+  DatabaseOutlined,
+  DatabaseFilled,
+  TeamOutlined,
+  TagsFilled,
+  HomeOutlined,
+  LoginOutlined,
+  LogoutOutlined
+} from '@ant-design/icons';
+import {checkAuthStatus, clearAuthData, type AuthStatus} from '@/utils/auth';
 
-const { Sider } = Layout;
-const { Title } = Typography;
+const {Sider} = Layout;
+const {Title} = Typography;
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -44,13 +52,14 @@ export default function Navigation() {
   }, []);
 
 
-
   // Get current selected key based on pathname
   const getSelectedKey = () => {
     if (pathname === '/') return 'home';
     if (pathname === '/signin') return 'login';
     if (pathname === '/catalogs') return 'catalogs';
+    if (pathname === '/catalog-roles') return 'catalog-roles';
     if (pathname === '/principals') return 'principals';
+    if (pathname === '/principal-roles') return 'principal-roles';
     return 'home';
   };
 
@@ -65,7 +74,7 @@ export default function Navigation() {
     router.push('/');
   };
 
-  const handleMenuClick = ({ key }: { key: string }) => {
+  const handleMenuClick = ({key}: { key: string }) => {
     switch (key) {
       case 'home':
         router.push('/');
@@ -76,8 +85,14 @@ export default function Navigation() {
       case 'catalogs':
         router.push('/catalogs');
         break;
+      case 'catalog-roles':
+        router.push('/catalog-roles');
+        break;
       case 'principals':
         router.push('/principals');
+        break;
+      case 'principal-roles':
+        router.push('/principal-roles');
         break;
       case 'signout':
         handleSignOut();
@@ -88,13 +103,13 @@ export default function Navigation() {
   const menuItems = [
     {
       key: 'home',
-      icon: <HomeOutlined />,
+      icon: <HomeOutlined/>,
       label: 'Home',
     },
     ...(!authStatus.isAuthenticated || authStatus.isExpired ? [
       {
         key: 'signin',
-        icon: <LoginOutlined />,
+        icon: <LoginOutlined/>,
         label: 'Sign In',
       },
     ] : []),
@@ -102,74 +117,84 @@ export default function Navigation() {
     ...(authStatus.isAuthenticated && !authStatus.isExpired ? [
       {
         key: 'catalogs',
-        icon: <DatabaseOutlined />,
+        icon: <DatabaseOutlined/>,
         label: 'Catalogs',
       },
       {
+        key: 'catalog-roles',
+        icon: <DatabaseFilled/>,
+        label: 'Catalog Roles',
+      },
+      {
         key: 'principals',
-        icon: <TeamOutlined />,
+        icon: <TeamOutlined/>,
         label: 'Principals',
+      },
+      {
+        key: 'principal-roles',
+        icon: <TagsFilled/>,
+        label: 'Principal Roles',
       },
     ] : []),
   ];
 
   return (
-    <Sider
-      width={250}
-      style={{
-        overflow: 'auto',
-        height: '100vh',
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      theme="dark"
-    >
-      <div style={{ padding: '16px', textAlign: 'center' }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Title level={4} style={{ color: 'white', margin: 0 }}>
-            Polaris Admin
-          </Title>
-        </Link>
-      </div>
-
-      {/* Main navigation menu */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        <Menu
+      <Sider
+          width={250}
+          style={{
+            overflow: 'auto',
+            height: '100vh',
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
           theme="dark"
-          mode="inline"
-          selectedKeys={[getSelectedKey()]}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ borderRight: 0 }}
-        />
-      </div>
+      >
+        <div style={{padding: '16px', textAlign: 'center'}}>
+          <Link href="/" style={{textDecoration: 'none'}}>
+            <Title level={4} style={{color: 'white', margin: 0}}>
+              Polaris Admin
+            </Title>
+          </Link>
+        </div>
 
-      {/* SignOut button at the bottom - only show when authenticated */}
-      {authStatus.isAuthenticated && !authStatus.isExpired && (
-        <div style={{ marginTop: 'auto' }}>
+        {/* Main navigation menu */}
+        <div style={{flex: 1, overflow: 'auto'}}>
           <Menu
-            theme="dark"
-            mode="inline"
-            items={[
-              {
-                key: 'signout',
-                icon: <LogoutOutlined />,
-                label: 'Sign Out',
-              }
-            ]}
-            onClick={handleMenuClick}
-            style={{
-              borderRight: 0,
-              borderTop: '1px solid #434343',
-              margin: 0
-            }}
+              theme="dark"
+              mode="inline"
+              selectedKeys={[getSelectedKey()]}
+              items={menuItems}
+              onClick={handleMenuClick}
+              style={{borderRight: 0}}
           />
         </div>
-      )}
-    </Sider>
+
+        {/* SignOut button at the bottom - only show when authenticated */}
+        {authStatus.isAuthenticated && !authStatus.isExpired && (
+            <div style={{marginTop: 'auto'}}>
+              <Menu
+                  theme="dark"
+                  mode="inline"
+                  items={[
+                    {
+                      key: 'signout',
+                      icon: <LogoutOutlined/>,
+                      label: 'Sign Out',
+                    }
+                  ]}
+                  onClick={handleMenuClick}
+                  style={{
+                    borderRight: 0,
+                    borderTop: '1px solid #434343',
+                    margin: 0
+                  }}
+              />
+            </div>
+        )}
+      </Sider>
   );
 }
