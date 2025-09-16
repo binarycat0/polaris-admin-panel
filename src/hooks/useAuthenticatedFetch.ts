@@ -29,7 +29,7 @@ export function useAuthenticatedFetch() {
       } else {
         message.error('No access token found. Please authenticate first.');
       }
-      router.push('/auth');
+      router.push('/signin');
       return null;
     }
 
@@ -51,15 +51,21 @@ export function useAuthenticatedFetch() {
         cache: 'no-store',
       });
 
-      // Handle 401 responses
+      // Handle non-ok responses
       if (!response.ok) {
         const errorText = await response.json().catch(() => {
           return {"error": {"message": "Unknown error"}}
         });
         console.error(`HTTP ${response.status} error for ${url}:`, errorText.error.message);
-        message.error('An unexpected error occurred. Please try again.');
 
-        handleAuthFailure(router, 'Authentication failed. Please login again.');
+        // Only handle authentication failures for 401 responses
+        if (response.status === 401) {
+          handleAuthFailure(router, 'Authentication failed. Please login again.');
+          return null;
+        }
+
+        // For other errors, show the error message but don't redirect
+        message.error(errorText.error?.message || 'An unexpected error occurred. Please try again.');
         return null;
       }
 

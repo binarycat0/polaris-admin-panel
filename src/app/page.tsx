@@ -53,7 +53,7 @@ export default function Home() {
             {
                 !authStatus.isAuthenticated && (
                     <p className={styles.authSuccess}>
-                      Please <Link href="/auth"
+                      Please <Link href="/signin"
                                    className={styles.authLink}><b>Sign in</b></Link> to continue.
                     </p>
                 )

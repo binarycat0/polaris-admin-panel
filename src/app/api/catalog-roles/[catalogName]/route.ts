@@ -24,8 +24,13 @@ export async function GET(
     }
 
     const {catalogName} = await params;
+    const targetUrl = apiManagementCatalogRolesUrl(catalogName);
 
-    const response = await fetch(apiManagementCatalogRolesUrl(catalogName), {
+    console.log(`Fetching catalog roles for catalog: ${catalogName}`);
+    console.log(`Target URL: ${targetUrl}`);
+    console.log(`Authorization header present: ${!!authHeader}`);
+
+    const response = await fetch(targetUrl, {
       method: 'GET',
       headers: {
         'Authorization': authHeader,
@@ -33,17 +38,32 @@ export async function GET(
       },
     });
 
+    console.log(`Response status: ${response.status}`);
+    console.log(`Response headers:`, Object.fromEntries(response.headers.entries()));
+
     const data = await response.json();
+    console.log(`Response data:`, data);
 
     if (!response.ok) {
+      console.error(`Backend API error for catalog ${catalogName}:`, data);
       return NextResponse.json(data, {status: response.status});
     }
 
     return NextResponse.json(data);
   } catch (error) {
     console.error('Catalog roles proxy error:', error);
+
+    // Provide more detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorDetails = {
+      message: `Failed to fetch catalog roles: ${errorMessage}`,
+      type: 'InternalServerError',
+      code: 500,
+      details: error instanceof Error ? error.stack : String(error)
+    };
+
     return NextResponse.json(
-        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
+        {error: errorDetails},
         {status: 500}
     );
   }
