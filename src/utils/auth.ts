@@ -75,7 +75,7 @@ export function isAuthenticated(): boolean {
 
 /**
  * Handle authentication failure (401 responses)
- * Clears auth data and redirects to auth page
+ * Clears signin data and redirects to signin page
  * @param router - Next.js router instance
  * @param message - Optional custom error message
  */
@@ -89,7 +89,7 @@ export function handleAuthFailure(router: { push: (url: string) => void }, custo
     });
   }
 
-  router.push('/auth');
+  router.push('/signin');
 }
 
 /**

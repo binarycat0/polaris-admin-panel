@@ -1,15 +1,16 @@
 'use client'
 
-import {Form, Input, Button, Card, Typography, message} from 'antd';
-import {UserOutlined, LockOutlined} from '@ant-design/icons';
+import {Button, Card, Form, Input, message, Typography} from 'antd';
+import {KeyOutlined, LockOutlined, UserOutlined} from '@ant-design/icons';
 import {useState} from 'react';
-import type { ValidateErrorEntity } from 'rc-field-form/lib/interface';
+import type {ValidateErrorEntity} from 'rc-field-form/lib/interface';
 
 const {Title} = Typography;
 
 interface LoginFormValues {
-  username: string; // client_id
-  password: string; // client_secret
+  username: string;
+  password: string;
+  scope: string;
 }
 
 interface OAuthTokenResponse {
@@ -27,14 +28,13 @@ export default function Page() {
     setLoading(true);
 
     try {
-      // Prepare OAuth2 client credentials request
       const requestBody = {
         client_id: values.username,
         client_secret: values.password,
-        scope: "PRINCIPAL_ROLE:ALL" // Polaris requires a scope parameter
+        scope: values.scope,
       };
 
-      const response = await fetch('/api/auth', {
+      const response = await fetch('/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +45,6 @@ export default function Page() {
       if (response.ok) {
         const tokenData: OAuthTokenResponse = await response.json();
 
-        // Store the access token (you might want to use a more secure storage method)
         localStorage.setItem('access_token', tokenData.access_token);
         localStorage.setItem('token_type', tokenData.token_type);
 
@@ -90,9 +89,9 @@ export default function Page() {
             }}
         >
           <div style={{textAlign: 'center', marginBottom: 24}}>
-            <Title level={2}>Polaris Authentication</Title>
+            <Title level={2}>Sign in</Title>
             <p style={{color: '#666', marginTop: 8}}>
-              Enter your OAuth2 client credentials
+              Internal Polaris Authentification
             </p>
           </div>
 
@@ -105,7 +104,8 @@ export default function Page() {
               layout="vertical"
               initialValues={{
                 username: "root",
-                password: "s3cr3t"
+                password: "s3cr3t",
+                scope: "PRINCIPAL_ROLE:ALL"
               }}
           >
             <Form.Item
@@ -120,7 +120,7 @@ export default function Page() {
             >
               <Input
                   prefix={<UserOutlined/>}
-                  placeholder="Enter your OAuth2 client ID"
+                  placeholder="Enter your Polaris client ID"
                   size="large"
               />
             </Form.Item>
@@ -137,7 +137,24 @@ export default function Page() {
             >
               <Input.Password
                   prefix={<LockOutlined/>}
-                  placeholder="Enter your OAuth2 client secret"
+                  placeholder="Enter your Polaris client secret"
+                  size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+                label="Scope"
+                name="scope"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input the Polaris scope!'
+                  }
+                ]}
+            >
+              <Input
+                  prefix={<KeyOutlined/>}
+                  placeholder="Enter Polaris scope"
                   size="large"
               />
             </Form.Item>

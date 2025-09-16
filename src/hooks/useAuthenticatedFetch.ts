@@ -33,7 +33,7 @@ export function useAuthenticatedFetch() {
       return null;
     }
 
-    // Get auth headers
+    // Get signin headers
     const authHeaders = getAuthHeaders();
     if (!authHeaders) {
       handleAuthFailure(router, 'Authentication failed. Please login again.');

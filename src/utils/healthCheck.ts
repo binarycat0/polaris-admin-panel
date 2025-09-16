@@ -66,7 +66,7 @@ export async function checkCatalogApiHealth(): Promise<HealthCheckResult> {
   const startTime = Date.now();
   
   try {
-    // Try to reach the auth endpoint as a health check
+    // Try to reach the signin endpoint as a health check
     const response = await fetch(`${apiCatalogUrl}/oauth/tokens`, {
       method: 'POST',
       headers: {
@@ -78,7 +78,7 @@ export async function checkCatalogApiHealth(): Promise<HealthCheckResult> {
 
     const responseTime = Date.now() - startTime;
 
-    // For auth endpoint, we expect 401 or 400, not 500
+    // For signin endpoint, we expect 401 or 400, not 500
     if (response.status === 401 || response.status === 400) {
       return {
         isHealthy: true,

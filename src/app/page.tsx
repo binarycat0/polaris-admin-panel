@@ -24,7 +24,7 @@ export default function Home() {
       }
     };
 
-    // Check when window gains focus (user returns from auth page)
+    // Check when window gains focus (user returns from signin page)
     const handleFocus = () => {
       const newStatus = checkAuthStatus();
       setAuthStatus(newStatus);
@@ -54,7 +54,7 @@ export default function Home() {
                 !authStatus.isAuthenticated && (
                     <p className={styles.authSuccess}>
                       Please <Link href="/auth"
-                                   className={styles.authLink}><b>Authenticate</b></Link> to continue.
+                                   className={styles.authLink}><b>Sign in</b></Link> to continue.
                     </p>
                 )
             }
