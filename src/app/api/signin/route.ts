@@ -4,7 +4,7 @@ import {apiCatalogAuthUrl} from "@/app/constants";
 
 export async function POST(request: NextRequest) {
   try {
-    const { client_id, client_secret, scope } = await request.json();
+    const { client_id, client_secret, scope, realmHeaderName, realmHeaderValue } = await request.json();
 
     // OAuth2 endpoints typically expect form-encoded data
     const formData = new URLSearchParams();
@@ -14,11 +14,19 @@ export async function POST(request: NextRequest) {
     // Polaris requires a scope parameter - use 'PRINCIPAL_ROLE:ALL' as default if not provided
     formData.append('scope', scope || 'PRINCIPAL_ROLE:ALL');
 
+    // Prepare headers with optional realm header
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+
+    // Add realm header if both name and value are provided
+    if (realmHeaderName && realmHeaderValue) {
+      headers[realmHeaderName] = realmHeaderValue;
+    }
+
     const response = await fetch(apiCatalogAuthUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers,
       body: formData.toString(),
     });
 

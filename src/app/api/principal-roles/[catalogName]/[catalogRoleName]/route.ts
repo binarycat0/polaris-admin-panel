@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogRolesPrincipalRolesUrl} from "@/app/constants";
+import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 
 export async function GET(
@@ -25,11 +26,15 @@ export async function GET(
 
     const {catalogName, catalogRoleName} = await params;
 
+    // Get realm headers from the request
+    const realmHeaders = getRealmHeadersFromRequest(request);
+
     const response = await fetch(apiManagementCatalogRolesPrincipalRolesUrl(catalogName, catalogRoleName), {
       method: 'GET',
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
+        ...realmHeaders,
       },
     });
 

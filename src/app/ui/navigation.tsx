@@ -1,22 +1,23 @@
 'use client'
 
+import {blue} from '@ant-design/colors';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
-import {Layout, Menu, Typography, message} from 'antd';
+import {Layout, Menu, message, Typography} from 'antd';
 import {
-  DatabaseOutlined,
   DatabaseFilled,
-  TeamOutlined,
-  TagsFilled,
+  DatabaseOutlined,
   HomeOutlined,
   LoginOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  TagsFilled,
+  TeamOutlined
 } from '@ant-design/icons';
-import {checkAuthStatus, clearAuthData, type AuthStatus} from '@/utils/auth';
+import {type AuthStatus, checkAuthStatus, clearAuthData} from '@/utils/auth';
 
 const {Sider} = Layout;
-const {Title} = Typography;
+const {Title, Text} = Typography;
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -25,21 +26,44 @@ export default function Navigation() {
     isAuthenticated: false,
     isExpired: false
   });
+  const [realmInfo, setRealmInfo] = useState<{
+    headerName: string | null;
+    headerValue: string | null;
+  }>({
+    headerName: null,
+    headerValue: null
+  });
 
   useEffect(() => {
     const status = checkAuthStatus();
     setAuthStatus(status);
 
+    // Get realm information from localStorage
+    const updateRealmInfo = () => {
+      if (typeof window !== 'undefined') {
+        const headerName = localStorage.getItem('realm_header_name');
+        const headerValue = localStorage.getItem('realm_header_value');
+        setRealmInfo({
+          headerName,
+          headerValue
+        });
+      }
+    };
+
+    updateRealmInfo();
+
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const newStatus = checkAuthStatus();
         setAuthStatus(newStatus);
+        updateRealmInfo();
       }
     };
 
     const handleFocus = () => {
       const newStatus = checkAuthStatus();
       setAuthStatus(newStatus);
+      updateRealmInfo();
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -69,6 +93,10 @@ export default function Navigation() {
     setAuthStatus({
       isAuthenticated: false,
       isExpired: false
+    });
+    setRealmInfo({
+      headerName: null,
+      headerValue: null
     });
     message.success('Successfully signed out');
     router.push('/');
@@ -140,7 +168,7 @@ export default function Navigation() {
 
   return (
       <Sider
-          width={250}
+          width="250"
           style={{
             overflow: 'auto',
             height: '100vh',
@@ -153,15 +181,14 @@ export default function Navigation() {
           }}
           theme="dark"
       >
-        <div style={{padding: '16px', textAlign: 'center'}}>
+        <div style={{padding: '16px', textAlign: 'center', height: '64px'}}>
           <Link href="/" style={{textDecoration: 'none'}}>
-            <Title level={4} style={{color: 'white', margin: 0}}>
-              Polaris Admin
+            <Title level={4} style={{color: blue[1], margin: 0}}>
+              Polaris Catalog Admin
             </Title>
           </Link>
         </div>
 
-        {/* Main navigation menu */}
         <div style={{flex: 1, overflow: 'auto'}}>
           <Menu
               theme="dark"
@@ -173,7 +200,6 @@ export default function Navigation() {
           />
         </div>
 
-        {/* SignOut button at the bottom - only show when authenticated */}
         {authStatus.isAuthenticated && !authStatus.isExpired && (
             <div style={{marginTop: 'auto'}}>
               <Menu

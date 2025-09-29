@@ -61,6 +61,8 @@ export function clearAuthData(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('token_type');
     localStorage.removeItem('token_expires_at');
+    localStorage.removeItem('realm_header_name');
+    localStorage.removeItem('realm_header_value');
   }
 }
 
@@ -94,16 +96,55 @@ export function handleAuthFailure(router: { push: (url: string) => void }, custo
 
 /**
  * Get authorization headers for API requests
- * @returns Authorization header object or null if not authenticated
+ * @returns Authorization header object with optional realm headers or null if not authenticated
  */
-export function getAuthHeaders(): { Authorization: string } | null {
+export function getAuthHeaders(): Record<string, string> | null {
   const authStatus = checkAuthStatus();
 
   if (!authStatus.isAuthenticated || !authStatus.token) {
     return null;
   }
 
-  return {
+  const headers: Record<string, string> = {
     Authorization: `${authStatus.tokenType} ${authStatus.token}`
   };
+
+  // Add realm headers if they exist
+  if (typeof window !== 'undefined') {
+    const realmHeaderName = localStorage.getItem('realm_header_name');
+    const realmHeaderValue = localStorage.getItem('realm_header_value');
+
+    if (realmHeaderName && realmHeaderValue) {
+      headers[realmHeaderName] = realmHeaderValue;
+    }
+  }
+
+  return headers;
+}
+
+/**
+ * Get realm headers from request for server-side API routes
+ * @param request - NextRequest object
+ * @returns Realm headers object or empty object if not present
+ */
+export function getRealmHeadersFromRequest(request: { headers: { entries: () => IterableIterator<[string, string]> } }): Record<string, string> {
+  const headers: Record<string, string> = {};
+
+  // Iterate through all headers to find realm headers
+  // We'll exclude standard HTTP headers and only include custom headers that might be realm-related
+  const standardHeaders = new Set([
+    'authorization', 'content-type', 'accept', 'user-agent', 'host', 'connection',
+    'cache-control', 'pragma', 'accept-encoding', 'accept-language', 'cookie',
+    'referer', 'origin', 'x-forwarded-for', 'x-forwarded-proto', 'x-real-ip'
+  ]);
+
+  for (const [name, value] of request.headers.entries()) {
+    const lowerName = name.toLowerCase();
+    // Include headers that are not standard HTTP headers and might be realm-related
+    if (!standardHeaders.has(lowerName) && value) {
+      headers[name] = value;
+    }
+  }
+
+  return headers;
 }

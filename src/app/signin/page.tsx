@@ -1,6 +1,6 @@
 'use client'
 
-import {Button, Card, Form, Input, message, Typography} from 'antd';
+import {Button, Card, Form, Input, message, Space, Typography} from 'antd';
 import {KeyOutlined, LockOutlined, UserOutlined} from '@ant-design/icons';
 import {useState} from 'react';
 import type {ValidateErrorEntity} from 'rc-field-form/lib/interface';
@@ -11,6 +11,8 @@ interface LoginFormValues {
   username: string;
   password: string;
   scope: string;
+  realmHeaderName: string;
+  realmHeaderValue: string;
 }
 
 interface OAuthTokenResponse {
@@ -32,6 +34,8 @@ export default function Page() {
         client_id: values.username,
         client_secret: values.password,
         scope: values.scope,
+        realmHeaderName: values.realmHeaderName,
+        realmHeaderValue: values.realmHeaderValue,
       };
 
       const response = await fetch('/api/signin', {
@@ -51,6 +55,16 @@ export default function Page() {
         if (tokenData.expires_in) {
           const expiresAt = Date.now() + (tokenData.expires_in * 1000);
           localStorage.setItem('token_expires_at', expiresAt.toString());
+        }
+
+        // Save realm settings if provided
+        if (values.realmHeaderName && values.realmHeaderValue) {
+          localStorage.setItem('realm_header_name', values.realmHeaderName);
+          localStorage.setItem('realm_header_value', values.realmHeaderValue);
+        } else {
+          // Clear realm settings if not provided
+          localStorage.removeItem('realm_header_name');
+          localStorage.removeItem('realm_header_value');
         }
 
         message.success('Authentication successful!');
@@ -89,9 +103,9 @@ export default function Page() {
             }}
         >
           <div style={{textAlign: 'center', marginBottom: 24}}>
-            <Title level={2}>Sign in</Title>
+            <Title level={2}>Authentification</Title>
             <p style={{color: '#666', marginTop: 8}}>
-              Internal Polaris Authentification
+              Internal Polaris Auth
             </p>
           </div>
 
@@ -105,7 +119,9 @@ export default function Page() {
               initialValues={{
                 username: "root",
                 password: "s3cr3t",
-                scope: "PRINCIPAL_ROLE:ALL"
+                scope: "PRINCIPAL_ROLE:ALL",
+                realmHeaderName: "Polaris-Realm",
+                realmHeaderValue: "POLARIS"
               }}
           >
             <Form.Item
@@ -121,7 +137,6 @@ export default function Page() {
               <Input
                   prefix={<UserOutlined/>}
                   placeholder="Enter your Polaris client ID"
-                  size="large"
               />
             </Form.Item>
 
@@ -138,7 +153,6 @@ export default function Page() {
               <Input.Password
                   prefix={<LockOutlined/>}
                   placeholder="Enter your Polaris client secret"
-                  size="large"
               />
             </Form.Item>
 
@@ -155,19 +169,39 @@ export default function Page() {
               <Input
                   prefix={<KeyOutlined/>}
                   placeholder="Enter Polaris scope"
-                  size="large"
               />
             </Form.Item>
 
-            <Form.Item style={{marginBottom: 0}}>
+            <Form.Item label="Polaris Realm" style={{marginBottom: 16}}>
+              <Space.Compact style={{display: 'flex', width: '100%'}}>
+                <Form.Item
+                    name="realmHeaderName"
+                    style={{flex: 1, marginBottom: 0}}
+                >
+                  <Input
+                      placeholder="Header name"
+                  />
+                </Form.Item>
+                <Form.Item
+                    name="realmHeaderValue"
+                    style={{flex: 1, marginBottom: 0}}
+                >
+                  <Input
+                      placeholder="Header value"
+                  />
+                </Form.Item>
+              </Space.Compact>
+            </Form.Item>
+
+            <Form.Item>
               <Button
                   type="primary"
                   htmlType="submit"
-                  size="large"
                   loading={loading}
                   style={{width: '100%'}}
+                  size="large"
               >
-                Authenticate
+                Sign in
               </Button>
             </Form.Item>
           </Form>
