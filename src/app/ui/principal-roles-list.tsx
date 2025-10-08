@@ -1,6 +1,6 @@
 'use client'
-import { Table, Typography, Tag, Tooltip, Badge } from 'antd'
-import { TeamOutlined, CalendarOutlined, SettingOutlined, CloudOutlined, HomeOutlined } from '@ant-design/icons'
+import { Table, Typography, Tag, Tooltip, Badge, Button } from 'antd'
+import { TeamOutlined, CalendarOutlined, SettingOutlined, CloudOutlined, HomeOutlined, UserOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
 const { Text, Title } = Typography;
@@ -19,6 +19,7 @@ export interface PrincipalRoleItem {
 interface PrincipalRolesListProps {
   roles: PrincipalRoleItem[];
   loading: boolean;
+  onViewPrincipals?: (principalRoleName: string) => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -26,7 +27,7 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function PrincipalRolesList({ roles, loading }: PrincipalRolesListProps) {
+export default function PrincipalRolesList({ roles, loading, onViewPrincipals }: PrincipalRolesListProps) {
   const columns: ColumnsType<PrincipalRoleItem> = [
     {
       title: (
@@ -120,11 +121,11 @@ export default function PrincipalRolesList({ roles, loading }: PrincipalRolesLis
       width: 250,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
-        
+
         if (properties.length === 0) {
           return <Text type="secondary">None</Text>;
         }
-        
+
         return (
           <div>
             {properties.slice(0, 2).map(([key, value]) => (
@@ -148,6 +149,27 @@ export default function PrincipalRolesList({ roles, loading }: PrincipalRolesLis
           </div>
         );
       },
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 150,
+      fixed: 'right',
+      render: (_, record) => (
+        <Button
+          type="primary"
+          size="small"
+          icon={<UserOutlined />}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onViewPrincipals) {
+              onViewPrincipals(record.name);
+            }
+          }}
+        >
+          View Principals
+        </Button>
+      ),
     },
   ];
 

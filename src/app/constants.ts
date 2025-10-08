@@ -6,6 +6,7 @@ export const apiManagementCatalogRolesGrantsUrl = (catalogName: string, catalogR
 export const apiManagementPrincipalsUrl = apiManagementUrl + "/principals";
 export const apiManagementPrincipalRolesUrl = apiManagementUrl + "/principal-roles";
 export const apiManagementPrincipalPrincipalRolesUrl = (principalName: string) => apiManagementUrl + `/principals/${principalName}/principal-roles`;
+export const apiManagementPrincipalRolePrincipalsUrl = (principalRoleName: string) => apiManagementUrl + `/principal-roles/${principalRoleName}/principals`;
 
 export const apiCatalogUrl = process.env.POLARIS_CATALOG_API_URL || "http://localhost:8181/api/catalog/v1";
 export const apiCatalogAuthUrl = apiCatalogUrl + "/oauth/tokens"
