@@ -182,8 +182,9 @@ export default function Catalogs({ catalogs, onRowClick, selectedCatalog }: Cata
         selectedCatalog === record.name ? 'selected-row' : ''
       }
       pagination={{
+        position: ['bottomCenter'],
         pageSize: 10,
-        showSizeChanger: true,
+        showSizeChanger: false,
         showQuickJumper: true,
         showTotal: (total, range) =>
           `${range[0]}-${range[1]} of ${total} catalogs`,
@@ -199,7 +200,6 @@ export default function Catalogs({ catalogs, onRowClick, selectedCatalog }: Cata
           </div>
         ),
       }}
-      scroll={{ x: 1200 }}
       size="middle"
     />
   );

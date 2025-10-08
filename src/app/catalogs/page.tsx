@@ -5,7 +5,7 @@ import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
 import {useEffect, useState, useCallback} from 'react'
-import {Spin} from 'antd';
+import {Spin, Splitter, Typography} from 'antd';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import styles from './page.module.css';
 
@@ -20,7 +20,7 @@ export default function Page() {
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
-  const { authenticatedFetch } = useAuthenticatedFetch();
+  const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
     try {
@@ -35,9 +35,13 @@ export default function Page() {
       // Handle different possible response structures
       if (Array.isArray(data)) {
         return data;
-      } else if (data && typeof data === 'object' && 'catalogs' in data && Array.isArray((data as { catalogs: unknown }).catalogs)) {
+      } else if (data && typeof data === 'object' && 'catalogs' in data && Array.isArray((data as {
+        catalogs: unknown
+      }).catalogs)) {
         return (data as { catalogs: CatalogEntity[] }).catalogs;
-      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as { data: unknown }).data)) {
+      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as {
+        data: unknown
+      }).data)) {
         return (data as { data: CatalogEntity[] }).data;
       } else {
         console.error('Unexpected API response structure:', data);
@@ -60,7 +64,9 @@ export default function Page() {
       console.log('Catalog Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
-      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
+        roles: unknown
+      }).roles)) {
         return (data as { roles: CatalogRole[] }).roles;
       } else {
         console.error('Unexpected catalogs roles response structure:', data);
@@ -83,7 +89,9 @@ export default function Page() {
       console.log('Principal Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
-      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
+        roles: unknown
+      }).roles)) {
         return (data as { roles: PrincipalRole[] }).roles;
       } else {
         console.error('Unexpected principal roles response structure:', data);
@@ -123,9 +131,13 @@ export default function Page() {
       // Handle different possible response structures
       if (Array.isArray(data)) {
         return data;
-      } else if (data && typeof data === 'object' && 'grants' in data && Array.isArray((data as { grants: unknown }).grants)) {
+      } else if (data && typeof data === 'object' && 'grants' in data && Array.isArray((data as {
+        grants: unknown
+      }).grants)) {
         return (data as { grants: Grant[] }).grants;
-      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as { data: unknown }).data)) {
+      } else if (data && typeof data === 'object' && 'data' in data && Array.isArray((data as {
+        data: unknown
+      }).data)) {
         return (data as { data: Grant[] }).data;
       } else {
         console.error('Unexpected grants response structure:', data);
@@ -172,52 +184,61 @@ export default function Page() {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <Spin size="large"/>
-      </div>
+        <div className={styles.loadingContainer}>
+          <Spin size="large"/>
+        </div>
     );
   }
 
   return (
-    <div className={styles.pageContainer}>
       <div className={styles.contentWrapper}>
-        <h1 className={styles.title}>
-          Catalogs
-        </h1>
-        <Catalogs
-          catalogs={catalogs}
-          onRowClick={handleCatalogRowClick}
-          selectedCatalog={selectedCatalog}
-        />
-
-        {selectedCatalog && (
-          <CatalogRoles
-            catalogName={selectedCatalog}
-            roles={catalogRoles}
-            loading={rolesLoading}
-            onRowClick={handleCatalogRoleRowClick}
-            selectedCatalogRole={selectedCatalogRole}
-          />
-        )}
-
-        {selectedCatalog && selectedCatalogRole && (
-          <PrincipalRoles
-            catalogName={selectedCatalog}
-            catalogRoleName={selectedCatalogRole}
-            roles={principalRoles}
-            loading={principalRolesLoading}
-          />
-        )}
-
-        {selectedCatalog && selectedCatalogRole && (
-          <Grants
-            catalogName={selectedCatalog}
-            catalogRoleName={selectedCatalogRole}
-            grants={grants}
-            loading={grantsLoading}
-          />
-        )}
+        <Splitter style={{height: 600, boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'}}>
+          <Splitter.Panel collapsible>
+            <Typography.Title level={4}>
+              Catalogs
+            </Typography.Title>
+            <Catalogs
+                catalogs={catalogs}
+                onRowClick={handleCatalogRowClick}
+                selectedCatalog={selectedCatalog}
+            />
+          </Splitter.Panel>
+          <Splitter.Panel>
+            <Splitter layout="vertical">
+              <Splitter.Panel>
+                {selectedCatalog && (
+                    <CatalogRoles
+                        catalogName={selectedCatalog}
+                        roles={catalogRoles}
+                        loading={rolesLoading}
+                        onRowClick={handleCatalogRoleRowClick}
+                        selectedCatalogRole={selectedCatalogRole}
+                    />
+                )}
+              </Splitter.Panel>
+              <Splitter.Panel>
+                {selectedCatalog && selectedCatalogRole && (
+                    <PrincipalRoles
+                        catalogName={selectedCatalog}
+                        catalogRoleName={selectedCatalogRole}
+                        roles={principalRoles}
+                        loading={principalRolesLoading}
+                    />
+                )}
+              </Splitter.Panel>
+              <Splitter.Panel>
+                {selectedCatalog && selectedCatalogRole && (
+                    <Grants
+                        catalogName={selectedCatalog}
+                        catalogRoleName={selectedCatalogRole}
+                        grants={grants}
+                        loading={grantsLoading}
+                    />
+                )}
+              </Splitter.Panel>
+            </Splitter>
+          </Splitter.Panel>
+        </Splitter>
       </div>
-    </div>
   )
 }

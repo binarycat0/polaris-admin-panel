@@ -107,10 +107,6 @@ export default function Page() {
   return (
       <div className={styles.pageContainer}>
         <div className={styles.contentWrapper}>
-          <h1 className={styles.title}>
-            Principals
-          </h1>
-
           <Principals
             principals={principals}
             loading={loading}

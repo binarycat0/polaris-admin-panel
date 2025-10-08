@@ -107,10 +107,6 @@ export default function Page() {
   return (
       <div className={styles.pageContainer}>
         <div className={styles.contentWrapper}>
-          <h1 className={styles.title}>
-            Principal Roles
-          </h1>
-
           <PrincipalRolesList
             roles={principalRoles}
             loading={loading}

@@ -217,13 +217,6 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
         dataSource={grants.map((grant, index) => ({ ...grant, _key: grant.id || grant.name || `grant-${index}` }))}
         rowKey="_key"
         loading={loading}
-        pagination={{
-          pageSize: 5,
-          showSizeChanger: false,
-          showQuickJumper: false,
-          showTotal: (total, range) => 
-            `${range[0]}-${range[1]} of ${total} grants`,
-        }}
         locale={{
           emptyText: (
             <div style={{ padding: '20px 0' }}>
@@ -235,13 +228,6 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
           ),
         }}
         size="small"
-        style={{
-          backgroundColor: '#f5f5f5',
-          border: '1px solid #e0e0e0',
-          borderRadius: '6px',
-          padding: '16px'
-        }}
-        scroll={{ x: 800 }}
       />
     </div>
   );

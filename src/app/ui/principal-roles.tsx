@@ -188,12 +188,6 @@ export default function PrincipalRoles({ catalogName, catalogRoleName, roles, lo
           ),
         }}
         size="small"
-        style={{
-          backgroundColor: '#f0f0f0',
-          border: '1px solid #e8e8e8',
-          borderRadius: '6px',
-          padding: '16px'
-        }}
       />
     </div>
   );

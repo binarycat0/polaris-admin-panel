@@ -53,7 +53,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
       title: 'Version',
       dataIndex: 'entityVersion',
       key: 'entityVersion',
-      width: 100,
+      // width: 100,
       sorter: (a, b) => a.entityVersion - b.entityVersion,
       render: (version: number) => (
         <Tag color="green">v{version}</Tag>
@@ -68,7 +68,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      // width: 180,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
       render: (timestamp: number) => (
         <Text type="secondary">{formatDate(timestamp)}</Text>
@@ -83,7 +83,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
       ),
       dataIndex: 'lastUpdateTimestamp',
       key: 'lastUpdateTimestamp',
-      width: 180,
+      // width: 180,
       sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
       render: (timestamp: number) => (
         <Text type="secondary">{formatDate(timestamp)}</Text>
@@ -97,7 +97,7 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
         </>
       ),
       key: 'properties',
-      width: 250,
+      width: 150,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
         
@@ -132,8 +132,8 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
   ];
 
   return (
-    <div style={{ marginTop: 24 }}>
-      <Title level={4} style={{ marginBottom: 16 }}>
+    <div >
+      <Title level={5}>
         <UserOutlined style={{ marginRight: 8, color: '#1890ff' }} />
         Catalog Roles for &quot;{catalogName}&quot;
       </Title>
@@ -175,12 +175,6 @@ export default function CatalogRoles({ catalogName, roles, loading, onRowClick, 
           ),
         }}
         size="small"
-        style={{
-          backgroundColor: '#fafafa',
-          border: '1px solid #f0f0f0',
-          borderRadius: '6px',
-          padding: '16px'
-        }}
       />
     </div>
   );
