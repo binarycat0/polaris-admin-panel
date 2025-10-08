@@ -1,6 +1,6 @@
 'use client'
-import { Table, Typography, Tag, Tooltip } from 'antd'
-import { UserOutlined, CalendarOutlined, SettingOutlined, IdcardOutlined } from '@ant-design/icons'
+import { Table, Typography, Tag, Tooltip, Button } from 'antd'
+import { UserOutlined, CalendarOutlined, SettingOutlined, IdcardOutlined, TeamOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
 const { Text, Title } = Typography;
@@ -19,6 +19,7 @@ export interface Principal {
 interface PrincipalsProps {
   principals: Principal[];
   loading: boolean;
+  onViewRoles?: (principalName: string) => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -26,7 +27,7 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function Principals({ principals, loading }: PrincipalsProps) {
+export default function Principals({ principals, loading, onViewRoles }: PrincipalsProps) {
   const columns: ColumnsType<Principal> = [
     {
       title: (
@@ -98,43 +99,64 @@ export default function Principals({ principals, loading }: PrincipalsProps) {
     },
     {
       title: (
-        <>
-          <SettingOutlined style={{ marginRight: 8 }} />
-          Properties
-        </>
+          <>
+            <SettingOutlined style={{ marginRight: 8 }} />
+            Properties
+          </>
       ),
       key: 'properties',
-      width: 250,
+      // width: 150,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
-        
+
         if (properties.length === 0) {
           return <Text type="secondary">None</Text>;
         }
-        
+
         return (
-          <div>
-            {properties.slice(0, 2).map(([key, value]) => (
-              <Tag key={key} style={{ marginBottom: 2, fontSize: '11px' }}>
-                {key}: {value}
-              </Tag>
-            ))}
-            {properties.length > 2 && (
-              <Tooltip title={
-                <div>
-                  {properties.slice(2).map(([key, value]) => (
-                    <div key={key}>{key}: {value}</div>
-                  ))}
-                </div>
-              }>
-                <Tag style={{ fontSize: '11px' }}>
-                  +{properties.length - 2} more
-                </Tag>
-              </Tooltip>
-            )}
-          </div>
+            <div>
+              {properties.slice(0, 2).map(([key, value]) => (
+                  <Tag key={key} style={{ marginBottom: 2, fontSize: '11px' }}>
+                    {key}: {value}
+                  </Tag>
+              ))}
+              {properties.length > 2 && (
+                  <Tooltip title={
+                    <div>
+                      {properties.slice(2).map(([key, value]) => (
+                          <div key={key}>{key}: {value}</div>
+                      ))}
+                    </div>
+                  }>
+                    <Tag style={{ fontSize: '11px' }}>
+                      +{properties.length - 2} more
+                    </Tag>
+                  </Tooltip>
+              )}
+            </div>
         );
       },
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      fixed: 'right',
+      render: (_, record) => (
+          <Button
+              type="primary"
+              size="small"
+              icon={<TeamOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onViewRoles) {
+                  onViewRoles(record.name);
+                }
+              }}
+          >
+            Roles
+          </Button>
+      ),
     },
   ];
 
@@ -144,7 +166,7 @@ export default function Principals({ principals, loading }: PrincipalsProps) {
         <UserOutlined style={{ marginRight: 8 }} />
         Principals
       </Title>
-      
+
       <Table
         columns={columns}
         dataSource={principals}
@@ -154,7 +176,7 @@ export default function Principals({ principals, loading }: PrincipalsProps) {
           pageSize: 10,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => 
+          showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} principals`,
         }}
         locale={{
