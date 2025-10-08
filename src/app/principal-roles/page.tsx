@@ -1,20 +1,52 @@
 'use client'
 
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Spin} from 'antd';
 import styles from './page.module.css';
+import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+import PrincipalRolesList, {PrincipalRoleItem} from '@/app/ui/principal-roles-list';
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
+  const [principalRoles, setPrincipalRoles] = useState<PrincipalRoleItem[]>([]);
+  const {authenticatedFetch} = useAuthenticatedFetch();
+
+  const getPrincipalRoles = useCallback(async (): Promise<PrincipalRoleItem[]> => {
+    try {
+      const data = await authenticatedFetch('/api/principal-roles');
+
+      if (!data) {
+        return []; // Authentication failed, user redirected
+      }
+
+      console.log('Principal Roles API Response:', data);
+
+      // Handle the response structure { roles: [...] }
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+        return (data as { roles: PrincipalRoleItem[] }).roles;
+      } else {
+        console.error('Unexpected principal roles response structure:', data);
+        return [];
+      }
+    } catch {
+      // Error handling is done in authenticatedFetch
+      return [];
+    }
+  }, [authenticatedFetch]);
 
   useEffect(() => {
-    // Simulate loading for now - you can add actual API calls here
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    async function fetchPrincipalRoles() {
+      setLoading(true);
+      try {
+        const rolesData = await getPrincipalRoles();
+        setPrincipalRoles(rolesData);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    return () => clearTimeout(timer);
-  }, []);
+    fetchPrincipalRoles();
+  }, [getPrincipalRoles]);
 
   if (loading) {
     return (
@@ -31,14 +63,7 @@ export default function Page() {
             Principal Roles
           </h1>
 
-          <div className={styles.placeholder}>
-            <h3 className={styles.placeholderTitle}>
-              Principal Roles Management
-            </h3>
-            <p className={styles.placeholderText}>
-              Principal Roles management functionality will be implemented here.
-            </p>
-          </div>
+          <PrincipalRolesList roles={principalRoles} loading={loading} />
         </div>
       </div>
   );
