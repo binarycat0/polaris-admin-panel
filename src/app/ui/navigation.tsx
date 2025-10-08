@@ -81,7 +81,6 @@ export default function Navigation() {
     if (pathname === '/') return 'home';
     if (pathname === '/signin') return 'login';
     if (pathname === '/catalogs') return 'catalogs';
-    if (pathname === '/catalog-roles') return 'catalog-roles';
     if (pathname === '/principals') return 'principals';
     if (pathname === '/principal-roles') return 'principal-roles';
     return 'home';
@@ -112,9 +111,6 @@ export default function Navigation() {
         break;
       case 'catalogs':
         router.push('/catalogs');
-        break;
-      case 'catalog-roles':
-        router.push('/catalog-roles');
         break;
       case 'principals':
         router.push('/principals');
@@ -147,11 +143,6 @@ export default function Navigation() {
         key: 'catalogs',
         icon: <DatabaseOutlined/>,
         label: 'Catalogs',
-      },
-      {
-        key: 'catalog-roles',
-        icon: <DatabaseFilled/>,
-        label: 'Catalog Roles',
       },
       {
         key: 'principals',

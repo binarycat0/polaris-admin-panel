@@ -157,7 +157,7 @@ export default function PrincipalRolesModal({
       onCancel={onClose}
       footer={null}
       width={1000}
-      destroyOnClose
+      destroyOnHidden
     >
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
