@@ -14,21 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Polaris Catalog Admin Panel",
+  title: "Apache Polaris Management Panel",
   description: "Manage your Apache Polaris Instance",
 };
 
-export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout(
+    {
+      children,
+    }: Readonly<{
+      children: React.ReactNode;
+    }>) {
   return (
       <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <LayoutWrapper>
-          {children}
-        </LayoutWrapper>
+      <LayoutWrapper>
+        {children}
+      </LayoutWrapper>
       </body>
       </html>
   );

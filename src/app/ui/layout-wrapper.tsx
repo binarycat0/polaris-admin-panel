@@ -99,7 +99,7 @@ export default function LayoutWrapper({children}: LayoutWrapperProps) {
         <Layout>
           <Navigation/>
           <Layout>
-            <Content>
+            <Content className="content-panel">
               {children}
             </Content>
           </Layout>

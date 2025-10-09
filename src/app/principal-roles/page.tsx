@@ -2,7 +2,6 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {Spin} from 'antd';
-import styles from './page.module.css';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalRoleItem} from '@/app/ui/principal-roles-list';
 import PrincipalsModal, {PrincipalItem} from '@/app/ui/principals-modal';
@@ -27,7 +26,9 @@ export default function Page() {
       console.log('Principal Roles API Response:', data);
 
       // Handle the response structure { roles: [...] }
-      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as { roles: unknown }).roles)) {
+      if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
+        roles: unknown
+      }).roles)) {
         return (data as { roles: PrincipalRoleItem[] }).roles;
       } else {
         console.error('Unexpected principal roles response structure:', data);
@@ -50,7 +51,9 @@ export default function Page() {
       console.log('Principals API Response:', data);
 
       // Handle the response structure { principals: [...] }
-      if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as { principals: unknown }).principals)) {
+      if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
+        principals: unknown
+      }).principals)) {
         return (data as { principals: PrincipalItem[] }).principals;
       } else {
         console.error('Unexpected principals response structure:', data);
@@ -97,30 +100,24 @@ export default function Page() {
   }, [getPrincipalRoles]);
 
   if (loading) {
-    return (
-        <div className={styles.loadingContainer}>
-          <Spin size="large"/>
-        </div>
-    );
+    return <Spin size="large"/>;
   }
 
   return (
-      <div className={styles.pageContainer}>
-        <div className={styles.contentWrapper}>
-          <PrincipalRolesList
+      <>
+        <PrincipalRolesList
             roles={principalRoles}
             loading={loading}
             onViewPrincipals={handleViewPrincipals}
-          />
+        />
 
-          <PrincipalsModal
+        <PrincipalsModal
             visible={modalVisible}
             principalRoleName={selectedPrincipalRoleName}
             principals={principals}
             loading={principalsLoading}
             onClose={handleCloseModal}
-          />
-        </div>
-      </div>
+        />
+      </>
   );
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import {Button, Flex, Space, Typography} from 'antd';
+import {Button, Flex, Space, Typography, Row, Col} from 'antd';
 import {useEffect, useState} from "react";
 import {type AuthStatus, checkAuthStatus} from "@/utils/auth";
 
@@ -48,7 +48,7 @@ export default function Home() {
   }, []);
 
   return (
-      <Flex justify="center" align="center" style={{minHeight: '100vh'}}>
+      <Flex id="home-page" justify="center" align="center" style={{height: '100%'}}>
         <Space direction="vertical" align="center">
           <Title level={1}>Apache Polaris Management Panel</Title>
           {

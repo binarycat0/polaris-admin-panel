@@ -1,9 +1,15 @@
 'use client'
-import { Table, Typography, Tag, Tooltip, Button } from 'antd'
-import { UserOutlined, CalendarOutlined, SettingOutlined, IdcardOutlined, TeamOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import {Table, Typography, Tag, Tooltip, Button, Space} from 'antd'
+import {
+  UserOutlined,
+  CalendarOutlined,
+  SettingOutlined,
+  IdcardOutlined,
+  TeamOutlined
+} from '@ant-design/icons'
+import type {ColumnsType} from 'antd/es/table'
 
-const { Text, Title } = Typography;
+const {Text, Title} = Typography;
 
 export interface Principal {
   name: string;
@@ -27,34 +33,29 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function Principals({ principals, loading, onViewRoles }: PrincipalsProps) {
+export default function Principals({principals, loading, onViewRoles}: PrincipalsProps) {
   const columns: ColumnsType<Principal> = [
     {
-      title: (
-        <>
-          <UserOutlined style={{ marginRight: 8 }} />
-          Principal Name
-        </>
-      ),
+      title: "Name",
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string) => (
-        <Text strong style={{ color: '#1890ff' }}>{name}</Text>
+          <Text strong style={{color: '#1890ff'}}>{name}</Text>
       ),
     },
     {
       title: (
-        <>
-          <IdcardOutlined style={{ marginRight: 8 }} />
-          Client ID
-        </>
+          <Space>
+            <IdcardOutlined/>
+            Client ID
+          </Space>
       ),
       dataIndex: 'clientId',
       key: 'clientId',
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
-        <Text code>{clientId}</Text>
+          <Text code>{clientId}</Text>
       ),
     },
     {
@@ -64,45 +65,45 @@ export default function Principals({ principals, loading, onViewRoles }: Princip
       width: 100,
       sorter: (a, b) => a.entityVersion - b.entityVersion,
       render: (version: number) => (
-        <Tag color="blue">v{version}</Tag>
+          <Tag color="blue">v{version}</Tag>
       ),
     },
     {
       title: (
-        <>
-          <CalendarOutlined style={{ marginRight: 8 }} />
-          Created
-        </>
+          <Space>
+            <CalendarOutlined/>
+            Created
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
       width: 180,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
       render: (timestamp: number) => (
-        <Text type="secondary">{formatDate(timestamp)}</Text>
+          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
       title: (
-        <>
-          <CalendarOutlined style={{ marginRight: 8 }} />
-          Last Updated
-        </>
+          <Space>
+            <CalendarOutlined/>
+            Last Updated
+          </Space>
       ),
       dataIndex: 'lastUpdateTimestamp',
       key: 'lastUpdateTimestamp',
       width: 180,
       sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
       render: (timestamp: number) => (
-        <Text type="secondary">{formatDate(timestamp)}</Text>
+          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
       title: (
-          <>
-            <SettingOutlined style={{ marginRight: 8 }} />
+          <Space>
+            <SettingOutlined/>
             Properties
-          </>
+          </Space>
       ),
       key: 'properties',
       // width: 150,
@@ -116,7 +117,7 @@ export default function Principals({ principals, loading, onViewRoles }: Princip
         return (
             <div>
               {properties.slice(0, 2).map(([key, value]) => (
-                  <Tag key={key} style={{ marginBottom: 2, fontSize: '11px' }}>
+                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
                     {key}: {value}
                   </Tag>
               ))}
@@ -128,7 +129,7 @@ export default function Principals({ principals, loading, onViewRoles }: Princip
                       ))}
                     </div>
                   }>
-                    <Tag style={{ fontSize: '11px' }}>
+                    <Tag style={{fontSize: '11px'}}>
                       +{properties.length - 2} more
                     </Tag>
                   </Tooltip>
@@ -146,7 +147,7 @@ export default function Principals({ principals, loading, onViewRoles }: Princip
           <Button
               type="primary"
               size="small"
-              icon={<TeamOutlined />}
+              icon={<TeamOutlined/>}
               onClick={(e) => {
                 e.stopPropagation();
                 if (onViewRoles) {
@@ -161,37 +162,39 @@ export default function Principals({ principals, loading, onViewRoles }: Princip
   ];
 
   return (
-    <div>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        <UserOutlined style={{ marginRight: 8 }} />
-        Principals
-      </Title>
+      <>
+        <Title level={4}>
+          <Space>
+            Principals
+            <UserOutlined/>
+          </Space>
+        </Title>
 
-      <Table
-        columns={columns}
-        dataSource={principals}
-        rowKey="name"
-        loading={loading}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} principals`,
-        }}
-        locale={{
-          emptyText: (
-            <div style={{ padding: '20px 0' }}>
-              <UserOutlined style={{ fontSize: '32px', color: '#d9d9d9', marginBottom: '8px' }} />
-              <div>
-                <Text type="secondary">No principals found</Text>
-              </div>
-            </div>
-          ),
-        }}
-        scroll={{ x: 1200 }}
-      />
-    </div>
+        <Table
+            columns={columns}
+            dataSource={principals}
+            rowKey="name"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} principals`,
+            }}
+            locale={{
+              emptyText: (
+                  <div style={{padding: '20px 0'}}>
+                    <UserOutlined
+                        style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
+                    <div>
+                      <Text type="secondary">No principals found</Text>
+                    </div>
+                  </div>
+              ),
+            }}
+        />
+      </>
   );
 }
 

@@ -1,9 +1,16 @@
 'use client'
-import { Table, Typography, Tag, Tooltip, Badge, Button } from 'antd'
-import { TeamOutlined, CalendarOutlined, SettingOutlined, CloudOutlined, HomeOutlined, UserOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import {Badge, Button, Flex, Space, Table, Tag, Tooltip, Typography} from 'antd'
+import {
+  CalendarOutlined,
+  CloudOutlined,
+  HomeOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined
+} from '@ant-design/icons'
+import type {ColumnsType} from 'antd/es/table'
 
-const { Text, Title } = Typography;
+const {Text, Title} = Typography;
 
 export interface PrincipalRoleItem {
   name: string;
@@ -27,20 +34,20 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function PrincipalRolesList({ roles, loading, onViewPrincipals }: PrincipalRolesListProps) {
+export default function PrincipalRolesList({
+                                             roles,
+                                             loading,
+                                             onViewPrincipals
+                                           }: PrincipalRolesListProps) {
   const columns: ColumnsType<PrincipalRoleItem> = [
     {
-      title: (
-        <>
-          <TeamOutlined style={{ marginRight: 8 }} />
-          Principal Role Name
-        </>
-      ),
+      title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 250,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string) => (
-        <Text strong style={{ color: '#722ed1' }}>{name}</Text>
+          <Text strong className="principal-roles-text">{name}</Text>
       ),
     },
     {
@@ -50,24 +57,22 @@ export default function PrincipalRolesList({ roles, loading, onViewPrincipals }:
       width: 150,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
-        <Badge 
-          status={federated ? "processing" : "default"} 
-          text={
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              {federated ? (
-                <>
-                  <CloudOutlined style={{ marginRight: 4 }} />
-                  Federated
-                </>
-              ) : (
-                <>
-                  <HomeOutlined style={{ marginRight: 4 }} />
-                  Local
-                </>
-              )}
-            </span>
-          }
-        />
+          <Flex align="center">
+            <Badge
+                status={federated ? "processing" : "default"}
+                text={federated ? (
+                    <Space>
+                      <CloudOutlined/>
+                      Federated
+                    </Space>
+                ) : (
+                    <Space>
+                      <HomeOutlined/>
+                      Local
+                    </Space>
+                )}
+            />
+          </Flex>
       ),
     },
     {
@@ -77,45 +82,45 @@ export default function PrincipalRolesList({ roles, loading, onViewPrincipals }:
       width: 100,
       sorter: (a, b) => a.entityVersion - b.entityVersion,
       render: (version: number) => (
-        <Tag color="purple">v{version}</Tag>
+          <Tag color="purple">v{version}</Tag>
       ),
     },
     {
       title: (
-        <>
-          <CalendarOutlined style={{ marginRight: 8 }} />
-          Created
-        </>
+          <Space>
+            <CalendarOutlined/>
+            Created
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
       width: 180,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
       render: (timestamp: number) => (
-        <Text type="secondary">{formatDate(timestamp)}</Text>
+          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
       title: (
-        <>
-          <CalendarOutlined style={{ marginRight: 8 }} />
-          Last Updated
-        </>
+          <Space>
+            <CalendarOutlined/>
+            Last Updated
+          </Space>
       ),
       dataIndex: 'lastUpdateTimestamp',
       key: 'lastUpdateTimestamp',
       width: 180,
       sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
       render: (timestamp: number) => (
-        <Text type="secondary">{formatDate(timestamp)}</Text>
+          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
       title: (
-        <>
-          <SettingOutlined style={{ marginRight: 8 }} />
-          Properties
-        </>
+          <Space>
+            <SettingOutlined/>
+            Properties
+          </Space>
       ),
       key: 'properties',
       width: 250,
@@ -127,26 +132,26 @@ export default function PrincipalRolesList({ roles, loading, onViewPrincipals }:
         }
 
         return (
-          <div>
-            {properties.slice(0, 2).map(([key, value]) => (
-              <Tag key={key} style={{ marginBottom: 2, fontSize: '11px' }}>
-                {key}: {value}
-              </Tag>
-            ))}
-            {properties.length > 2 && (
-              <Tooltip title={
-                <div>
-                  {properties.slice(2).map(([key, value]) => (
-                    <div key={key}>{key}: {value}</div>
-                  ))}
-                </div>
-              }>
-                <Tag style={{ fontSize: '11px' }}>
-                  +{properties.length - 2} more
-                </Tag>
-              </Tooltip>
-            )}
-          </div>
+            <div>
+              {properties.slice(0, 2).map(([key, value]) => (
+                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
+                    {key}: {value}
+                  </Tag>
+              ))}
+              {properties.length > 2 && (
+                  <Tooltip title={
+                    <div>
+                      {properties.slice(2).map(([key, value]) => (
+                          <div key={key}>{key}: {value}</div>
+                      ))}
+                    </div>
+                  }>
+                    <Tag style={{fontSize: '11px'}}>
+                      +{properties.length - 2} more
+                    </Tag>
+                  </Tooltip>
+              )}
+            </div>
         );
       },
     },
@@ -156,55 +161,57 @@ export default function PrincipalRolesList({ roles, loading, onViewPrincipals }:
       width: 150,
       fixed: 'right',
       render: (_, record) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<UserOutlined />}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onViewPrincipals) {
-              onViewPrincipals(record.name);
-            }
-          }}
-        >
-          View Principals
-        </Button>
+          <Button
+              variant="outlined"
+              size="small"
+              icon={<UserOutlined/>}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onViewPrincipals) {
+                  onViewPrincipals(record.name);
+                }
+              }}
+          >
+            Principals
+          </Button>
       ),
     },
   ];
 
   return (
-    <div>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        <TeamOutlined style={{ marginRight: 8 }} />
-        Principal Roles
-      </Title>
-      
-      <Table
-        columns={columns}
-        dataSource={roles}
-        rowKey="name"
-        loading={loading}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) => 
-            `${range[0]}-${range[1]} of ${total} principal roles`,
-        }}
-        locale={{
-          emptyText: (
-            <div style={{ padding: '20px 0' }}>
-              <TeamOutlined style={{ fontSize: '32px', color: '#d9d9d9', marginBottom: '8px' }} />
-              <div>
-                <Text type="secondary">No principal roles found</Text>
-              </div>
-            </div>
-          ),
-        }}
-        scroll={{ x: 1200 }}
-      />
-    </div>
+      <>
+        <Title level={4}>
+          <Space>
+            Principal Roles
+            <TeamOutlined/>
+          </Space>
+        </Title>
+
+        <Table
+            columns={columns}
+            dataSource={roles}
+            rowKey="name"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} principal roles`,
+            }}
+            locale={{
+              emptyText: (
+                  <div style={{padding: '20px 0'}}>
+                    <TeamOutlined
+                        style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
+                    <div>
+                      <Text type="secondary">No principal roles found</Text>
+                    </div>
+                  </div>
+              ),
+            }}
+        />
+      </>
   );
 }
 
