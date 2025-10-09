@@ -1,9 +1,10 @@
 'use client'
 
+import {Button, Flex, Space, Typography} from 'antd';
 import {useEffect, useState} from "react";
-import styles from "./page.module.css";
 import {type AuthStatus, checkAuthStatus} from "@/utils/auth";
-import Link from 'next/link';
+
+const {Title} = Typography;
 
 export default function Home() {
   const [authStatus, setAuthStatus] = useState<AuthStatus>({
@@ -47,26 +48,19 @@ export default function Home() {
   }, []);
 
   return (
-      <div className={styles.page}>
-        <main className={styles.main}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>
-              Apache Polaris Management Panel
-            </h1>
-            <p className={styles.subtitle}>
-              Manage your Apache Polaris Instance
-            </p>
-
-            {
-                !authStatus.isAuthenticated && (
-                    <p className={styles.authSuccess}>
-                      Please <Link href="/signin"
-                                   className={styles.authLink}><b>Sign in</b></Link> to continue.
-                    </p>
-                )
-            }
-          </div>
-        </main>
-      </div>
+      <Flex justify="center" align="center" style={{minHeight: '100vh'}}>
+        <Space direction="vertical" align="center">
+          <Title level={1}>Apache Polaris Management Panel</Title>
+          {
+              !authStatus.isAuthenticated && (
+                  <Space wrap>
+                    Please
+                    <Button shape="circle" size="large" type="link" href="/signin">Sign in</Button>
+                    to continue.
+                  </Space>
+              )
+          }
+        </Space>
+      </Flex>
   );
 }

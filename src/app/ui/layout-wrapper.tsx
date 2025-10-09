@@ -89,7 +89,7 @@ export default function LayoutWrapper({children}: LayoutWrapperProps) {
             {isAuthenticated && (
                 <Space style={{color: '#ffffff90'}}>
                   {realmText}
-                  <Button variant="text" size="middle" onClick={handleSignOut}>
+                  <Button ghost onClick={handleSignOut}>
                     Sign Out <LogoutOutlined/>
                   </Button>
                 </Space>
