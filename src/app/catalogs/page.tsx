@@ -192,49 +192,59 @@ export default function Page() {
 
   return (
       <div className={styles.contentWrapper}>
-        <Splitter style={{height: 600, boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'}}>
+        <Splitter style={{boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'}}>
           <Splitter.Panel collapsible>
-            <Typography.Title level={4}>
-              Catalogs
-            </Typography.Title>
-            <Catalogs
-                catalogs={catalogs}
-                onRowClick={handleCatalogRowClick}
-                selectedCatalog={selectedCatalog}
-            />
+            <Splitter layout="vertical">
+              <Splitter.Panel>
+                <Typography.Title level={4}>
+                  Catalogs
+                </Typography.Title>
+                <Catalogs
+                    catalogs={catalogs}
+                    onRowClick={handleCatalogRowClick}
+                    selectedCatalog={selectedCatalog}
+                />
+              </Splitter.Panel>
+              <Splitter.Panel>
+                <div style={{background: '#1890ff10', height: '100%'}}>
+                  {selectedCatalog && (
+                      <CatalogRoles
+                          catalogName={selectedCatalog}
+                          roles={catalogRoles}
+                          loading={rolesLoading}
+                          onRowClick={handleCatalogRoleRowClick}
+                          selectedCatalogRole={selectedCatalogRole}
+                      />
+                  )}
+                </div>
+              </Splitter.Panel>
+            </Splitter>
           </Splitter.Panel>
           <Splitter.Panel>
             <Splitter layout="vertical">
               <Splitter.Panel>
-                {selectedCatalog && (
-                    <CatalogRoles
-                        catalogName={selectedCatalog}
-                        roles={catalogRoles}
-                        loading={rolesLoading}
-                        onRowClick={handleCatalogRoleRowClick}
-                        selectedCatalogRole={selectedCatalogRole}
-                    />
-                )}
+                <div style={{background: '#722ed110', height: '100%'}}>
+                  {selectedCatalog && selectedCatalogRole && (
+                      <PrincipalRoles
+                          catalogName={selectedCatalog}
+                          catalogRoleName={selectedCatalogRole}
+                          roles={principalRoles}
+                          loading={principalRolesLoading}
+                      />
+                  )}
+                </div>
               </Splitter.Panel>
               <Splitter.Panel>
-                {selectedCatalog && selectedCatalogRole && (
-                    <PrincipalRoles
-                        catalogName={selectedCatalog}
-                        catalogRoleName={selectedCatalogRole}
-                        roles={principalRoles}
-                        loading={principalRolesLoading}
-                    />
-                )}
-              </Splitter.Panel>
-              <Splitter.Panel>
-                {selectedCatalog && selectedCatalogRole && (
-                    <Grants
-                        catalogName={selectedCatalog}
-                        catalogRoleName={selectedCatalogRole}
-                        grants={grants}
-                        loading={grantsLoading}
-                    />
-                )}
+                <div style={{background: '#fa8c1610', height: '100%'}}>
+                  {selectedCatalog && selectedCatalogRole && (
+                      <Grants
+                          catalogName={selectedCatalog}
+                          catalogRoleName={selectedCatalogRole}
+                          grants={grants}
+                          loading={grantsLoading}
+                      />
+                  )}
+                </div>
               </Splitter.Panel>
             </Splitter>
           </Splitter.Panel>
