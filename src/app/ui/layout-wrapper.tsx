@@ -1,21 +1,21 @@
 'use client'
 
-import {Layout, Row, theme, Typography} from 'antd';
+import {Button, Flex, Layout, Typography} from 'antd';
+import {LogoutOutlined} from '@ant-design/icons';
 import Navigation from './navigation';
-import {AuthStatus, checkAuthStatus} from "@/utils/auth";
+import {useRouter} from 'next/navigation';
+import {AuthStatus, checkAuthStatus, clearAuthData} from "@/utils/auth";
 import {useEffect, useState} from 'react';
 
-const {Title, Text} = Typography;
 const {Content, Header} = Layout;
+const {Text} = Typography;
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
 }
 
 export default function LayoutWrapper({children}: LayoutWrapperProps) {
-  const {
-    token: {colorBgContainer, borderRadiusLG},
-  } = theme.useToken();
+  const router = useRouter();
 
   const [authStatus, setAuthStatus] = useState<AuthStatus>({
     isAuthenticated: false,
@@ -48,34 +48,49 @@ export default function LayoutWrapper({children}: LayoutWrapperProps) {
     updateRealmInfo();
   }, []);
 
+  const isAuthenticated = authStatus.isAuthenticated && !authStatus.isExpired;
+
+  const realmText = isAuthenticated
+      ? `${realmInfo.headerName}: ${realmInfo.headerValue}`
+      : 'Polaris Realm: POLARIS';
+
+  const handleSignOut = () => {
+    clearAuthData();
+
+    setAuthStatus({
+      isAuthenticated: false,
+      isExpired: false
+    });
+    setRealmInfo({
+      headerName: null,
+      headerValue: null
+    });
+    router.push('/');
+  };
+
   return (
-      <Layout style={{minHeight: '100vh'}}>
-        <Navigation/>
-        <Layout style={{marginLeft: 250}}>
-          <Header style={{
-            position: 'sticky',
-            padding: 0,
-            background: colorBgContainer,
-            display: 'flex',
-            top: 0,
-            zIndex: 1000
-          }}>
-
-            {authStatus.isAuthenticated && !authStatus.isExpired && (
-                <Row align="middle">
-                  <Title level={5} style={{marginLeft: 24}}>
-                    {realmInfo.headerName && realmInfo.headerValue
-                        ? `${realmInfo.headerName}: ${realmInfo.headerValue}`
-                        : 'Polaris Realm'
-                    }
-                  </Title>
-                </Row>
+      <Layout>
+        <Header className="header-panel">
+          <Flex justify="flex-start" align="middle">
+            <div className="header-panel-demo-logo"/>
+          </Flex>
+          <Flex justify="flex-end" align="middle">
+            {isAuthenticated && (
+                <div style={{color: "white"}}>
+                  <Text type="secondary" color="white">{realmText}</Text>
+                  <Button type="text" size="middle" onClick={handleSignOut}>Sign
+                    Out <LogoutOutlined/></Button>
+                </div>
             )}
-
-          </Header>
-          <Content style={{overflow: 'initial'}}>
-            {children}
-          </Content>
+          </Flex>
+        </Header>
+        <Layout>
+          <Navigation/>
+          <Layout>
+            <Content>
+              {children}
+            </Content>
+          </Layout>
         </Layout>
       </Layout>
   );

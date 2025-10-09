@@ -156,7 +156,7 @@ export default function Grants({catalogName, catalogRoleName, grants, loading}: 
 
   return (
       <Table
-          id="grants-table"
+          id="roles-grants-table"
           columns={columns}
           dataSource={grants.map((grant, index) => ({
             ...grant,

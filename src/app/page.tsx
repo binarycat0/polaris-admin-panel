@@ -44,7 +44,7 @@ export default function Home() {
         <main className={styles.main}>
           <div className={styles.header}>
             <h1 className={styles.title}>
-              Polaris Catalog Admin Panel
+              Apache Polaris Management Panel
             </h1>
             <p className={styles.subtitle}>
               Manage your Apache Polaris Instance

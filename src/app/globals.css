@@ -41,9 +41,27 @@ a {
   }
 }
 
-/* Layout adjustments for sidebar navigation */
-.ant-layout-content {
-  min-height: 100%;
+.header-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-panel-menu {
+  flex: 1;
+  min-width: 0;
+}
+
+.left-side-panel-sider {
+  width: 200px
+}
+
+.header-panel-demo-logo {
+  width: 200px
+}
+
+.left-side-panel-menu {
+  height: 100%
 }
 
 #catalog-roles-table > div > div > table > thead > tr > th.ant-table-cell {
@@ -54,6 +72,6 @@ a {
   background-color: #722ed140;
 }
 
-#grants-table > div > div > table > thead > tr > th.ant-table-cell {
+#roles-grants-table > div > div > table > thead > tr > th.ant-table-cell {
   background-color: #fa8c1640;
 }

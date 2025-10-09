@@ -1,11 +1,11 @@
 'use client'
 
-import {Button, Card, Form, Input, message, Space, Typography} from 'antd';
+import {Button, Card, Form, Input, message, Space, Typography, Flex} from 'antd';
 import {KeyOutlined, LockOutlined, UserOutlined} from '@ant-design/icons';
 import {useState} from 'react';
 import type {ValidateErrorEntity} from 'rc-field-form/lib/interface';
 
-const {Title} = Typography;
+const {Title, Text} = Typography;
 
 interface LoginFormValues {
   username: string;
@@ -88,26 +88,14 @@ export default function Page() {
   };
 
   return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: 'calc(100vh - 64px)',
-        backgroundColor: '#f0f2f5',
-        padding: '20px 0'
-      }}>
-        <Card
-            style={{
-              width: 400,
-              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-            }}
-        >
-          <div style={{textAlign: 'center', marginBottom: 24}}>
-            <Title level={2}>Authentification</Title>
-            <p style={{color: '#666', marginTop: 8}}>
-              Internal Polaris Auth
-            </p>
-          </div>
+      <Flex justify="center" align="center" style={{height: '100%'}}>
+        <Card>
+          <Flex justify="center" align="center">
+            <Space direction="vertical" size="small" align="center">
+              <Title level={2}>Authentification</Title>
+              <Text type="secondary">Internal Polaris Auth</Text>
+            </Space>
+          </Flex>
 
           <Form
               form={form}
@@ -206,6 +194,6 @@ export default function Page() {
             </Form.Item>
           </Form>
         </Card>
-      </div>
+      </Flex>
   );
 }
