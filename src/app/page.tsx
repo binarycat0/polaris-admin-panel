@@ -30,12 +30,19 @@ export default function Home() {
       setAuthStatus(newStatus);
     };
 
+    const handleAuthStateChange = () => {
+      const newStatus = checkAuthStatus();
+      setAuthStatus(newStatus);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('auth-state-changed', handleAuthStateChange);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('auth-state-changed', handleAuthStateChange);
     };
   }, []);
 

@@ -60,12 +60,31 @@ export default function Navigation() {
       updateRealmInfo();
     };
 
+    const handleStorageChange = (e: StorageEvent) => {
+      // Check if auth-related keys were removed
+      if (e.key === 'access_token' || e.key === null) {
+        const newStatus = checkAuthStatus();
+        setAuthStatus(newStatus);
+        updateRealmInfo();
+      }
+    };
+
+    const handleAuthStateChange = () => {
+      const newStatus = checkAuthStatus();
+      setAuthStatus(newStatus);
+      updateRealmInfo();
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-state-changed', handleAuthStateChange);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-state-changed', handleAuthStateChange);
     };
   }, []);
 

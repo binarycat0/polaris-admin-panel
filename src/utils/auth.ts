@@ -63,6 +63,7 @@ export function clearAuthData(): void {
     localStorage.removeItem('token_expires_at');
     localStorage.removeItem('realm_header_name');
     localStorage.removeItem('realm_header_value');
+    window.dispatchEvent(new CustomEvent('auth-state-changed'));
   }
 }
 

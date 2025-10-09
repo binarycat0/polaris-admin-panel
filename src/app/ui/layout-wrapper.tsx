@@ -45,6 +45,18 @@ export default function LayoutWrapper({children}: LayoutWrapperProps) {
     };
 
     updateRealmInfo();
+
+    const handleAuthStateChange = () => {
+      const newStatus = checkAuthStatus();
+      setAuthStatus(newStatus);
+      updateRealmInfo();
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthStateChange);
+
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthStateChange);
+    };
   }, []);
 
   const isAuthenticated = authStatus.isAuthenticated && !authStatus.isExpired;
