@@ -1,6 +1,6 @@
 'use client'
 
-import {Button, Card, Form, Input, message, Space, Typography, Flex} from 'antd';
+import {Button, Card, Flex, Form, Input, message, Space, Typography} from 'antd';
 import {KeyOutlined, LockOutlined, UserOutlined} from '@ant-design/icons';
 import {useState} from 'react';
 import type {ValidateErrorEntity} from 'rc-field-form/lib/interface';
@@ -88,13 +88,11 @@ export default function Page() {
   };
 
   return (
-      <Flex justify="center" align="center" style={{height: '100%'}}>
+      <Flex justify="center" align="center" style={{minHeight: '100vh'}}>
         <Card>
-          <Flex justify="center" align="center">
-            <Space direction="vertical" size="small" align="center">
-              <Title level={2}>Authentification</Title>
-              <Text type="secondary">Internal Polaris Auth</Text>
-            </Space>
+          <Flex justify="center" align="center" vertical>
+            <Title level={2}>Authentification</Title>
+            <Text type="secondary">Internal Polaris Authentication</Text>
           </Flex>
 
           <Form

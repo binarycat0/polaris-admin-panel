@@ -1,6 +1,6 @@
 'use client'
 
-import {Button, Flex, Layout, Typography} from 'antd';
+import {Button, Flex, Layout, Space} from 'antd';
 import {LogoutOutlined} from '@ant-design/icons';
 import Navigation from './navigation';
 import {useRouter} from 'next/navigation';
@@ -8,7 +8,6 @@ import {AuthStatus, checkAuthStatus, clearAuthData} from "@/utils/auth";
 import {useEffect, useState} from 'react';
 
 const {Content, Header} = Layout;
-const {Text} = Typography;
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -71,16 +70,17 @@ export default function LayoutWrapper({children}: LayoutWrapperProps) {
   return (
       <Layout>
         <Header className="header-panel">
-          <Flex justify="flex-start" align="middle">
+          <Flex justify="flex-start" align="center">
             <div className="header-panel-demo-logo"/>
           </Flex>
-          <Flex justify="flex-end" align="middle">
+          <Flex justify="flex-end" align="center">
             {isAuthenticated && (
-                <div style={{color: "white"}}>
-                  <Text type="secondary" color="white">{realmText}</Text>
-                  <Button type="text" size="middle" onClick={handleSignOut}>Sign
-                    Out <LogoutOutlined/></Button>
-                </div>
+                <Space style={{color: '#ffffff90'}}>
+                  {realmText}
+                  <Button variant="text" size="middle" onClick={handleSignOut}>
+                    Sign Out <LogoutOutlined/>
+                  </Button>
+                </Space>
             )}
           </Flex>
         </Header>
