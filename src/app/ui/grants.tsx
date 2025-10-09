@@ -1,25 +1,14 @@
 'use client'
-import { Table, Typography, Tag, Tooltip } from 'antd'
-import { SafetyOutlined, CalendarOutlined, SettingOutlined, KeyOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
+import {Table, Tag, Tooltip, Typography} from 'antd'
+import {KeyOutlined, SafetyOutlined, SettingOutlined} from '@ant-design/icons'
+import type {ColumnsType} from 'antd/es/table'
 
-const { Text, Title } = Typography;
+const {Text, Title} = Typography;
 
 export interface Grant {
-  id?: string;
-  name?: string;
-  type?: string;
   privilege?: string;
-  resource?: string;
-  grantee?: string;
-  grantor?: string;
-  createTimestamp?: number;
-  lastUpdateTimestamp?: number;
-  createdAt?: number;
-  updatedAt?: number;
-  version?: number;
-  entityVersion?: number;
-  properties?: Record<string, unknown>;
+  type?: string;
+
   [key: string]: unknown; // Allow additional properties
 }
 
@@ -30,7 +19,7 @@ interface GrantsProps {
   loading: boolean;
 }
 
-export default function Grants({ catalogName, catalogRoleName, grants, loading }: GrantsProps) {
+export default function Grants({catalogName, catalogRoleName, grants, loading}: GrantsProps) {
   const formatDate = (timestamp: number) => {
     if (!timestamp) return 'N/A';
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -52,9 +41,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
     const columns: ColumnsType<Grant> = [];
 
     // Common expected fields with special handling
-    const specialFields = ['id', 'name', 'type', 'privilege', 'resource', 'grantee', 'grantor'];
-    const dateFields = ['createTimestamp', 'lastUpdateTimestamp', 'createdAt', 'updatedAt'];
-    const versionFields = ['version', 'entityVersion'];
+    const specialFields = ['type', 'privilege'];
 
     // Add special columns first
     Object.keys(sampleGrant).forEach((key) => {
@@ -62,16 +49,16 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
         if (key === 'name' || key === 'id') {
           columns.push({
             title: (
-              <>
-                <SafetyOutlined style={{ marginRight: 8 }} />
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </>
+                <>
+                  <SafetyOutlined style={{marginRight: 8}}/>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </>
             ),
             dataIndex: key,
             key: key,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
             render: (value: unknown) => (
-              <Text strong style={{ color: '#fa8c16' }}>{String(value || 'N/A')}</Text>
+                <Text strong style={{color: '#fa8c16'}}>{String(value || 'N/A')}</Text>
             ),
           });
         } else if (key === 'type' || key === 'privilege') {
@@ -82,7 +69,7 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
             width: 120,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
             render: (value: unknown) => (
-              <Tag color="orange">{String(value || 'N/A')}</Tag>
+                <Tag color="orange">{String(value || 'N/A')}</Tag>
             ),
           });
         } else {
@@ -92,66 +79,28 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
             key: key,
             sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
             render: (value: unknown) => (
-              <Text>{String(value || 'N/A')}</Text>
+                <Text>{String(value || 'N/A')}</Text>
             ),
           });
         }
       }
     });
 
-    // Add version columns
-    Object.keys(sampleGrant).forEach((key) => {
-      if (versionFields.includes(key)) {
-        columns.push({
-          title: 'Version',
-          dataIndex: key,
-          key: key,
-          width: 100,
-          sorter: (a, b) => (Number(a[key]) || 0) - (Number(b[key]) || 0),
-          render: (value: unknown) => (
-            <Tag color="orange">v{Number(value) || 0}</Tag>
-          ),
-        });
-      }
-    });
-
-    // Add date columns
-    Object.keys(sampleGrant).forEach((key) => {
-      if (dateFields.includes(key)) {
-        columns.push({
-          title: (
-            <>
-              <CalendarOutlined style={{ marginRight: 8 }} />
-              {key.includes('create') || key.includes('Created') ? 'Created' : 'Updated'}
-            </>
-          ),
-          dataIndex: key,
-          key: key,
-          width: 180,
-          sorter: (a, b) => (Number(a[key]) || 0) - (Number(b[key]) || 0),
-          render: (value: unknown) => (
-            <Text type="secondary">{formatDate(Number(value))}</Text>
-          ),
-        });
-      }
-    });
 
     // Add properties column for any remaining object fields
     const remainingFields = Object.keys(sampleGrant).filter(
-      key => !specialFields.includes(key) && 
-             !dateFields.includes(key) && 
-             !versionFields.includes(key) &&
-             typeof sampleGrant[key] === 'object' &&
-             sampleGrant[key] !== null
+        key => !specialFields.includes(key) &&
+            typeof sampleGrant[key] === 'object' &&
+            sampleGrant[key] !== null
     );
 
     if (remainingFields.length > 0) {
       columns.push({
         title: (
-          <>
-            <SettingOutlined style={{ marginRight: 8 }} />
-            Additional Data
-          </>
+            <>
+              <SettingOutlined style={{marginRight: 8}}/>
+              Additional Data
+            </>
         ),
         key: 'additionalData',
         width: 250,
@@ -169,32 +118,32 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
               }
             }
           });
-          
+
           if (additionalData.length === 0) {
             return <Text type="secondary">None</Text>;
           }
-          
+
           return (
-            <div>
-              {additionalData.slice(0, 2).map(([key, value]) => (
-                <Tag key={key} style={{ marginBottom: 2, fontSize: '11px' }}>
-                  {key}: {String(value)}
-                </Tag>
-              ))}
-              {additionalData.length > 2 && (
-                <Tooltip title={
-                  <div>
-                    {additionalData.slice(2).map(([key, value]) => (
-                      <div key={key}>{key}: {String(value)}</div>
-                    ))}
-                  </div>
-                }>
-                  <Tag style={{ fontSize: '11px' }}>
-                    +{additionalData.length - 2} more
-                  </Tag>
-                </Tooltip>
-              )}
-            </div>
+              <div>
+                {additionalData.slice(0, 2).map(([key, value]) => (
+                    <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
+                      {key}: {String(value)}
+                    </Tag>
+                ))}
+                {additionalData.length > 2 && (
+                    <Tooltip title={
+                      <div>
+                        {additionalData.slice(2).map(([key, value]) => (
+                            <div key={key}>{key}: {String(value)}</div>
+                        ))}
+                      </div>
+                    }>
+                      <Tag style={{fontSize: '11px'}}>
+                        +{additionalData.length - 2} more
+                      </Tag>
+                    </Tooltip>
+                )}
+              </div>
           );
         },
       });
@@ -206,29 +155,26 @@ export default function Grants({ catalogName, catalogRoleName, grants, loading }
   const columns = generateColumns();
 
   return (
-    <div style={{ marginTop: 24 }}>
-      <Title level={5} style={{ marginBottom: 16 }}>
-        <KeyOutlined style={{ marginRight: 8, color: '#fa8c16' }} />
-        Grants for Catalog Role &quot;{catalogRoleName}&quot; in &quot;{catalogName}&quot;
-      </Title>
-      
       <Table
-        columns={columns}
-        dataSource={grants.map((grant, index) => ({ ...grant, _key: grant.id || grant.name || `grant-${index}` }))}
-        rowKey="_key"
-        loading={loading}
-        locale={{
-          emptyText: (
-            <div style={{ padding: '20px 0' }}>
-              <KeyOutlined style={{ fontSize: '32px', color: '#d9d9d9', marginBottom: '8px' }} />
-              <div>
-                <Text type="secondary">No grants found for this catalog role</Text>
-              </div>
-            </div>
-          ),
-        }}
-        size="small"
+          id="grants-table"
+          columns={columns}
+          dataSource={grants.map((grant, index) => ({
+            ...grant,
+            _key: grant.id || grant.name || `grant-${index}`
+          }))}
+          rowKey="_key"
+          loading={loading}
+          locale={{
+            emptyText: (
+                <div style={{padding: '20px 0'}}>
+                  <KeyOutlined style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
+                  <div>
+                    <Text type="secondary">No grants found for this catalog role</Text>
+                  </div>
+                </div>
+            ),
+          }}
+          size="small"
       />
-    </div>
   );
 }

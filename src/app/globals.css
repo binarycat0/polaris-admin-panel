@@ -43,5 +43,17 @@ a {
 
 /* Layout adjustments for sidebar navigation */
 .ant-layout-content {
-  min-height: 100vh;
+  min-height: 100%;
+}
+
+#catalog-roles-table > div > div > table > thead > tr > th.ant-table-cell {
+  background-color: #1890ff40;
+}
+
+#principal-roles-table > div > div > table > thead > tr > th.ant-table-cell {
+  background-color: #722ed140;
+}
+
+#grants-table > div > div > table > thead > tr > th.ant-table-cell {
+  background-color: #fa8c1640;
 }
