@@ -4,6 +4,7 @@ import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
 import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
+import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import {useCallback, useEffect, useState} from 'react'
 import {Breadcrumb, Col, Divider, FloatButton, Row, Spin} from 'antd';
 import {PlusCircleTwoTone} from '@ant-design/icons';
@@ -20,6 +21,7 @@ export default function Page() {
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
@@ -171,16 +173,21 @@ export default function Page() {
     }
   };
 
-  useEffect(() => {
-    const fetchCatalogs = async () => {
-      setLoading(true);
-      const catalogsData = await getCatalogs();
-      setCatalogs(catalogsData);
-      setLoading(false);
-    };
-    fetchCatalogs().then(() => {
-    });
+  const refreshCatalogs = useCallback(async () => {
+    setLoading(true);
+    const catalogsData = await getCatalogs();
+    setCatalogs(catalogsData);
+    setLoading(false);
   }, [getCatalogs]);
+
+  useEffect(() => {
+    refreshCatalogs().then(() => {
+    });
+  }, [refreshCatalogs]);
+
+  const handleCreateSuccess = () => {
+    refreshCatalogs();
+  };
 
   if (loading) {
     return (
@@ -206,7 +213,6 @@ export default function Page() {
     ] : []),
   ];
 
-
   return (
       <>
         <Breadcrumb separator={">"} items={breadcrumbItems}/>
@@ -220,6 +226,7 @@ export default function Page() {
                     className="catalogs-panel-catalogs-add-button"
                     type="default"
                     icon={<PlusCircleTwoTone/>}
+                    onClick={() => setCreateModalVisible(true)}
                 />
                 <Catalogs
                     catalogs={catalogs}
@@ -258,6 +265,12 @@ export default function Page() {
             </Row>
           </Col>
         </Row>
+
+        <CreateCatalogModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
+        />
       </>
   )
 }
