@@ -4,10 +4,9 @@ import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
 import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
-import {useEffect, useState, useCallback} from 'react'
-import {Spin, Splitter, Typography, Breadcrumb} from 'antd';
+import {useCallback, useEffect, useState} from 'react'
+import {Breadcrumb, Col, Row, Spin, Divider} from 'antd';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
-import styles from './page.module.css';
 
 export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
@@ -178,95 +177,79 @@ export default function Page() {
       setCatalogs(catalogsData);
       setLoading(false);
     };
-
-    fetchCatalogs();
+    fetchCatalogs().then(r => {
+    });
   }, [getCatalogs]);
 
   if (loading) {
     return (
-        <div className={styles.loadingContainer}>
-          <Spin size="large"/>
-        </div>
+        <Spin size="large"/>
     );
   }
 
-  return (
-      <div style={{height: 'auto'}}>
-        <div className={styles.breadcrumbContainer}>
-          <Typography.Title level={5}>
-            <Breadcrumb
-                separator={">"}
-                items={[
-                  {
-                    title: 'Catalogs',
-                  },
-                  {
-                    title: selectedCatalog || 'Select a catalog ...',
-                  },
-                  {
-                    title: selectedCatalogRole || 'Select a catalog role ...',
-                  },
-                ]}>
-            </Breadcrumb>
-          </Typography.Title>
-        </div>
-        <div className={styles.contentWrapper}>
+  const breadcrumbItems = [
+    {
+      title: 'Catalogs',
+    },
+    ...(
+        selectedCatalog ? [
+          {
+            title: selectedCatalog,
+          },
+        ] : []
+    ),
+    ...(selectedCatalogRole ? [
+      {
+        title: selectedCatalogRole,
+      },
+    ] : []),
+  ];
 
-          <Splitter style={{boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)'}}>
-            <Splitter.Panel collapsible style={{height:'900px'}} size={'70%'}>
-              <Splitter layout="vertical">
-                <Splitter.Panel>
-                  <Catalogs
-                      catalogs={catalogs}
-                      onRowClick={handleCatalogRowClick}
-                      selectedCatalog={selectedCatalog}
-                  />
-                </Splitter.Panel>
-                <Splitter.Panel>
-                  <div style={{background: '#1890ff10', height: '100%'}}>
-                    {selectedCatalog && (
-                        <CatalogRoles
-                            catalogName={selectedCatalog}
-                            roles={catalogRoles}
-                            loading={rolesLoading}
-                            onRowClick={handleCatalogRoleRowClick}
-                            selectedCatalogRole={selectedCatalogRole}
-                        />
-                    )}
-                  </div>
-                </Splitter.Panel>
-              </Splitter>
-            </Splitter.Panel>
-            <Splitter.Panel>
-              <Splitter layout="vertical">
-                <Splitter.Panel>
-                  <div style={{background: '#722ed110', height: '100%'}}>
-                    {selectedCatalog && selectedCatalogRole && (
-                        <PrincipalRoles
-                            catalogName={selectedCatalog}
-                            catalogRoleName={selectedCatalogRole}
-                            roles={principalRoles}
-                            loading={principalRolesLoading}
-                        />
-                    )}
-                  </div>
-                </Splitter.Panel>
-                <Splitter.Panel>
-                  <div style={{background: '#fa8c1610', height: '100%'}}>
-                    {selectedCatalog && selectedCatalogRole && (
-                        <Grants
-                            catalogName={selectedCatalog}
-                            catalogRoleName={selectedCatalogRole}
-                            grants={grants}
-                            loading={grantsLoading}
-                        />
-                    )}
-                  </div>
-                </Splitter.Panel>
-              </Splitter>
-            </Splitter.Panel>
-          </Splitter>
-        </div>
-      </div>
+  return (
+      <>
+        <Breadcrumb separator={">"} items={breadcrumbItems}/>
+        <Divider/>
+        <Row gutter={16} className="catalogs-panel-content">
+          <Col span={12}>
+            <Row className="catalogs-panel-catalogs">
+              <Col>
+                <Catalogs
+                    catalogs={catalogs}
+                    onRowClick={handleCatalogRowClick}
+                    selectedCatalog={selectedCatalog}
+                />
+              </Col>
+            </Row>
+            <Row className="catalogs-panel-catalog-roles">
+              <Col>
+                {selectedCatalog && (
+                    <CatalogRoles
+                        roles={catalogRoles}
+                        loading={rolesLoading}
+                        onRowClick={handleCatalogRoleRowClick}
+                        selectedCatalogRole={selectedCatalogRole}
+                    />
+                )}
+              </Col>
+            </Row>
+          </Col>
+          <Col span={12}>
+            <Row className="catalogs-panel-catalog-role-principal-roles">
+              <Col>
+                {selectedCatalog && selectedCatalogRole && (
+                    <PrincipalRoles roles={principalRoles} loading={principalRolesLoading}/>
+                )}
+              </Col>
+            </Row>
+            <Row className="catalogs-panel-catalog-role-grants">
+              <Col>
+                {selectedCatalog && selectedCatalogRole && (
+                    <Grants grants={grants} loading={grantsLoading}/>
+                )}
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </>
   )
 }

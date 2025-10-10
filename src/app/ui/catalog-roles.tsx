@@ -1,5 +1,5 @@
 'use client'
-import {Button, Popover, Table, Tag, Typography,} from 'antd'
+import {Button, Popover, Table, Tag, Typography, Space} from 'antd'
 import {
   CalendarOutlined,
   FileUnknownOutlined,
@@ -21,7 +21,6 @@ export interface CatalogRole {
 }
 
 interface CatalogRolesProps {
-  catalogName: string;
   roles: CatalogRole[];
   loading: boolean;
   onRowClick?: (catalogRoleName: string) => void;
@@ -30,7 +29,6 @@ interface CatalogRolesProps {
 
 export default function CatalogRoles(
     {
-      catalogName,
       roles,
       loading,
       onRowClick,
@@ -49,10 +47,10 @@ export default function CatalogRoles(
   const columns: ColumnsType<CatalogRole> = [
     {
       title: (
-          <>
-            <UserOutlined style={{marginRight: 8}}/>
+          <Space>
+            <UserOutlined/>
             Role Name
-          </>
+          </Space>
       ),
       dataIndex: 'name',
       key: 'name',
@@ -68,40 +66,32 @@ export default function CatalogRoles(
       render: (_, record) => {
 
         const content = (
-            <div>
-              <p>
-                <>
-                  <FileUnknownOutlined style={{marginRight: 8}}/>
-                  Version:
-                </>
+            <Space direction="vertical">
+              <Space>
+                <FileUnknownOutlined/>
+                Version:
                 <Text type="secondary"> <Tag color="blue">{record.entityVersion}</Tag></Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Created:
-                </>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Created:
                 <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Last Updated:
-                </>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Last Updated:
                 <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
-              </p>
-            </div>
+              </Space>
+            </Space>
         );
 
         return (
-            <div>
-              <Popover content={content}>
-                <Button type="primary" size="small">
-                  <InfoCircleOutlined></InfoCircleOutlined>
-                  More details ...
-                </Button>
-              </Popover>
-            </div>
+            <Popover content={content}>
+              <Button variant="outlined" size="small">
+                <InfoCircleOutlined></InfoCircleOutlined>
+                More details ...
+              </Button>
+            </Popover>
         )
       },
     },
@@ -129,7 +119,6 @@ export default function CatalogRoles(
               selectedCatalogRole === record.name ? 'selected-catalogs-role-row' : ''
           }
           pagination={{
-            position: ['bottomLeft'],
             pageSize: 5,
             showSizeChanger: false,
             showQuickJumper: false,
@@ -138,12 +127,10 @@ export default function CatalogRoles(
           }}
           locale={{
             emptyText: (
-                <div style={{padding: '20px 0'}}>
-                  <UserOutlined style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                  <div>
-                    <Text type="secondary">No roles found for this catalog</Text>
-                  </div>
-                </div>
+                <Space direction="vertical">
+                  <UserOutlined/>
+                  <Text type="secondary">No roles found for this catalog</Text>
+                </Space>
             ),
           }}
           size="small"

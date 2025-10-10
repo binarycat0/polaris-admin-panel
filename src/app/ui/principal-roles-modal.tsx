@@ -1,5 +1,5 @@
 'use client'
-import { Modal, Table, Typography, Tag, Tooltip, Badge, Spin } from 'antd'
+import { Modal, Table, Typography, Tag, Tooltip, Badge, Spin, Space} from 'antd'
 import { TeamOutlined, CalendarOutlined, SettingOutlined, CloudOutlined, HomeOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
@@ -177,12 +177,10 @@ export default function PrincipalRolesModal({
           }}
           locale={{
             emptyText: (
-              <div style={{ padding: '20px 0' }}>
-                <TeamOutlined style={{ fontSize: '32px', color: '#d9d9d9', marginBottom: '8px' }} />
-                <div>
-                  <Text type="secondary">No principal roles found for this principal</Text>
-                </div>
-              </div>
+              <Space direction="vertical">
+                <TeamOutlined/>
+                <Text type="secondary">No principal roles found for this principal</Text>
+              </Space>
             ),
           }}
           scroll={{ x: 800 }}

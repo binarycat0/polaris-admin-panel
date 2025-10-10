@@ -1,5 +1,5 @@
 'use client'
-import { Modal, Table, Typography, Tag, Tooltip, Spin } from 'antd'
+import { Modal, Table, Typography, Tag, Tooltip, Spin, Space } from 'antd'
 import { UserOutlined, CalendarOutlined, SettingOutlined, IdcardOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
@@ -164,12 +164,10 @@ export default function PrincipalsModal({
           }}
           locale={{
             emptyText: (
-              <div style={{ padding: '20px 0' }}>
-                <UserOutlined style={{ fontSize: '32px', color: '#d9d9d9', marginBottom: '8px' }} />
-                <div>
-                  <Text type="secondary">No principals found for this principal role</Text>
-                </div>
-              </div>
+              <Space direction="vertical">
+                <UserOutlined/>
+                <Text type="secondary">No principals found for this principal role</Text>
+              </Space>
             ),
           }}
           scroll={{ x: 800 }}

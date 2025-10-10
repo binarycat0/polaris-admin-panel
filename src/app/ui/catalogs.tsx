@@ -1,11 +1,11 @@
 'use client'
-import {Button, Table, Typography, Popover, Tag} from 'antd'
+import {Button, Popover, Space, Table, Tag, Typography} from 'antd'
 import {
-  DatabaseOutlined,
-  InfoCircleOutlined,
   CalendarOutlined,
   CloudOutlined,
-  FileUnknownOutlined
+  DatabaseOutlined,
+  FileUnknownOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
@@ -70,56 +70,44 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
       render: (_, record) => {
 
         const content = (
-            <div>
-              <p>
-                <>
-                  <FileUnknownOutlined style={{marginRight: 8}}/>
-                  Version:
-                </>
+            <Space direction="vertical">
+              <Space>
+                <FileUnknownOutlined/>
+                Version:
                 <Text type="secondary"> <Tag color="blue">{record.entityVersion}</Tag></Text>
-              </p>
-              <p>
-                <>
-                  <CloudOutlined style={{marginRight: 8}}/>
-                  Base Location:
-                </>
+              </Space>
+              <Space>
+                <CloudOutlined/>
+                Base Location:
                 <Text type="secondary"> {record.properties['default-base-location']}</Text>
-              </p>
-              <p>
-                <>
-                  <CloudOutlined style={{marginRight: 8}}/>
-                  Allowed Location:
-                </>
+              </Space>
+              <Space>
+                <CloudOutlined/>
+                Allowed Location:
                 <Text
                     type="secondary"> {record.storageConfigInfo?.allowedLocations || 'Not specified'}
                 </Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Created:
-                </>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Created:
                 <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Last Updated:
-                </>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Last Updated:
                 <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
-              </p>
-            </div>
+              </Space>
+            </Space>
         );
 
         return (
-            <div>
-              <Popover content={content}>
-                <Button type="primary" size="small">
-                  <InfoCircleOutlined></InfoCircleOutlined>
-                  More details ...
-                </Button>
-              </Popover>
-            </div>
+            <Popover content={content}>
+              <Button variant="outlined" size="small">
+                <InfoCircleOutlined></InfoCircleOutlined>
+                More details ...
+              </Button>
+            </Popover>
         )
       },
     },
@@ -145,7 +133,6 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
               selectedCatalog === record.name ? 'selected-row' : ''
           }
           pagination={{
-            position: ['bottomLeft'],
             pageSize: 10,
             showSizeChanger: false,
             showQuickJumper: true,
@@ -154,14 +141,11 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
           }}
           locale={{
             emptyText: (
-                <div style={{padding: '20px 0'}}>
-                  <DatabaseOutlined
-                      style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                  <div>
-                    <Title level={4} type="secondary">No catalogs found</Title>
-                    <Text type="secondary">There are no catalogs available at the moment.</Text>
-                  </div>
-                </div>
+                <Space direction="vertical">
+                  <DatabaseOutlined/>
+                  <Title level={4} type="secondary">No catalogs found</Title>
+                  <Text type="secondary">There are no catalogs available at the moment.</Text>
+                </Space>
             ),
           }}
           size="small"

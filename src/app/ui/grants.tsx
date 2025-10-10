@@ -1,5 +1,5 @@
 'use client'
-import {Table, Tag, Tooltip, Typography} from 'antd'
+import {Space, Table, Tag, Tooltip, Typography} from 'antd'
 import {KeyOutlined, SafetyOutlined, SettingOutlined} from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
@@ -13,24 +13,11 @@ export interface Grant {
 }
 
 interface GrantsProps {
-  catalogName: string;
-  catalogRoleName: string;
   grants: Grant[];
   loading: boolean;
 }
 
-export default function Grants({catalogName, catalogRoleName, grants, loading}: GrantsProps) {
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return 'N/A';
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
+export default function Grants({grants, loading}: GrantsProps) {
   // Dynamic columns based on the actual data structure
   const generateColumns = (): ColumnsType<Grant> => {
     if (grants.length === 0) {
@@ -166,12 +153,10 @@ export default function Grants({catalogName, catalogRoleName, grants, loading}: 
           loading={loading}
           locale={{
             emptyText: (
-                <div style={{padding: '20px 0'}}>
-                  <KeyOutlined style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                  <div>
-                    <Text type="secondary">No grants found for this catalog role</Text>
-                  </div>
-                </div>
+                <Space direction="vertical">
+                  <KeyOutlined/>
+                  <Text type="secondary">No grants found for this catalog role</Text>
+                </Space>
             ),
           }}
           size="small"

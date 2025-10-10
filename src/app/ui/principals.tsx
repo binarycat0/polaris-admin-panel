@@ -145,7 +145,7 @@ export default function Principals({principals, loading, onViewRoles}: Principal
       fixed: 'right',
       render: (_, record) => (
           <Button
-              type="primary"
+              variant="outlined"
               size="small"
               icon={<TeamOutlined/>}
               onClick={(e) => {
@@ -184,13 +184,10 @@ export default function Principals({principals, loading, onViewRoles}: Principal
             }}
             locale={{
               emptyText: (
-                  <div style={{padding: '20px 0'}}>
-                    <UserOutlined
-                        style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                    <div>
-                      <Text type="secondary">No principals found</Text>
-                    </div>
-                  </div>
+                  <Space direction="vertical">
+                    <UserOutlined/>
+                    <Text type="secondary">No principals found</Text>
+                  </Space>
               ),
             }}
         />

@@ -69,6 +69,35 @@ a {
   height: 100%
 }
 
+.catalogs-panel-content {
+  height: 100vh;
+}
+
+.catalogs-panel-catalogs {
+  height: 50%;
+  background-color: #ff55ff10;
+}
+
+.catalogs-panel-content .ant-col {
+  width: 100%;
+}
+
+.catalogs-panel-catalog-roles {
+  height: 50%;
+  background-color: #1890ff10;
+}
+
+.catalogs-panel-catalog-role-principal-roles {
+  height: 50%;
+  background-color: #722ed110;
+}
+
+.catalogs-panel-catalog-role-grants {
+  height: 50%;
+  background-color: #fa8c1610;
+}
+
+
 #catalog-roles-table > div > div > table > thead > tr > th.ant-table-cell {
   background-color: #1890ff40;
 }

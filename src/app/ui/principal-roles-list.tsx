@@ -201,13 +201,10 @@ export default function PrincipalRolesList({
             }}
             locale={{
               emptyText: (
-                  <div style={{padding: '20px 0'}}>
-                    <TeamOutlined
-                        style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                    <div>
-                      <Text type="secondary">No principal roles found</Text>
-                    </div>
-                  </div>
+                  <Space direction="vertical">
+                    <TeamOutlined/>
+                    <Text type="secondary">No principal roles found</Text>
+                  </Space>
               ),
             }}
         />

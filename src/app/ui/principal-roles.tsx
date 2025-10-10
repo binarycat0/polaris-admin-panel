@@ -1,5 +1,5 @@
 'use client'
-import {Button, Popover, Table, Tag, Typography} from 'antd'
+import {Button, Popover, Space, Table, Tag, Typography} from 'antd'
 import {
   CalendarOutlined,
   FileUnknownOutlined,
@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
 export interface PrincipalRole {
   name: string;
@@ -22,15 +22,11 @@ export interface PrincipalRole {
 }
 
 interface PrincipalRolesProps {
-  catalogName: string;
-  catalogRoleName: string;
   roles: PrincipalRole[];
   loading: boolean;
 }
 
 export default function PrincipalRoles({
-                                         catalogName,
-                                         catalogRoleName,
                                          roles,
                                          loading
                                        }: PrincipalRolesProps) {
@@ -47,10 +43,10 @@ export default function PrincipalRoles({
   const columns: ColumnsType<PrincipalRole> = [
     {
       title: (
-          <>
-            <TeamOutlined style={{marginRight: 8}}/>
+          <Space>
+            <TeamOutlined/>
             Principal Role Name
-          </>
+          </Space>
       ),
       dataIndex: 'name',
       key: 'name',
@@ -65,40 +61,32 @@ export default function PrincipalRoles({
       render: (_, record) => {
 
         const content = (
-            <div>
-              <p>
-                <>
-                  <FileUnknownOutlined style={{marginRight: 8}}/>
-                  Version:
-                </>
-                <Text type="secondary"> <Tag color="blue">{record.entityVersion}</Tag></Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Created:
-                </>
+            <Space direction="vertical">
+              <Space>
+                <FileUnknownOutlined/>
+                Version:
+                <Text type="secondary"><Tag color="blue">{record.entityVersion}</Tag></Text>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Created:
                 <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
-              </p>
-              <p>
-                <>
-                  <CalendarOutlined style={{marginRight: 8}}/>
-                  Last Updated:
-                </>
+              </Space>
+              <Space>
+                <CalendarOutlined/>
+                Last Updated:
                 <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
-              </p>
-            </div>
+              </Space>
+            </Space>
         );
 
         return (
-            <div>
-              <Popover content={content}>
-                <Button type="primary" size="small">
-                  <InfoCircleOutlined></InfoCircleOutlined>
-                  More details ...
-                </Button>
-              </Popover>
-            </div>
+            <Popover content={content}>
+              <Button variant="outlined" size="small">
+                <InfoCircleOutlined></InfoCircleOutlined>
+                More details ...
+              </Button>
+            </Popover>
         )
       },
     },
@@ -120,12 +108,10 @@ export default function PrincipalRoles({
           }}
           locale={{
             emptyText: (
-                <div style={{padding: '20px 0'}}>
+                <Space direction="vertical">
                   <TeamOutlined style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
-                  <div>
-                    <Text type="secondary">No principal roles found for this catalog role</Text>
-                  </div>
-                </div>
+                  <Text type="secondary">No principal roles found for this catalog role</Text>
+                </Space>
             ),
           }}
           size="small"
