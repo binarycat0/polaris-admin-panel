@@ -7,6 +7,7 @@ import {
   DatabaseOutlined,
   HomeOutlined,
   LoginOutlined,
+  SafetyOutlined,
   TagsFilled,
   TeamOutlined
 } from '@ant-design/icons';
@@ -94,6 +95,7 @@ export default function Navigation() {
     if (pathname === '/catalogs') return 'catalogs';
     if (pathname === '/principals') return 'principals';
     if (pathname === '/principal-roles') return 'principal-roles';
+    if (pathname === '/privileges') return 'privileges';
     return 'home';
   };
 
@@ -113,6 +115,9 @@ export default function Navigation() {
         break;
       case 'principal-roles':
         router.push('/principal-roles');
+        break;
+      case 'privileges':
+        router.push('/privileges');
         break;
     }
   };
@@ -145,6 +150,11 @@ export default function Navigation() {
         key: 'principal-roles',
         icon: <TagsFilled/>,
         label: 'Principal Roles',
+      },
+      {
+        key: 'privileges',
+        icon: <SafetyOutlined/>,
+        label: 'Privileges',
       },
     ] : []),
   ];
