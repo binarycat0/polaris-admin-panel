@@ -1,9 +1,22 @@
 'use client'
-import {Modal, Form, Input, Button, Space, Typography, Divider, message} from 'antd'
-import {DatabaseOutlined, CloudOutlined, PlusOutlined, DeleteOutlined} from '@ant-design/icons'
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  message,
+  Modal,
+  Radio,
+  Select,
+  Space,
+  Typography,
+  Flex
+} from 'antd'
+import {CloudOutlined, DatabaseOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 
 const {Text} = Typography;
+const {TextArea} = Input;
 
 interface CreateCatalogModalProps {
   visible: boolean;
@@ -12,15 +25,48 @@ interface CreateCatalogModalProps {
 }
 
 interface CatalogFormValues {
+  type: 'INTERNAL' | 'EXTERNAL';
   name: string;
   defaultBaseLocation: string;
-  allowedLocations: string;
+  storageType: 'S3' | 'AZURE' | 'GCS' | 'FILE';
+  allowedLocations: string[];
   properties: { key: string; value: string }[];
+  // External catalog fields
+  connectionType?: 'ICEBERG_REST' | 'HADOOP' | 'HIVE';
+  uri?: string;
+  remoteCatalogName?: string;
+  warehouse?: string;
+  authenticationType?: 'OAUTH' | 'BEARER' | 'SIGV4' | 'IMPLICIT';
+  // AWS S3 fields
+  roleArn?: string;
+  externalId?: string;
+  userArn?: string;
+  region?: string;
+  // Azure fields
+  tenantId?: string;
+  multiTenantAppName?: string;
+  // GCP fields
+  gcsServiceAccount?: string;
+  // OAuth fields
+  tokenUri?: string;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: string;
+  // Bearer fields
+  bearerToken?: string;
+  // SigV4 fields
+  signingRegion?: string;
+  signingName?: string;
+  roleSessionName?: string;
 }
 
 export default function CreateCatalogModal({visible, onClose, onSuccess}: CreateCatalogModalProps) {
   const [form] = Form.useForm<CatalogFormValues>();
   const [loading, setLoading] = useState(false);
+  const [catalogType, setCatalogType] = useState<'INTERNAL' | 'EXTERNAL'>('INTERNAL');
+  const [storageType, setStorageType] = useState<'S3' | 'AZURE' | 'GCS' | 'FILE'>('S3');
+  const [connectionType, setConnectionType] = useState<'ICEBERG_REST' | 'HADOOP' | 'HIVE'>('ICEBERG_REST');
+  const [authenticationType, setAuthenticationType] = useState<'OAUTH' | 'BEARER' | 'SIGV4' | 'IMPLICIT'>('IMPLICIT');
 
   const handleSubmit = async (values: CatalogFormValues) => {
     setLoading(true);
@@ -39,15 +85,78 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         });
       }
 
+      // Build storage config based on storage type
+      const storageConfigInfo: any = {
+        storageType: values.storageType,
+        allowedLocations: values.allowedLocations,
+      };
+
+      // Add storage-specific fields
+      if (values.storageType === 'S3') {
+        if (values.roleArn) storageConfigInfo.roleArn = values.roleArn;
+        if (values.externalId) storageConfigInfo.externalId = values.externalId;
+        if (values.userArn) storageConfigInfo.userArn = values.userArn;
+        if (values.region) storageConfigInfo.region = values.region;
+      } else if (values.storageType === 'AZURE') {
+        if (values.tenantId) storageConfigInfo.tenantId = values.tenantId;
+        if (values.multiTenantAppName) storageConfigInfo.multiTenantAppName = values.multiTenantAppName;
+      } else if (values.storageType === 'GCS') {
+        if (values.gcsServiceAccount) storageConfigInfo.gcsServiceAccount = values.gcsServiceAccount;
+      }
+
+      // Build the base catalog object
+      const catalog: any = {
+        type: values.type,
+        name: values.name,
+        properties,
+        storageConfigInfo,
+      };
+
+      // Add external catalog specific fields
+      if (values.type === 'EXTERNAL' && values.connectionType) {
+        const connectionConfigInfo: any = {
+          connectionType: values.connectionType,
+        };
+
+        if (values.uri) connectionConfigInfo.uri = values.uri;
+
+        // Add connection-specific fields
+        if (values.connectionType === 'ICEBERG_REST' && values.remoteCatalogName) {
+          connectionConfigInfo.remoteCatalogName = values.remoteCatalogName;
+        } else if ((values.connectionType === 'HADOOP' || values.connectionType === 'HIVE') && values.warehouse) {
+          connectionConfigInfo.warehouse = values.warehouse;
+        }
+
+        // Add authentication parameters if specified
+        if (values.authenticationType) {
+          const authenticationParameters: any = {
+            authenticationType: values.authenticationType,
+          };
+
+          if (values.authenticationType === 'OAUTH') {
+            if (values.tokenUri) authenticationParameters.tokenUri = values.tokenUri;
+            if (values.clientId) authenticationParameters.clientId = values.clientId;
+            if (values.clientSecret) authenticationParameters.clientSecret = values.clientSecret;
+            if (values.scopes) authenticationParameters.scopes = values.scopes.split(',').map(s => s.trim());
+          } else if (values.authenticationType === 'BEARER') {
+            if (values.bearerToken) authenticationParameters.bearerToken = values.bearerToken;
+          } else if (values.authenticationType === 'SIGV4') {
+            if (values.roleArn) authenticationParameters.roleArn = values.roleArn;
+            if (values.signingRegion) authenticationParameters.signingRegion = values.signingRegion;
+            if (values.externalId) authenticationParameters.externalId = values.externalId;
+            if (values.roleSessionName) authenticationParameters.roleSessionName = values.roleSessionName;
+            if (values.signingName) authenticationParameters.signingName = values.signingName;
+          }
+
+          connectionConfigInfo.authenticationParameters = authenticationParameters;
+        }
+
+        catalog.connectionConfigInfo = connectionConfigInfo;
+      }
+
       // Build the request payload
       const payload = {
-        catalog: {
-          name: values.name,
-          properties,
-          storageConfigInfo: {
-            allowedLocations: values.allowedLocations,
-          },
-        },
+        catalog,
       };
 
       // Get auth headers from localStorage
@@ -109,24 +218,44 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
           open={visible}
           onCancel={handleCancel}
           footer={null}
-          width={700}
+          width={800}
           destroyOnHidden
+          centered
+          styles={{body: {maxHeight: '70vh', overflowY: 'auto'}}}
       >
         <Form
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
             autoComplete="off"
+            initialValues={{
+              type: 'INTERNAL',
+              storageType: 'S3',
+              connectionType: 'ICEBERG_REST',
+              authenticationType: 'IMPLICIT',
+            }}
         >
+          <Form.Item
+              label="Catalog Type"
+              name="type"
+              rules={[{required: true, message: 'Please select a catalog type'}]}
+          >
+            <Radio.Group onChange={(e) => setCatalogType(e.target.value)}>
+              <Radio.Button value="INTERNAL">Internal</Radio.Button>
+              <Radio.Button value="EXTERNAL">External</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+
           <Form.Item
               label="Catalog Name"
               name="name"
               rules={[
                 {required: true, message: 'Please enter a catalog name'},
                 {
-                  pattern: /^[a-zA-Z0-9_-]+$/,
-                  message: 'Catalog name can only contain letters, numbers, underscores, and hyphens',
+                  pattern: /^(?!\s*[s|S][y|Y][s|S][t|T][e|E][m|M]$).*$/,
+                  message: 'Catalog name cannot be "system"',
                 },
+                {min: 1, max: 256, message: 'Name must be between 1 and 256 characters'},
               ]}
           >
             <Input
@@ -141,27 +270,184 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
               rules={[
                 {required: true, message: 'Please enter a default base location'},
               ]}
-              tooltip="For AWS: s3://bucketname/prefix/, for Azure: abfss://container@storageaccount.blob.core.windows.net/prefix/, for GCP: gs://bucketname/prefix/"
+              tooltip={(<>
+                The default base location for the catalog. This is the location where all the data
+                for the catalog will be stored.
+              </>)}
           >
             <Input
                 prefix={<CloudOutlined/>}
-                placeholder="s3://bucketname/prefix/ or abfss://container@account.blob.core.windows.net/prefix/"
+                placeholder="s3://bucketname/prefix/"
             />
+          </Form.Item>
+
+          <Divider orientation="left">Storage Configuration</Divider>
+
+          <Form.Item
+              label="Storage Type"
+              name="storageType"
+              rules={[{required: true, message: 'Please select a storage type'}]}
+          >
+            <Select onChange={(value) => setStorageType(value)}>
+              <Select.Option value="S3">AWS S3</Select.Option>
+              <Select.Option value="AZURE">Azure</Select.Option>
+              <Select.Option value="GCS">Google Cloud Storage</Select.Option>
+              <Select.Option value="FILE">File (Testing Only)</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item
               label="Allowed Locations"
               name="allowedLocations"
-              rules={[
-                {required: true, message: 'Please enter allowed locations'},
-              ]}
-              tooltip="Storage locations that are allowed for this catalog"
+              rules={[{required: true, message: 'Please enter allowed locations'}]}
+              tooltip="Enter one location per line"
           >
-            <Input
-                prefix={<CloudOutlined/>}
-                placeholder="s3://bucketname/prefix/ or abfss://container@account.blob.core.windows.net/prefix/"
+            <Select
+                mode="tags"
+                placeholder="s3://bucketname/prefix/"
+                style={{width: '100%'}}
             />
           </Form.Item>
+
+          {storageType === 'S3' && (
+              <>
+                <Form.Item label="Role ARN" name="roleArn">
+                  <Input placeholder="arn:aws:iam::123456789001:role/my-role"/>
+                </Form.Item>
+                <Form.Item label="User ARN" name="userArn">
+                  <Input placeholder="arn:aws:iam::123456789001:user/my-user"/>
+                </Form.Item>
+                <Form.Item label="External ID" name="externalId">
+                  <Input placeholder="Optional external ID"/>
+                </Form.Item>
+                <Form.Item label="Region" name="region">
+                  <Input placeholder="us-east-1"/>
+                </Form.Item>
+              </>
+          )}
+
+          {storageType === 'AZURE' && (
+              <>
+                <Form.Item
+                    label="Tenant ID"
+                    name="tenantId"
+                    rules={[{required: true, message: 'Tenant ID is required for Azure storage'}]}
+                >
+                  <Input placeholder="Azure tenant ID"/>
+                </Form.Item>
+                <Form.Item label="Multi-Tenant App Name" name="multiTenantAppName">
+                  <Input placeholder="Azure application name"/>
+                </Form.Item>
+              </>
+          )}
+
+          {/* GCP specific fields */}
+          {storageType === 'GCS' && (
+              <Form.Item label="GCS Service Account" name="gcsServiceAccount">
+                <Input placeholder="GCS service account"/>
+              </Form.Item>
+          )}
+
+          {catalogType === 'EXTERNAL' && (
+              <>
+                <Divider orientation="left">Connection Configuration</Divider>
+
+                <Form.Item
+                    label="Connection Type"
+                    name="connectionType"
+                    rules={[{required: true, message: 'Please select a connection type'}]}
+                >
+                  <Select onChange={(value) => setConnectionType(value)}>
+                    <Select.Option value="ICEBERG_REST">Iceberg REST</Select.Option>
+                    <Select.Option value="HADOOP">Hadoop</Select.Option>
+                    <Select.Option value="HIVE">Hive</Select.Option>
+                  </Select>
+                </Form.Item>
+
+                <Form.Item label="URI" name="uri">
+                  <Input placeholder="https://catalog.example.com"/>
+                </Form.Item>
+
+                {connectionType === 'ICEBERG_REST' && (
+                    <Form.Item label="Remote Catalog Name" name="remoteCatalogName">
+                      <Input placeholder="Remote catalog instance name"/>
+                    </Form.Item>
+                )}
+
+                {(connectionType === 'HADOOP' || connectionType === 'HIVE') && (
+                    <Form.Item label="Warehouse" name="warehouse">
+                      <Input placeholder="Warehouse location"/>
+                    </Form.Item>
+                )}
+
+                <Form.Item
+                    label="Authentication Type"
+                    name="authenticationType"
+                    rules={[{required: true, message: 'Please select an authentication type'}]}
+                >
+                  <Select onChange={(value) => setAuthenticationType(value)}>
+                    <Select.Option value="IMPLICIT">Implicit</Select.Option>
+                    <Select.Option value="OAUTH">OAuth</Select.Option>
+                    <Select.Option value="BEARER">Bearer Token</Select.Option>
+                    <Select.Option value="SIGV4">AWS SigV4</Select.Option>
+                  </Select>
+                </Form.Item>
+
+                {authenticationType === 'OAUTH' && (
+                    <>
+                      <Form.Item label="Token URI" name="tokenUri">
+                        <Input placeholder="https://auth.example.com/token"/>
+                      </Form.Item>
+                      <Form.Item label="Client ID" name="clientId">
+                        <Input placeholder="OAuth client ID"/>
+                      </Form.Item>
+                      <Form.Item label="Client Secret" name="clientSecret">
+                        <Input.Password placeholder="OAuth client secret"/>
+                      </Form.Item>
+                      <Form.Item label="Scopes" name="scopes">
+                        <Input placeholder="scope1, scope2"/>
+                      </Form.Item>
+                    </>
+                )}
+
+                {authenticationType === 'BEARER' && (
+                    <Form.Item label="Bearer Token" name="bearerToken">
+                      <Input.Password placeholder="Bearer token"/>
+                    </Form.Item>
+                )}
+
+                {authenticationType === 'SIGV4' && (
+                    <>
+                      <Form.Item
+                          label="Role ARN"
+                          name="roleArn"
+                          rules={[{required: true, message: 'Role ARN is required for SigV4'}]}
+                      >
+                        <Input placeholder="arn:aws:iam::123456789001:role/my-role"/>
+                      </Form.Item>
+                      <Form.Item
+                          label="Signing Region"
+                          name="signingRegion"
+                          rules={[{
+                            required: true,
+                            message: 'Signing region is required for SigV4'
+                          }]}
+                      >
+                        <Input placeholder="us-west-2"/>
+                      </Form.Item>
+                      <Form.Item label="External ID" name="externalId">
+                        <Input placeholder="Optional external ID"/>
+                      </Form.Item>
+                      <Form.Item label="Role Session Name" name="roleSessionName">
+                        <Input placeholder="polaris-remote-catalog-access"/>
+                      </Form.Item>
+                      <Form.Item label="Signing Name" name="signingName">
+                        <Input placeholder="execute-api"/>
+                      </Form.Item>
+                    </>
+                )}
+              </>
+          )}
 
           <Divider orientation="left">
             <Text type="secondary">Additional Properties (Optional)</Text>
@@ -203,15 +489,17 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
             )}
           </Form.List>
 
-          <Form.Item style={{marginBottom: 0, marginTop: 24}}>
-            <Space style={{width: '100%', justifyContent: 'flex-end'}}>
-              <Button onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                Create Catalog
-              </Button>
-            </Space>
+          <Form.Item>
+            <Flex justify="flex-end">
+              <Space>
+                <Button onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  Create Catalog
+                </Button>
+              </Space>
+            </Flex>
           </Form.Item>
         </Form>
       </Modal>
