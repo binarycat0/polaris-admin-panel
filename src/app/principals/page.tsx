@@ -85,6 +85,16 @@ export default function Page() {
     setPrincipalRoles([]);
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const principalsData = await getPrincipals();
+      setPrincipals(principalsData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchPrincipals() {
       setLoading(true);
@@ -111,6 +121,7 @@ export default function Page() {
             principals={principals}
             loading={loading}
             onViewRoles={handleViewRoles}
+            onRefresh={handleRefresh}
         />
 
         <PrincipalRolesModal

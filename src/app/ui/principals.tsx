@@ -1,13 +1,16 @@
 'use client'
-import {Table, Typography, Tag, Tooltip, Button, Space} from 'antd'
+import {Table, Typography, Tag, Tooltip, Button, Space, Flex} from 'antd'
 import {
   UserOutlined,
   CalendarOutlined,
   SettingOutlined,
   IdcardOutlined,
-  TeamOutlined
+  TeamOutlined,
+  PlusOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
+import {useState} from 'react'
+import CreatePrincipalModal from './create-principal-modal'
 
 const {Text, Title} = Typography;
 
@@ -26,6 +29,7 @@ interface PrincipalsProps {
   principals: Principal[];
   loading: boolean;
   onViewRoles?: (principalName: string) => void;
+  onRefresh?: () => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -33,7 +37,15 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function Principals({principals, loading, onViewRoles}: PrincipalsProps) {
+export default function Principals({principals, loading, onViewRoles, onRefresh}: PrincipalsProps) {
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+
+  const handleCreateSuccess = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   const columns: ColumnsType<Principal> = [
     {
       title: "Name",
@@ -163,12 +175,21 @@ export default function Principals({principals, loading, onViewRoles}: Principal
 
   return (
       <>
-        <Title level={4}>
-          <Space>
-            Principals
-            <UserOutlined/>
-          </Space>
-        </Title>
+        <Flex justify="space-between" align="center">
+          <Title level={4}>
+            <Space>
+              Principals
+              <UserOutlined/>
+            </Space>
+          </Title>
+          <Button
+            type="primary"
+            icon={<PlusOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+          >
+            Create new principal
+          </Button>
+        </Flex>
 
         <Table
             columns={columns}
@@ -184,12 +205,18 @@ export default function Principals({principals, loading, onViewRoles}: Principal
             }}
             locale={{
               emptyText: (
-                  <Space direction="vertical">
+                  <Space>
                     <UserOutlined/>
                     <Text type="secondary">No principals found</Text>
                   </Space>
               ),
             }}
+        />
+
+        <CreatePrincipalModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
         />
       </>
   );

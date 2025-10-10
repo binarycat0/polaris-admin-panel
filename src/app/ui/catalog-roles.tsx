@@ -127,7 +127,7 @@ export default function CatalogRoles(
           }}
           locale={{
             emptyText: (
-                <Space direction="vertical">
+                <Space>
                   <UserOutlined/>
                   <Text type="secondary">No roles found for this catalog</Text>
                 </Space>

@@ -167,7 +167,7 @@ export default function PrincipalRolesModal({
                 }}
                 locale={{
                   emptyText: (
-                      <Space direction="vertical">
+                      <Space>
                         <TeamOutlined/>
                         <Text type="secondary">No principal roles found for this principal</Text>
                       </Space>

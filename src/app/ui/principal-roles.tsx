@@ -108,8 +108,8 @@ export default function PrincipalRoles({
           }}
           locale={{
             emptyText: (
-                <Space direction="vertical">
-                  <TeamOutlined style={{fontSize: '32px', color: '#d9d9d9', marginBottom: '8px'}}/>
+                <Space>
+                  <TeamOutlined/>
                   <Text type="secondary">No principal roles found for this catalog role</Text>
                 </Space>
             ),

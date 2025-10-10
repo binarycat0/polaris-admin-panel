@@ -141,9 +141,8 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
           }}
           locale={{
             emptyText: (
-                <Space direction="vertical">
+                <Space>
                   <DatabaseOutlined/>
-                  <Title level={4} type="secondary">No catalogs found</Title>
                   <Text type="secondary">There are no catalogs available at the moment.</Text>
                 </Space>
             ),

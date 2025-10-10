@@ -201,7 +201,7 @@ export default function PrincipalRolesList({
             }}
             locale={{
               emptyText: (
-                  <Space direction="vertical">
+                  <Space>
                     <TeamOutlined/>
                     <Text type="secondary">No principal roles found</Text>
                   </Space>

@@ -153,7 +153,7 @@ export default function Grants({grants, loading}: GrantsProps) {
           loading={loading}
           locale={{
             emptyText: (
-                <Space direction="vertical">
+                <Space>
                   <KeyOutlined/>
                   <Text type="secondary">No grants found for this catalog role</Text>
                 </Space>
