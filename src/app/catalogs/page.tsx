@@ -5,7 +5,8 @@ import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
 import {useCallback, useEffect, useState} from 'react'
-import {Breadcrumb, Col, Row, Spin, Divider} from 'antd';
+import {Breadcrumb, Col, Divider, FloatButton, Row, Spin} from 'antd';
+import {PlusCircleTwoTone} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 
 export default function Page() {
@@ -205,6 +206,7 @@ export default function Page() {
     ] : []),
   ];
 
+
   return (
       <>
         <Breadcrumb separator={">"} items={breadcrumbItems}/>
@@ -212,7 +214,13 @@ export default function Page() {
         <Row gutter={16} className="catalogs-panel-content">
           <Col span={12}>
             <Row className="catalogs-panel-catalogs">
-              <Col>
+              <Col style={{position: 'relative', overflow: 'hidden'}}
+              >
+                <FloatButton
+                    className="catalogs-panel-catalogs-add-button"
+                    type="default"
+                    icon={<PlusCircleTwoTone/>}
+                />
                 <Catalogs
                     catalogs={catalogs}
                     onRowClick={handleCatalogRowClick}
