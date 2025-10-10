@@ -2,6 +2,7 @@
 import {
   Button,
   Divider,
+  Flex,
   Form,
   Input,
   message,
@@ -9,14 +10,13 @@ import {
   Radio,
   Select,
   Space,
-  Typography,
-  Flex
+  Tabs,
+  Typography
 } from 'antd'
 import {CloudOutlined, DatabaseOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 
 const {Text} = Typography;
-const {TextArea} = Input;
 
 interface CreateCatalogModalProps {
   visible: boolean;
@@ -69,14 +69,13 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
   const [authenticationType, setAuthenticationType] = useState<'OAUTH' | 'BEARER' | 'SIGV4' | 'IMPLICIT'>('IMPLICIT');
 
   const handleSubmit = async (values: CatalogFormValues) => {
+    console.log('Form submitted with values:', values);
     setLoading(true);
     try {
-      // Build the properties object
       const properties: Record<string, string> = {
         'default-base-location': values.defaultBaseLocation,
       };
 
-      // Add additional properties if provided
       if (values.properties && values.properties.length > 0) {
         values.properties.forEach(prop => {
           if (prop.key && prop.value) {
@@ -85,13 +84,11 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         });
       }
 
-      // Build storage config based on storage type
       const storageConfigInfo: any = {
         storageType: values.storageType,
         allowedLocations: values.allowedLocations,
       };
 
-      // Add storage-specific fields
       if (values.storageType === 'S3') {
         if (values.roleArn) storageConfigInfo.roleArn = values.roleArn;
         if (values.externalId) storageConfigInfo.externalId = values.externalId;
@@ -104,7 +101,6 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         if (values.gcsServiceAccount) storageConfigInfo.gcsServiceAccount = values.gcsServiceAccount;
       }
 
-      // Build the base catalog object
       const catalog: any = {
         type: values.type,
         name: values.name,
@@ -112,7 +108,6 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         storageConfigInfo,
       };
 
-      // Add external catalog specific fields
       if (values.type === 'EXTERNAL' && values.connectionType) {
         const connectionConfigInfo: any = {
           connectionType: values.connectionType,
@@ -120,14 +115,12 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
 
         if (values.uri) connectionConfigInfo.uri = values.uri;
 
-        // Add connection-specific fields
         if (values.connectionType === 'ICEBERG_REST' && values.remoteCatalogName) {
           connectionConfigInfo.remoteCatalogName = values.remoteCatalogName;
         } else if ((values.connectionType === 'HADOOP' || values.connectionType === 'HIVE') && values.warehouse) {
           connectionConfigInfo.warehouse = values.warehouse;
         }
 
-        // Add authentication parameters if specified
         if (values.authenticationType) {
           const authenticationParameters: any = {
             authenticationType: values.authenticationType,
@@ -154,12 +147,10 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         catalog.connectionConfigInfo = connectionConfigInfo;
       }
 
-      // Build the request payload
       const payload = {
         catalog,
       };
 
-      // Get auth headers from localStorage
       const token = localStorage.getItem('access_token');
       const realmHeaderName = localStorage.getItem('realm_header_name');
       const realmHeaderValue = localStorage.getItem('realm_header_value');
@@ -207,6 +198,125 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
     onClose();
   };
 
+  const storageS3MenuChildren = (
+      <>
+        <Form.Item
+            label="Allowed Locations"
+            name="allowedLocations"
+            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            tooltip="Storage locations that are allowed for this catalog"
+        >
+          <Select
+              mode="tags"
+              placeholder="s3://bucketname/prefix/"
+              style={{width: '100%'}}
+          />
+        </Form.Item>
+        <Form.Item label="Role ARN" name="roleArn">
+          <Input placeholder="arn:aws:iam::123456789001:role/my-role"/>
+        </Form.Item>
+        <Form.Item label="User ARN" name="userArn">
+          <Input placeholder="arn:aws:iam::123456789001:user/my-user"/>
+        </Form.Item>
+        <Form.Item label="External ID" name="externalId">
+          <Input placeholder="Optional external ID"/>
+        </Form.Item>
+        <Form.Item label="Region" name="region">
+          <Input placeholder="us-east-1"/>
+        </Form.Item>
+      </>
+  )
+
+  const storageAzureMenuChildren = (
+      <>
+        <Form.Item
+            label="Allowed Locations"
+            name="allowedLocations"
+            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            tooltip="Storage locations that are allowed for this catalog"
+        >
+          <Select
+              mode="tags"
+              placeholder="abfss://container@storageaccount.blob.core.windows.net/prefix/"
+              style={{width: '100%'}}
+          />
+        </Form.Item>
+        <Form.Item
+            label="Tenant ID"
+            name="tenantId"
+            rules={[{
+              required: true,
+              message: 'Tenant ID is required for Azure storage'
+            }]}
+        >
+          <Input placeholder="Azure tenant ID"/>
+        </Form.Item>
+        <Form.Item label="Multi-Tenant App Name" name="multiTenantAppName">
+          <Input placeholder="Azure application name"/>
+        </Form.Item>
+      </>
+  )
+
+  const storageGCSMenuChildren = (
+      <>
+        <Form.Item
+            label="Allowed Locations"
+            name="allowedLocations"
+            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            tooltip="Storage locations that are allowed for this catalog"
+        >
+          <Select
+              mode="tags"
+              placeholder="gs://bucketname/prefix/"
+              style={{width: '100%'}}
+          />
+        </Form.Item>
+        <Form.Item label="GCS Service Account" name="gcsServiceAccount">
+          <Input placeholder="GCS service account"/>
+        </Form.Item>
+      </>
+  )
+
+  const storageFileMenuChildren = (
+      <>
+        <Form.Item
+            label="Allowed Locations"
+            name="allowedLocations"
+            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            tooltip="Storage locations that are allowed for this catalog"
+        >
+          <Select
+              mode="tags"
+              placeholder="file:///path/to/directory/"
+              style={{width: '100%'}}
+          />
+        </Form.Item>
+      </>
+  )
+
+  const storageTypeItems = [
+    {
+      key: 'S3',
+      label: 'AWS S3',
+      children: storageS3MenuChildren,
+    },
+    {
+      key: 'AZURE',
+      label: 'Azure',
+      children: storageAzureMenuChildren,
+    },
+    {
+      key: 'GCS',
+      label: 'Google Cloud Storage',
+      children: storageGCSMenuChildren,
+    },
+    {
+      key: 'FILE',
+      label: 'File (Testing Only)',
+      children: storageFileMenuChildren,
+    },
+  ]
+
   return (
       <Modal
           title={
@@ -227,6 +337,10 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
+            onFinishFailed={(errorInfo) => {
+              console.log('Form validation failed:', errorInfo);
+              message.error('Please fill in all required fields');
+            }}
             autoComplete="off"
             initialValues={{
               type: 'INTERNAL',
@@ -283,70 +397,19 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
 
           <Divider orientation="left">Storage Configuration</Divider>
 
-          <Form.Item
-              label="Storage Type"
-              name="storageType"
-              rules={[{required: true, message: 'Please select a storage type'}]}
-          >
-            <Select onChange={(value) => setStorageType(value)}>
-              <Select.Option value="S3">AWS S3</Select.Option>
-              <Select.Option value="AZURE">Azure</Select.Option>
-              <Select.Option value="GCS">Google Cloud Storage</Select.Option>
-              <Select.Option value="FILE">File (Testing Only)</Select.Option>
-            </Select>
+          <Form.Item name="storageType" hidden noStyle>
+            <Input/>
           </Form.Item>
 
-          <Form.Item
-              label="Allowed Locations"
-              name="allowedLocations"
-              rules={[{required: true, message: 'Please enter allowed locations'}]}
-              tooltip="Enter one location per line"
-          >
-            <Select
-                mode="tags"
-                placeholder="s3://bucketname/prefix/"
-                style={{width: '100%'}}
-            />
-          </Form.Item>
-
-          {storageType === 'S3' && (
-              <>
-                <Form.Item label="Role ARN" name="roleArn">
-                  <Input placeholder="arn:aws:iam::123456789001:role/my-role"/>
-                </Form.Item>
-                <Form.Item label="User ARN" name="userArn">
-                  <Input placeholder="arn:aws:iam::123456789001:user/my-user"/>
-                </Form.Item>
-                <Form.Item label="External ID" name="externalId">
-                  <Input placeholder="Optional external ID"/>
-                </Form.Item>
-                <Form.Item label="Region" name="region">
-                  <Input placeholder="us-east-1"/>
-                </Form.Item>
-              </>
-          )}
-
-          {storageType === 'AZURE' && (
-              <>
-                <Form.Item
-                    label="Tenant ID"
-                    name="tenantId"
-                    rules={[{required: true, message: 'Tenant ID is required for Azure storage'}]}
-                >
-                  <Input placeholder="Azure tenant ID"/>
-                </Form.Item>
-                <Form.Item label="Multi-Tenant App Name" name="multiTenantAppName">
-                  <Input placeholder="Azure application name"/>
-                </Form.Item>
-              </>
-          )}
-
-          {/* GCP specific fields */}
-          {storageType === 'GCS' && (
-              <Form.Item label="GCS Service Account" name="gcsServiceAccount">
-                <Input placeholder="GCS service account"/>
-              </Form.Item>
-          )}
+          <Tabs
+              type="card"
+              activeKey={storageType}
+              onChange={(key) => {
+                setStorageType(key as 'S3' | 'AZURE' | 'GCS' | 'FILE');
+                form.setFieldValue('storageType', key);
+              }}
+              items={storageTypeItems}
+          />
 
           {catalogType === 'EXTERNAL' && (
               <>
