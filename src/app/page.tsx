@@ -1,6 +1,6 @@
 'use client'
 
-import {Button, Flex, Space, Typography, Row, Col} from 'antd';
+import {Button, Flex, Space, Typography} from 'antd';
 import {useEffect, useState} from "react";
 import {type AuthStatus, checkAuthStatus} from "@/utils/auth";
 

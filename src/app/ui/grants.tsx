@@ -3,7 +3,7 @@ import {Space, Table, Tag, Tooltip, Typography} from 'antd'
 import {KeyOutlined, SafetyOutlined, SettingOutlined} from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
 export interface Grant {
   privilege?: string;

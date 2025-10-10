@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
 export interface CatalogRole {
   name: string;

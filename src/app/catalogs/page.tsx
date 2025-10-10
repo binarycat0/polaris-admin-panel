@@ -177,7 +177,7 @@ export default function Page() {
       setCatalogs(catalogsData);
       setLoading(false);
     };
-    fetchCatalogs().then(r => {
+    fetchCatalogs().then(() => {
     });
   }, [getCatalogs]);
 
