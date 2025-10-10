@@ -58,7 +58,12 @@ const tablePrivileges: Privilege[] = [
   {
     key: '8',
     privilege: 'TABLE_FULL_METADATA',
-    description: 'Grants all table privileges, except TABLE_READ_DATA and TABLE_WRITE_DATA, which need to be granted individually.',
+    description: (
+        <Text>
+          Grants all table privileges, except <Text code>TABLE_READ_DATA</Text> and <Text code>TABLE_WRITE_DATA</Text>, which need to be granted
+          individually.
+        </Text>
+    ),
   },
   {
     key: '9',
@@ -157,7 +162,22 @@ const catalogPrivileges: Privilege[] = [
   {
     key: '2',
     privilege: 'CATALOG_MANAGE_CONTENT',
-    description: 'Enables full management of content for the catalog. This privilege encompasses the following privileges: CATALOG_MANAGE_METADATA, TABLE_FULL_METADATA, NAMESPACE_FULL_METADATA, VIEW_FULL_METADATA, TABLE_WRITE_DATA, TABLE_READ_DATA, CATALOG_READ_PROPERTIES, CATALOG_WRITE_PROPERTIES',
+    description: (
+        <Text>
+          Enables full management of content for the catalog. This privilege encompasses the
+          following privileges:
+          <Space direction="vertical">
+            <Text code>CATALOG_MANAGE_METADATA</Text>
+            <Text code>TABLE_FULL_METADATA</Text>
+            <Text code>NAMESPACE_FULL_METADATA</Text>
+            <Text code>VIEW_FULL_METADATA</Text>
+            <Text code>TABLE_WRITE_DATA</Text>
+            <Text code>TABLE_READ_DATA</Text>
+            <Text code>CATALOG_READ_PROPERTIES</Text>
+            <Text code>CATALOG_WRITE_PROPERTIES</Text>
+          </Space>
+        </Text>
+    )
   },
   {
     key: '3',
@@ -275,7 +295,8 @@ export default function PrivilegesPage() {
             </Text>
           </Paragraph>
           <Paragraph>
-            <Link href="https://polaris.apache.org/releases/1.1.0/access-control/#access-control-privileges">
+            <Link
+                href="https://polaris.apache.org/releases/1.1.0/access-control/#access-control-privileges">
               This information is taken from the Apache Polaris documentation site.
             </Link>
           </Paragraph>
