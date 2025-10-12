@@ -13,7 +13,7 @@ import {
   Tabs,
   Typography
 } from 'antd'
-import {CloudOutlined, DatabaseOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
+import {CloudOutlined, FolderOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 
 const {Text} = Typography;
@@ -321,7 +321,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       <Modal
           title={
             <Space>
-              <DatabaseOutlined/>
+              <FolderOutlined/>
               Create New Catalog
             </Space>
           }
@@ -373,7 +373,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
               ]}
           >
             <Input
-                prefix={<DatabaseOutlined/>}
+                prefix={<FolderOutlined/>}
                 placeholder="Enter catalog name (e.g., my_catalog)"
             />
           </Form.Item>

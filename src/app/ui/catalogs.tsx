@@ -4,7 +4,7 @@ import {Button, Dropdown, Space, Table, Tag, Typography} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
-  DatabaseOutlined,
+  FolderOutlined,
   DeleteOutlined,
   EditOutlined,
   FileUnknownOutlined,
@@ -59,7 +59,7 @@ export default function Catalogs({
   const columns: ColumnsType<CatalogEntity> = [
     {
       title: (
-          <Space><DatabaseOutlined/>Name</Space>
+          <Space><FolderOutlined/>Name</Space>
       ),
       dataIndex: 'name',
       key: 'name',
@@ -204,7 +204,7 @@ export default function Catalogs({
           locale={{
             emptyText: (
                 <Space>
-                  <DatabaseOutlined/>
+                  <FolderOutlined/>
                   <Text type="secondary">There are no catalogs available at the moment.</Text>
                 </Space>
             ),
