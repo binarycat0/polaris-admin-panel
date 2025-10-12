@@ -16,10 +16,22 @@ const {Title} = Typography;
 export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(null);
+  const [selectedCatalog, setSelectedCatalog] = useState<string | null>(() => {
+    // Restore selected catalog from localStorage on initial load
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selected_catalog');
+    }
+    return null;
+  });
   const [catalogRoles, setCatalogRoles] = useState<CatalogRole[]>([]);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const [selectedCatalogRole, setSelectedCatalogRole] = useState<string | null>(null);
+  const [selectedCatalogRole, setSelectedCatalogRole] = useState<string | null>(() => {
+    // Restore selected catalog role from localStorage on initial load
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selected_catalog_role');
+    }
+    return null;
+  });
   const [principalRoles, setPrincipalRoles] = useState<PrincipalRole[]>([]);
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const [grants, setGrants] = useState<Grant[]>([]);
@@ -111,7 +123,17 @@ export default function Page() {
 
   const handleCatalogRowClick = async (catalogName: string) => {
     setSelectedCatalog(catalogName);
+    // Save selected catalog to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selected_catalog', catalogName);
+    }
+
     setSelectedCatalogRole(null); // Clear selected catalogs role
+    // Clear selected catalog role from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('selected_catalog_role');
+    }
+
     setPrincipalRoles([]); // Clear principal roles
     setGrants([]); // Clear grants
     setRolesLoading(true);
@@ -159,6 +181,11 @@ export default function Page() {
     if (!selectedCatalog) return;
 
     setSelectedCatalogRole(catalogRoleName);
+    // Save selected catalog role to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selected_catalog_role', catalogRoleName);
+    }
+
     setPrincipalRolesLoading(true);
     setGrantsLoading(true);
 
@@ -188,6 +215,47 @@ export default function Page() {
     refreshCatalogs().then(() => {
     });
   }, [refreshCatalogs]);
+
+  // Restore state from localStorage when catalogs are loaded
+  useEffect(() => {
+    const restoreState = async () => {
+      if (catalogs.length === 0 || loading) return;
+
+      const savedCatalog = selectedCatalog;
+      const savedCatalogRole = selectedCatalogRole;
+
+      // Restore catalog roles if a catalog was selected
+      if (savedCatalog) {
+        setRolesLoading(true);
+        try {
+          const roles = await getCatalogRoles(savedCatalog);
+          setCatalogRoles(roles);
+
+          // Restore principal roles and grants if a catalog role was selected
+          if (savedCatalogRole) {
+            setPrincipalRolesLoading(true);
+            setGrantsLoading(true);
+            try {
+              const [roles, grantsData] = await Promise.all([
+                getPrincipalRoles(savedCatalog, savedCatalogRole),
+                getGrants(savedCatalog, savedCatalogRole)
+              ]);
+              setPrincipalRoles(roles);
+              setGrants(grantsData);
+            } finally {
+              setPrincipalRolesLoading(false);
+              setGrantsLoading(false);
+            }
+          }
+        } finally {
+          setRolesLoading(false);
+        }
+      }
+    };
+
+    restoreState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogs.length, loading]);
 
   const handleCreateSuccess = () => {
     refreshCatalogs();

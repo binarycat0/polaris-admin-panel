@@ -1,7 +1,12 @@
 'use client'
-import {Button, Flex, Space, Table, Tag, Tooltip, Typography} from 'antd'
+import type {MenuProps} from 'antd'
+import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography} from 'antd'
 import {
   CalendarOutlined,
+  CloudOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  HomeOutlined,
   IdcardOutlined,
   SettingOutlined,
   TeamOutlined,
@@ -25,11 +30,29 @@ export interface Principal {
   entityVersion: number;
 }
 
+export interface PrincipalRoleItem {
+  name: string;
+  federated: boolean;
+  properties: {
+    [key: string]: string;
+  };
+  createTimestamp: number;
+  lastUpdateTimestamp: number;
+  entityVersion: number;
+}
+
 interface PrincipalsProps {
   principals: Principal[];
   loading: boolean;
-  onViewRoles?: (principalName: string) => void;
+  onRowClick?: (principalName: string) => void;
   onRefresh?: () => void;
+  expandedRowKeys?: string[];
+  principalRoles?: Record<string, PrincipalRoleItem[]>;
+  rolesLoading?: Record<string, boolean>;
+  onEdit?: (principalName: string) => void;
+  onDelete?: (principalName: string) => void;
+  onEditPrincipalRole?: (principalName: string, roleName: string) => void;
+  onDeletePrincipalRole?: (principalName: string, roleName: string) => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -37,7 +60,19 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
 
-export default function Principals({principals, loading, onViewRoles, onRefresh}: PrincipalsProps) {
+export default function Principals({
+                                     principals,
+                                     loading,
+                                     onRowClick,
+                                     onRefresh,
+                                     expandedRowKeys = [],
+                                     principalRoles = {},
+                                     rolesLoading = {},
+                                     onEdit,
+                                     onDelete,
+                                     onEditPrincipalRole,
+                                     onDeletePrincipalRole
+                                   }: PrincipalsProps) {
   const [createModalVisible, setCreateModalVisible] = useState(false);
 
   const handleCreateSuccess = () => {
@@ -45,6 +80,167 @@ export default function Principals({principals, loading, onViewRoles, onRefresh}
       onRefresh();
     }
   };
+
+  // Columns for the principal-roles expandable table
+  const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
+    {
+      title: "Name",
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (name: string) => (
+          <Text strong style={{color: '#722ed1'}}>{name}</Text>
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'federated',
+      key: 'federated',
+      width: 140,
+      sorter: (a, b) => Number(a.federated) - Number(b.federated),
+      render: (federated: boolean) => (
+          <Flex align="center">
+            <Badge
+                status={federated ? "processing" : "default"}
+                text={federated ? (
+                    <Space>
+                      <CloudOutlined/>
+                      Federated
+                    </Space>
+                ) : (
+                    <Space>
+                      <HomeOutlined/>
+                      Local
+                    </Space>
+                )}
+            />
+          </Flex>
+      ),
+    },
+    {
+      title: 'Version',
+      dataIndex: 'entityVersion',
+      key: 'entityVersion',
+      width: 100,
+      sorter: (a, b) => a.entityVersion - b.entityVersion,
+      render: (version: number) => (
+          <Tag color="purple">v{version}</Tag>
+      ),
+    },
+    {
+      title: (
+          <Space>
+            <CalendarOutlined/>
+            Created
+          </Space>
+      ),
+      dataIndex: 'createTimestamp',
+      key: 'createTimestamp',
+      width: 180,
+      sorter: (a, b) => a.createTimestamp - b.createTimestamp,
+      render: (timestamp: number) => (
+          <Text type="secondary">{formatDate(timestamp)}</Text>
+      ),
+    },
+    {
+      title: (
+          <Space>
+            <CalendarOutlined/>
+            Last Updated
+          </Space>
+      ),
+      dataIndex: 'lastUpdateTimestamp',
+      key: 'lastUpdateTimestamp',
+      width: 180,
+      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
+      render: (timestamp: number) => (
+          <Text type="secondary">{formatDate(timestamp)}</Text>
+      ),
+    },
+    {
+      title: (
+          <Space>
+            <SettingOutlined/>
+            Properties
+          </Space>
+      ),
+      key: 'properties',
+      render: (_, record) => {
+        const properties = Object.entries(record.properties || {});
+
+        if (properties.length === 0) {
+          return <Text type="secondary">None</Text>;
+        }
+
+        return (
+            <div>
+              {properties.slice(0, 2).map(([key, value]) => (
+                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
+                    {key}: {value}
+                  </Tag>
+              ))}
+              {properties.length > 2 && (
+                  <Tooltip title={
+                    <div>
+                      {properties.slice(2).map(([key, value]) => (
+                          <div key={key}>{key}: {value}</div>
+                      ))}
+                    </div>
+                  }>
+                    <Tag style={{fontSize: '11px'}}>
+                      +{properties.length - 2} more
+                    </Tag>
+                  </Tooltip>
+              )}
+            </div>
+        );
+      },
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      fixed: 'right',
+      render: (_, record) => {
+        const items: MenuProps['items'] = [
+          {
+            key: 'edit',
+            label: 'Edit',
+            icon: <EditOutlined/>,
+            onClick: () => {
+              if (onEditPrincipalRole) {
+                onEditPrincipalRole(principalName, record.name);
+              }
+            },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            key: 'delete',
+            label: 'Delete',
+            icon: <DeleteOutlined/>,
+            danger: true,
+            onClick: () => {
+              if (onDeletePrincipalRole) {
+                onDeletePrincipalRole(principalName, record.name);
+              }
+            },
+          },
+        ];
+
+        return (
+            <Dropdown menu={{items}} trigger={['click']}>
+              <Button
+                  size="small"
+                  icon={<SettingOutlined/>}
+                  onClick={(e) => e.stopPropagation()}
+              />
+            </Dropdown>
+        );
+      },
+    },
+  ];
 
   const columns: ColumnsType<Principal> = [
     {
@@ -155,21 +351,44 @@ export default function Principals({principals, loading, onViewRoles, onRefresh}
       key: 'actions',
       width: 100,
       fixed: 'right',
-      render: (_, record) => (
-          <Button
-              variant="outlined"
-              size="small"
-              icon={<TeamOutlined/>}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onViewRoles) {
-                  onViewRoles(record.name);
-                }
-              }}
-          >
-            Roles
-          </Button>
-      ),
+      render: (_, record) => {
+        const items: MenuProps['items'] = [
+          {
+            key: 'edit',
+            label: 'Edit',
+            icon: <EditOutlined/>,
+            onClick: () => {
+              if (onEdit) {
+                onEdit(record.name);
+              }
+            },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            key: 'delete',
+            label: 'Delete',
+            icon: <DeleteOutlined/>,
+            danger: true,
+            onClick: () => {
+              if (onDelete) {
+                onDelete(record.name);
+              }
+            },
+          },
+        ];
+
+        return (
+            <Dropdown menu={{items}} trigger={['click']}>
+              <Button
+                  size="small"
+                  icon={<SettingOutlined/>}
+                  onClick={(e) => e.stopPropagation()}
+              />
+            </Dropdown>
+        );
+      },
     },
   ];
 
@@ -196,6 +415,68 @@ export default function Principals({principals, loading, onViewRoles, onRefresh}
             dataSource={principals}
             rowKey="name"
             loading={loading}
+            expandable={{
+              expandedRowKeys: expandedRowKeys,
+              onExpand: (expanded, record) => {
+                if (expanded && onRowClick) {
+                  onRowClick(record.name);
+                }
+              },
+              expandedRowRender: (record) => {
+                const roles = principalRoles[record.name] || [];
+                const loading = rolesLoading[record.name] || false;
+
+                if (loading) {
+                  return (
+                      <div style={{padding: '20px', textAlign: 'center'}}>
+                        <Spin size="large"/>
+                      </div>
+                  );
+                }
+
+                return (
+                    <div style={{padding: '0 10px'}}>
+                      <Title level={5} style={{marginBottom: 16}}>
+                        <Space>
+                          <TeamOutlined/>
+                          Principal Roles for:
+                          {record.name}
+                          <Tag color="blue">{roles.length}</Tag>
+                        </Space>
+                      </Title>
+                      <Table
+                          columns={getRolesColumns(record.name)}
+                          dataSource={roles}
+                          rowKey="name"
+                          pagination={{
+                            pageSize: 5,
+                            showSizeChanger: false,
+                            showQuickJumper: false,
+                            showTotal: (total, range) =>
+                                `${range[0]}-${range[1]} of ${total} roles`,
+                          }}
+                          locale={{
+                            emptyText: (
+                                <Space>
+                                  <TeamOutlined/>
+                                  <Text type="secondary">No principal roles found for this principal</Text>
+                                </Space>
+                            ),
+                          }}
+                          size="small"
+                      />
+                    </div>
+                );
+              },
+            }}
+            onRow={(record) => ({
+              onClick: () => {
+                if (onRowClick) {
+                  onRowClick(record.name);
+                }
+              },
+              style: {cursor: 'pointer'},
+            })}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
