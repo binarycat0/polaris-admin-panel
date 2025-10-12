@@ -1,15 +1,19 @@
 'use client'
-import {Button, Popover, Space, Table, Tag, Typography} from 'antd'
+import type {MenuProps} from 'antd'
+import {Button, Dropdown, Space, Table, Tag, Typography} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
-  DatabaseOutlined,
+  FolderOutlined,
+  DeleteOutlined,
+  EditOutlined,
   FileUnknownOutlined,
-  InfoCircleOutlined
+  SettingOutlined,
+  TeamOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
 export interface CatalogEntity {
   name: string;
@@ -29,15 +33,19 @@ interface CatalogsProps {
   catalogs: CatalogEntity[];
   onRowClick?: (catalogName: string) => void;
   selectedCatalog?: string | null;
+  onEdit?: (catalogName: string) => void;
+  onDelete?: (catalogName: string) => void;
+  onShowRoles?: (catalogName: string) => void;
 }
 
-export default function Catalogs({catalogs, onRowClick, selectedCatalog}: CatalogsProps) {
-  // Add defensive programming to handle non-array values
-  if (!Array.isArray(catalogs)) {
-    console.error('Catalogs prop is not an array:', catalogs);
-    return <Text type="danger">Error: Invalid catalog data received</Text>;
-  }
-
+export default function Catalogs({
+                                   catalogs,
+                                   onRowClick,
+                                   selectedCatalog,
+                                   onEdit,
+                                   onDelete,
+                                   onShowRoles
+                                 }: CatalogsProps) {
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -51,10 +59,7 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
   const columns: ColumnsType<CatalogEntity> = [
     {
       title: (
-          <>
-            <DatabaseOutlined style={{marginRight: 8}}/>
-            Catalog Name
-          </>
+          <Space><FolderOutlined/>Name</Space>
       ),
       dataIndex: 'name',
       key: 'name',
@@ -62,53 +67,109 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
       render: (name: string) => (
           <Text strong style={{color: '#1890ff'}}>{name}</Text>
       ),
-      minWidth: 250,
+      width: 200,
     },
     {
-      title: 'Details',
-      key: 'details',
+      title: (
+          <Space><FileUnknownOutlined/>Version</Space>
+      ),
+      dataIndex: 'entityVersion',
+      key: 'entityVersion',
+      width: 100,
+      sorter: (a, b) => a.entityVersion - b.entityVersion,
+      render: (version: number) => (
+          <Tag color="blue">v{version}</Tag>
+      ),
+    },
+    {
+      title: (
+          <Space><CloudOutlined/>Base Location</Space>
+      ),
+      dataIndex: ['properties', 'default-base-location'],
+      key: 'baseLocation',
+      ellipsis: true,
+      render: (location: string) => (
+          <Text type="secondary">{location}</Text>
+      ),
+    },
+    {
+      title: (
+          <Space><CloudOutlined/>Allowed Location</Space>
+      ),
+      key: 'allowedLocation',
+      ellipsis: true,
+      render: (_, record) => (
+          <Text type="secondary">
+            {record.storageConfigInfo?.allowedLocations || 'Not specified'}
+          </Text>
+      ),
+    },
+    {
+      title: (
+          <Space><CalendarOutlined/>Created</Space>
+      ),
+      dataIndex: 'createTimestamp',
+      key: 'created',
+      width: 180,
+      sorter: (a, b) => a.createTimestamp - b.createTimestamp,
+      render: (timestamp: number) => (
+          <Text type="secondary">{formatDate(timestamp)}</Text>
+      ),
+    },
+    {
+      title: (
+          <Space><CalendarOutlined/>Last Updated</Space>
+      ),
+      dataIndex: 'lastUpdateTimestamp',
+      key: 'lastUpdated',
+      width: 180,
+      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
+      render: (timestamp: number) => (
+          <Text type="secondary">{formatDate(timestamp)}</Text>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      fixed: 'right',
       render: (_, record) => {
-
-        const content = (
-            <Space direction="vertical">
-              <Space>
-                <FileUnknownOutlined/>
-                Version:
-                <Text type="secondary"> <Tag color="blue">{record.entityVersion}</Tag></Text>
-              </Space>
-              <Space>
-                <CloudOutlined/>
-                Base Location:
-                <Text type="secondary"> {record.properties['default-base-location']}</Text>
-              </Space>
-              <Space>
-                <CloudOutlined/>
-                Allowed Location:
-                <Text
-                    type="secondary"> {record.storageConfigInfo?.allowedLocations || 'Not specified'}
-                </Text>
-              </Space>
-              <Space>
-                <CalendarOutlined/>
-                Created:
-                <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
-              </Space>
-              <Space>
-                <CalendarOutlined/>
-                Last Updated:
-                <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
-              </Space>
-            </Space>
-        );
+        const items: MenuProps['items'] = [
+          {
+            key: 'edit',
+            label: 'Edit',
+            icon: <EditOutlined/>,
+            onClick: () => {
+              if (onEdit) {
+                onEdit(record.name);
+              }
+            },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            key: 'delete',
+            label: 'Delete',
+            icon: <DeleteOutlined/>,
+            danger: true,
+            onClick: () => {
+              if (onDelete) {
+                onDelete(record.name);
+              }
+            },
+          },
+        ];
 
         return (
-            <Popover content={content}>
-              <Button variant="outlined" size="small">
-                <InfoCircleOutlined></InfoCircleOutlined>
-                More details ...
-              </Button>
-            </Popover>
-        )
+            <Dropdown menu={{items}} trigger={['click']}>
+              <Button
+                  size="small"
+                  icon={<SettingOutlined/>}
+                  onClick={(e) => e.stopPropagation()}
+              />
+            </Dropdown>
+        );
       },
     },
   ];
@@ -118,6 +179,7 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
           columns={columns}
           dataSource={catalogs}
           rowKey="name"
+          scroll={{x: 'max-content'}}
           onRow={(record) => ({
             onClick: () => {
               if (onRowClick) {
@@ -141,9 +203,8 @@ export default function Catalogs({catalogs, onRowClick, selectedCatalog}: Catalo
           }}
           locale={{
             emptyText: (
-                <Space direction="vertical">
-                  <DatabaseOutlined/>
-                  <Title level={4} type="secondary">No catalogs found</Title>
+                <Space>
+                  <FolderOutlined/>
                   <Text type="secondary">There are no catalogs available at the moment.</Text>
                 </Space>
             ),

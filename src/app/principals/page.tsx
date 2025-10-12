@@ -3,16 +3,21 @@
 import {useCallback, useEffect, useState} from 'react';
 import {Spin} from 'antd';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
-import Principals, {Principal} from '@/app/ui/principals';
-import PrincipalRolesModal, {PrincipalRoleItem} from '@/app/ui/principal-roles-modal';
+import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [principals, setPrincipals] = useState<Principal[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPrincipalName, setSelectedPrincipalName] = useState<string | null>(null);
-  const [principalRoles, setPrincipalRoles] = useState<PrincipalRoleItem[]>([]);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>(() => {
+    // Restore expanded principal from localStorage on initial load
+    if (typeof window !== 'undefined') {
+      const savedPrincipal = localStorage.getItem('expanded_principal');
+      return savedPrincipal ? [savedPrincipal] : [];
+    }
+    return [];
+  });
+  const [principalRoles, setPrincipalRoles] = useState<Record<string, PrincipalRoleItem[]>>({});
+  const [rolesLoading, setRolesLoading] = useState<Record<string, boolean>>({});
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
@@ -65,24 +70,47 @@ export default function Page() {
     }
   }, [authenticatedFetch]);
 
-  const handleViewRoles = async (principalName: string) => {
-    setSelectedPrincipalName(principalName);
-    setModalVisible(true);
-    setRolesLoading(true);
-    setPrincipalRoles([]);
+  const handleRowClick = async (principalName: string) => {
+    // Toggle expansion
+    const isExpanded = expandedRowKeys.includes(principalName);
 
-    try {
-      const roles = await getPrincipalRoles(principalName);
-      setPrincipalRoles(roles);
-    } finally {
-      setRolesLoading(false);
+    if (isExpanded) {
+      // Collapse the row
+      setExpandedRowKeys([]);
+      // Clear from localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('expanded_principal');
+      }
+    } else {
+      // Expand the row (only one row at a time)
+      setExpandedRowKeys([principalName]);
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('expanded_principal', principalName);
+      }
+
+      // Load roles if not already loaded
+      if (!principalRoles[principalName]) {
+        setRolesLoading(prev => ({...prev, [principalName]: true}));
+
+        try {
+          const roles = await getPrincipalRoles(principalName);
+          setPrincipalRoles(prev => ({...prev, [principalName]: roles}));
+        } finally {
+          setRolesLoading(prev => ({...prev, [principalName]: false}));
+        }
+      }
     }
   };
 
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setSelectedPrincipalName(null);
-    setPrincipalRoles([]);
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const principalsData = await getPrincipals();
+      setPrincipals(principalsData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -99,6 +127,29 @@ export default function Page() {
     fetchPrincipals();
   }, [getPrincipals]);
 
+  // Restore state from localStorage when principals are loaded
+  useEffect(() => {
+    const restoreState = async () => {
+      if (principals.length === 0 || loading) return;
+
+      const savedPrincipal = expandedRowKeys[0];
+
+      // Restore principal roles if a principal was expanded
+      if (savedPrincipal && !principalRoles[savedPrincipal]) {
+        setRolesLoading(prev => ({...prev, [savedPrincipal]: true}));
+        try {
+          const roles = await getPrincipalRoles(savedPrincipal);
+          setPrincipalRoles(prev => ({...prev, [savedPrincipal]: roles}));
+        } finally {
+          setRolesLoading(prev => ({...prev, [savedPrincipal]: false}));
+        }
+      }
+    };
+
+    restoreState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [principals.length, loading]);
+
   if (loading) {
     return (
         <Spin size="large"/>
@@ -106,20 +157,14 @@ export default function Page() {
   }
 
   return (
-      <>
-        <Principals
-            principals={principals}
-            loading={loading}
-            onViewRoles={handleViewRoles}
-        />
-
-        <PrincipalRolesModal
-            visible={modalVisible}
-            principalName={selectedPrincipalName}
-            roles={principalRoles}
-            loading={rolesLoading}
-            onClose={handleCloseModal}
-        />
-      </>
+      <Principals
+          principals={principals}
+          loading={loading}
+          onRowClick={handleRowClick}
+          onRefresh={handleRefresh}
+          expandedRowKeys={expandedRowKeys}
+          principalRoles={principalRoles}
+          rolesLoading={rolesLoading}
+      />
   );
 }

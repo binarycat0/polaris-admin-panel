@@ -1,9 +1,14 @@
 'use client'
-import {Space, Table, Tag, Tooltip, Typography} from 'antd'
-import {KeyOutlined, SafetyOutlined, SettingOutlined} from '@ant-design/icons'
-import type {ColumnsType} from 'antd/es/table'
+import {Divider, List, Space, Spin, Tag, Typography} from 'antd'
+import {
+  EyeOutlined,
+  FolderOutlined,
+  KeyOutlined,
+  SafetyOutlined,
+  TableOutlined
+} from '@ant-design/icons'
 
-const {Text} = Typography;
+const {Text, Title} = Typography;
 
 export interface Grant {
   privilege?: string;
@@ -17,149 +22,116 @@ interface GrantsProps {
   loading: boolean;
 }
 
-export default function Grants({grants, loading}: GrantsProps) {
-  // Dynamic columns based on the actual data structure
-  const generateColumns = (): ColumnsType<Grant> => {
-    if (grants.length === 0) {
-      return [];
-    }
-
-    const sampleGrant = grants[0];
-    const columns: ColumnsType<Grant> = [];
-
-    // Common expected fields with special handling
-    const specialFields = ['type', 'privilege'];
-
-    // Add special columns first
-    Object.keys(sampleGrant).forEach((key) => {
-      if (specialFields.includes(key)) {
-        if (key === 'name' || key === 'id') {
-          columns.push({
-            title: (
-                <>
-                  <SafetyOutlined style={{marginRight: 8}}/>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                </>
-            ),
-            dataIndex: key,
-            key: key,
-            sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: unknown) => (
-                <Text strong style={{color: '#fa8c16'}}>{String(value || 'N/A')}</Text>
-            ),
-          });
-        } else if (key === 'type' || key === 'privilege') {
-          columns.push({
-            title: key.charAt(0).toUpperCase() + key.slice(1),
-            dataIndex: key,
-            key: key,
-            width: 120,
-            sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: unknown) => (
-                <Tag color="orange">{String(value || 'N/A')}</Tag>
-            ),
-          });
-        } else {
-          columns.push({
-            title: key.charAt(0).toUpperCase() + key.slice(1),
-            dataIndex: key,
-            key: key,
-            sorter: (a, b) => String(a[key] || '').localeCompare(String(b[key] || '')),
-            render: (value: unknown) => (
-                <Text>{String(value || 'N/A')}</Text>
-            ),
-          });
-        }
-      }
-    });
-
-
-    // Add properties column for any remaining object fields
-    const remainingFields = Object.keys(sampleGrant).filter(
-        key => !specialFields.includes(key) &&
-            typeof sampleGrant[key] === 'object' &&
-            sampleGrant[key] !== null
-    );
-
-    if (remainingFields.length > 0) {
-      columns.push({
-        title: (
-            <>
-              <SettingOutlined style={{marginRight: 8}}/>
-              Additional Data
-            </>
-        ),
-        key: 'additionalData',
-        width: 250,
-        render: (_, record) => {
-          const additionalData: Array<[string, unknown]> = [];
-
-          remainingFields.forEach(field => {
-            if (record[field] && typeof record[field] === 'object') {
-              if (Array.isArray(record[field])) {
-                additionalData.push([field, `Array(${(record[field] as unknown[]).length})`]);
-              } else {
-                Object.entries(record[field] as Record<string, unknown>).forEach(([key, value]) => {
-                  additionalData.push([`${field}.${key}`, value]);
-                });
-              }
-            }
-          });
-
-          if (additionalData.length === 0) {
-            return <Text type="secondary">None</Text>;
-          }
-
-          return (
-              <div>
-                {additionalData.slice(0, 2).map(([key, value]) => (
-                    <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                      {key}: {String(value)}
-                    </Tag>
-                ))}
-                {additionalData.length > 2 && (
-                    <Tooltip title={
-                      <div>
-                        {additionalData.slice(2).map(([key, value]) => (
-                            <div key={key}>{key}: {String(value)}</div>
-                        ))}
-                      </div>
-                    }>
-                      <Tag style={{fontSize: '11px'}}>
-                        +{additionalData.length - 2} more
-                      </Tag>
-                    </Tooltip>
-                )}
-              </div>
-          );
-        },
-      });
-    }
-
-    return columns;
+// Group grants by type
+const groupGrantsByType = (grants: Grant[]): Record<string, Grant[]> => {
+  const grouped: Record<string, Grant[]> = {
+    catalog: [],
+    namespace: [],
+    table: [],
+    view: [],
+    policy: []
   };
 
-  const columns = generateColumns();
+  grants.forEach(grant => {
+    const type = grant.type?.toLowerCase() || 'unknown';
+    if (grouped[type]) {
+      grouped[type].push(grant);
+    }
+  });
+
+  return grouped;
+};
+
+// Get icon for grant type
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case 'catalog':
+      return <FolderOutlined style={{fontSize: 16, color: '#1677ff'}}/>;
+    case 'namespace':
+      return <FolderOutlined style={{fontSize: 16, color: '#52c41a'}}/>;
+    case 'table':
+      return <TableOutlined style={{fontSize: 16, color: '#fa8c16'}}/>;
+    case 'view':
+      return <EyeOutlined style={{fontSize: 16, color: '#722ed1'}}/>;
+    case 'policy':
+      return <SafetyOutlined style={{fontSize: 16, color: '#eb2f96'}}/>;
+    default:
+      return <KeyOutlined style={{fontSize: 16}}/>;
+  }
+};
+
+const getTypeColor = (type: string) => {
+  switch (type) {
+    case 'catalog':
+      return 'blue';
+    case 'namespace':
+      return 'green';
+    case 'table':
+      return 'orange';
+    case 'view':
+      return 'purple';
+    case 'policy':
+      return 'magenta';
+    default:
+      return 'default';
+  }
+};
+
+export default function Grants({grants, loading}: GrantsProps) {
+  if (loading) {
+    return (
+        <div style={{textAlign: 'center', padding: '40px'}}>
+          <Spin size="large"/>
+        </div>
+    );
+  }
+
+  const groupedGrants = groupGrantsByType(grants);
+  const grantTypes = ['catalog', 'namespace', 'table', 'view', 'policy'];
 
   return (
-      <Table
-          id="roles-grants-table"
-          columns={columns}
-          dataSource={grants.map((grant, index) => ({
-            ...grant,
-            _key: grant.id || grant.name || `grant-${index}`
-          }))}
-          rowKey="_key"
-          loading={loading}
-          locale={{
-            emptyText: (
-                <Space direction="vertical">
-                  <KeyOutlined/>
-                  <Text type="secondary">No grants found for this catalog role</Text>
-                </Space>
-            ),
-          }}
-          size="small"
-      />
+      <Space direction="vertical" style={{width: '100%'}} size="small">
+        {grantTypes.map(type => {
+          const typeGrants = groupedGrants[type] || [];
+          const hasPrivileges = typeGrants.length > 0;
+
+          return (
+              <div key={type}>
+                <Divider orientation="left">
+                  <Space>
+                    {getTypeIcon(type)}
+                    {type.charAt(0).toUpperCase() + type.slice(1)} Grants
+                    <Tag color={getTypeColor(type)}>{typeGrants.length}</Tag>
+                  </Space>
+                </Divider>
+
+                <List
+                    bordered
+                    size="small"
+                    dataSource={hasPrivileges ? typeGrants : []}
+                    locale={{
+                      emptyText: (
+                          <Space>
+                            <KeyOutlined/>
+                            <Text type="secondary">No {type} privileges granted</Text>
+                          </Space>
+                      ),
+                    }}
+                    renderItem={(grant, index) => (
+                        <List.Item key={`${type}-${index}`}>
+                          <Space direction="vertical" style={{width: '100%'}}>
+                          </Space>
+                          {grant.privilege && (
+                              <Text code>
+                                {grant.privilege}
+                              </Text>
+                          )}
+                        </List.Item>
+                    )}
+                />
+              </div>
+          );
+        })}
+      </Space>
   );
 }

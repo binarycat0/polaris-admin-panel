@@ -2,7 +2,6 @@
 
 import {Divider, Space, Table, Typography} from 'antd'
 import {
-  DatabaseOutlined,
   EyeOutlined,
   FileProtectOutlined,
   FolderOutlined,
@@ -10,6 +9,18 @@ import {
   TableOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
+import {
+  TablePrivileges,
+  TablePrivilegeDescriptions,
+  ViewPrivileges,
+  ViewPrivilegeDescriptions,
+  NamespacePrivileges,
+  NamespacePrivilegeDescriptions,
+  CatalogPrivileges,
+  CatalogPrivilegeDescriptions,
+  PolicyPrivileges,
+  PolicyPrivilegeDescriptions,
+} from './constants'
 
 const {Text, Title, Paragraph, Link} = Typography;
 
@@ -21,231 +32,216 @@ interface Privilege {
 
 const tablePrivileges: Privilege[] = [
   {
-    key: '1',
-    privilege: 'TABLE_CREATE',
-    description: 'Enables registering a table with the catalog.',
-  },
-  {
     key: '2',
-    privilege: 'TABLE_DROP',
-    description: 'Enables dropping a table from the catalog.',
+    privilege: TablePrivileges.TABLE_DROP,
+    description: TablePrivilegeDescriptions.TABLE_DROP,
   },
   {
     key: '3',
-    privilege: 'TABLE_LIST',
-    description: 'Enables listing any table in the catalog.',
+    privilege: TablePrivileges.TABLE_LIST,
+    description: TablePrivilegeDescriptions.TABLE_LIST,
   },
   {
     key: '4',
-    privilege: 'TABLE_READ_PROPERTIES',
-    description: 'Enables reading properties of the table.',
+    privilege: TablePrivileges.TABLE_READ_PROPERTIES,
+    description: TablePrivilegeDescriptions.TABLE_READ_PROPERTIES,
   },
   {
     key: '5',
-    privilege: 'TABLE_WRITE_PROPERTIES',
-    description: 'Enables configuring properties for the table.',
+    privilege: TablePrivileges.TABLE_WRITE_PROPERTIES,
+    description: TablePrivilegeDescriptions.TABLE_WRITE_PROPERTIES,
   },
   {
     key: '6',
-    privilege: 'TABLE_READ_DATA',
-    description: 'Enables reading data from the table by receiving short-lived read-only storage credentials from the catalog.',
+    privilege: TablePrivileges.TABLE_READ_DATA,
+    description: TablePrivilegeDescriptions.TABLE_READ_DATA,
   },
   {
     key: '7',
-    privilege: 'TABLE_WRITE_DATA',
-    description: 'Enables writing data to the table by receiving short-lived read+write storage credentials from the catalog.',
+    privilege: TablePrivileges.TABLE_WRITE_DATA,
+    description: TablePrivilegeDescriptions.TABLE_WRITE_DATA,
   },
   {
     key: '8',
-    privilege: 'TABLE_FULL_METADATA',
+    privilege: TablePrivileges.TABLE_FULL_METADATA,
     description: (
         <Text>
-          Grants all table privileges, except <Text code>TABLE_READ_DATA</Text> and <Text code>TABLE_WRITE_DATA</Text>, which need to be granted
+          Grants all table privileges, except <Text code>{TablePrivileges.TABLE_READ_DATA}</Text> and <Text code>{TablePrivileges.TABLE_WRITE_DATA}</Text>, which need to be granted
           individually.
         </Text>
     ),
   },
   {
     key: '9',
-    privilege: 'TABLE_ATTACH_POLICY',
-    description: 'Enables attaching policy to a table.',
+    privilege: TablePrivileges.TABLE_ATTACH_POLICY,
+    description: TablePrivilegeDescriptions.TABLE_ATTACH_POLICY,
   },
   {
     key: '10',
-    privilege: 'TABLE_DETACH_POLICY',
-    description: 'Enables detaching policy from a table.',
+    privilege: TablePrivileges.TABLE_DETACH_POLICY,
+    description: TablePrivilegeDescriptions.TABLE_DETACH_POLICY,
   },
 ];
 
 const viewPrivileges: Privilege[] = [
   {
-    key: '1',
-    privilege: 'VIEW_CREATE',
-    description: 'Enables registering a view with the catalog.',
-  },
-  {
     key: '2',
-    privilege: 'VIEW_DROP',
-    description: 'Enables dropping a view from the catalog.',
+    privilege: ViewPrivileges.VIEW_DROP,
+    description: ViewPrivilegeDescriptions.VIEW_DROP,
   },
   {
     key: '3',
-    privilege: 'VIEW_LIST',
-    description: 'Enables listing any views in the catalog.',
+    privilege: ViewPrivileges.VIEW_LIST,
+    description: ViewPrivilegeDescriptions.VIEW_LIST,
   },
   {
     key: '4',
-    privilege: 'VIEW_READ_PROPERTIES',
-    description: 'Enables reading all the view properties.',
+    privilege: ViewPrivileges.VIEW_READ_PROPERTIES,
+    description: ViewPrivilegeDescriptions.VIEW_READ_PROPERTIES,
   },
   {
     key: '5',
-    privilege: 'VIEW_WRITE_PROPERTIES',
-    description: 'Enables configuring view properties.',
+    privilege: ViewPrivileges.VIEW_WRITE_PROPERTIES,
+    description: ViewPrivilegeDescriptions.VIEW_WRITE_PROPERTIES,
   },
   {
     key: '6',
-    privilege: 'VIEW_FULL_METADATA',
-    description: 'Grants all view privileges.',
+    privilege: ViewPrivileges.VIEW_FULL_METADATA,
+    description: ViewPrivilegeDescriptions.VIEW_FULL_METADATA,
   },
 ];
 
 const namespacePrivileges: Privilege[] = [
   {
     key: '1',
-    privilege: 'NAMESPACE_CREATE',
-    description: 'Enables creating a namespace in a catalog.',
+    privilege: NamespacePrivileges.NAMESPACE_CREATE,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_CREATE,
   },
   {
     key: '2',
-    privilege: 'NAMESPACE_DROP',
-    description: 'Enables dropping the namespace from the catalog.',
+    privilege: NamespacePrivileges.NAMESPACE_DROP,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_DROP,
   },
   {
     key: '3',
-    privilege: 'NAMESPACE_LIST',
-    description: 'Enables listing any object in the namespace, including nested namespaces and tables.',
+    privilege: NamespacePrivileges.NAMESPACE_LIST,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_LIST,
   },
   {
     key: '4',
-    privilege: 'NAMESPACE_READ_PROPERTIES',
-    description: 'Enables reading all the namespace properties.',
+    privilege: NamespacePrivileges.NAMESPACE_READ_PROPERTIES,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_READ_PROPERTIES,
   },
   {
     key: '5',
-    privilege: 'NAMESPACE_WRITE_PROPERTIES',
-    description: 'Enables configuring namespace properties.',
+    privilege: NamespacePrivileges.NAMESPACE_WRITE_PROPERTIES,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_WRITE_PROPERTIES,
   },
   {
     key: '6',
-    privilege: 'NAMESPACE_FULL_METADATA',
-    description: 'Grants all namespace privileges.',
+    privilege: NamespacePrivileges.NAMESPACE_FULL_METADATA,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_FULL_METADATA,
   },
   {
     key: '7',
-    privilege: 'NAMESPACE_ATTACH_POLICY',
-    description: 'Enables attaching policy to a namespace.',
+    privilege: NamespacePrivileges.NAMESPACE_ATTACH_POLICY,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_ATTACH_POLICY,
   },
   {
     key: '8',
-    privilege: 'NAMESPACE_DETACH_POLICY',
-    description: 'Enables detaching policy from a namespace.',
+    privilege: NamespacePrivileges.NAMESPACE_DETACH_POLICY,
+    description: NamespacePrivilegeDescriptions.NAMESPACE_DETACH_POLICY,
   },
 ];
 
 const catalogPrivileges: Privilege[] = [
   {
     key: '1',
-    privilege: 'CATALOG_MANAGE_ACCESS',
-    description: 'Includes the ability to grant or revoke privileges on objects in a catalog to catalog roles, and the ability to grant or revoke catalog roles to or from principal roles.',
+    privilege: CatalogPrivileges.CATALOG_MANAGE_ACCESS,
+    description: CatalogPrivilegeDescriptions.CATALOG_MANAGE_ACCESS,
   },
   {
     key: '2',
-    privilege: 'CATALOG_MANAGE_CONTENT',
+    privilege: CatalogPrivileges.CATALOG_MANAGE_CONTENT,
     description: (
         <Text>
           Enables full management of content for the catalog. This privilege encompasses the
           following privileges:
           <Space direction="vertical">
-            <Text code>CATALOG_MANAGE_METADATA</Text>
-            <Text code>TABLE_FULL_METADATA</Text>
-            <Text code>NAMESPACE_FULL_METADATA</Text>
-            <Text code>VIEW_FULL_METADATA</Text>
-            <Text code>TABLE_WRITE_DATA</Text>
-            <Text code>TABLE_READ_DATA</Text>
-            <Text code>CATALOG_READ_PROPERTIES</Text>
-            <Text code>CATALOG_WRITE_PROPERTIES</Text>
+            <Text code>{CatalogPrivileges.CATALOG_MANAGE_METADATA}</Text>
+            <Text code>{TablePrivileges.TABLE_FULL_METADATA}</Text>
+            <Text code>{NamespacePrivileges.NAMESPACE_FULL_METADATA}</Text>
+            <Text code>{ViewPrivileges.VIEW_FULL_METADATA}</Text>
+            <Text code>{TablePrivileges.TABLE_WRITE_DATA}</Text>
+            <Text code>{TablePrivileges.TABLE_READ_DATA}</Text>
+            <Text code>{CatalogPrivileges.CATALOG_READ_PROPERTIES}</Text>
+            <Text code>{CatalogPrivileges.CATALOG_WRITE_PROPERTIES}</Text>
           </Space>
         </Text>
     )
   },
   {
     key: '3',
-    privilege: 'CATALOG_MANAGE_METADATA',
-    description: 'Enables full management of the catalog, catalog roles, namespaces, and tables.',
+    privilege: CatalogPrivileges.CATALOG_MANAGE_METADATA,
+    description: CatalogPrivilegeDescriptions.CATALOG_MANAGE_METADATA,
   },
   {
     key: '4',
-    privilege: 'CATALOG_READ_PROPERTIES',
-    description: 'Enables listing catalogs and reading properties of the catalog.',
+    privilege: CatalogPrivileges.CATALOG_READ_PROPERTIES,
+    description: CatalogPrivilegeDescriptions.CATALOG_READ_PROPERTIES,
   },
   {
     key: '5',
-    privilege: 'CATALOG_WRITE_PROPERTIES',
-    description: 'Enables configuring catalog properties.',
+    privilege: CatalogPrivileges.CATALOG_WRITE_PROPERTIES,
+    description: CatalogPrivilegeDescriptions.CATALOG_WRITE_PROPERTIES,
   },
   {
     key: '6',
-    privilege: 'CATALOG_ATTACH_POLICY',
-    description: 'Enables attaching policy to a catalog.',
+    privilege: CatalogPrivileges.CATALOG_ATTACH_POLICY,
+    description: CatalogPrivilegeDescriptions.CATALOG_ATTACH_POLICY,
   },
   {
     key: '7',
-    privilege: 'CATALOG_DETACH_POLICY',
-    description: 'Enables detaching policy from a catalog.',
+    privilege: CatalogPrivileges.CATALOG_DETACH_POLICY,
+    description: CatalogPrivilegeDescriptions.CATALOG_DETACH_POLICY,
   },
 ];
 
 const policyPrivileges: Privilege[] = [
   {
-    key: '1',
-    privilege: 'POLICY_CREATE',
-    description: 'Enables creating a policy under specified namespace.',
-  },
-  {
     key: '2',
-    privilege: 'POLICY_READ',
-    description: 'Enables reading policy content and metadata.',
+    privilege: PolicyPrivileges.POLICY_READ,
+    description: PolicyPrivilegeDescriptions.POLICY_READ,
   },
   {
     key: '3',
-    privilege: 'POLICY_WRITE',
-    description: 'Enables updating the policy details such as its content or description.',
+    privilege: PolicyPrivileges.POLICY_WRITE,
+    description: PolicyPrivilegeDescriptions.POLICY_WRITE,
   },
   {
     key: '4',
-    privilege: 'POLICY_LIST',
-    description: 'Enables listing any policy from the catalog.',
+    privilege: PolicyPrivileges.POLICY_LIST,
+    description: PolicyPrivilegeDescriptions.POLICY_LIST,
   },
   {
     key: '5',
-    privilege: 'POLICY_DROP',
-    description: 'Enables dropping a policy if it is not attached to any resource entity.',
+    privilege: PolicyPrivileges.POLICY_DROP,
+    description: PolicyPrivilegeDescriptions.POLICY_DROP,
   },
   {
     key: '6',
-    privilege: 'POLICY_FULL_METADATA',
-    description: 'Grants all policy privileges.',
+    privilege: PolicyPrivileges.POLICY_FULL_METADATA,
+    description: PolicyPrivilegeDescriptions.POLICY_FULL_METADATA,
   },
   {
     key: '7',
-    privilege: 'POLICY_ATTACH',
-    description: 'Enables policy to be attached to entities.',
+    privilege: PolicyPrivileges.POLICY_ATTACH,
+    description: PolicyPrivilegeDescriptions.POLICY_ATTACH,
   },
   {
     key: '8',
-    privilege: 'POLICY_DETACH',
-    description: 'Enables policy to be detached from entities.',
+    privilege: PolicyPrivileges.POLICY_DETACH,
+    description: PolicyPrivilegeDescriptions.POLICY_DETACH,
   },
 ];
 
@@ -355,7 +351,7 @@ export default function PrivilegesPage() {
 
           <Title level={4}>
             <Space>
-              <DatabaseOutlined style={{color: '#722ed1'}}/>
+              <FolderOutlined style={{color: '#722ed1'}}/>
               Catalog Privileges
             </Space>
           </Title>

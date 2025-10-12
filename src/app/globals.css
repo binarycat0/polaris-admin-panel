@@ -73,6 +73,12 @@ a {
   height: 100vh;
 }
 
+.catalogs-panel-catalogs-add-button {
+  position: absolute;
+  right: calc(100% - 50px);
+  bottom: 10px
+}
+
 .catalogs-panel-catalogs {
   height: 50%;
   background-color: #ff55ff05;
