@@ -1,13 +1,13 @@
 'use client'
 
 import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
-import {CatalogRole} from "@/app/ui/catalog-roles"
-import {PrincipalRole} from "@/app/ui/principal-roles"
-import {Grant} from "@/app/ui/grants"
+import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
+import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
+import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import {useCallback, useEffect, useState} from 'react'
-import {Breadcrumb, Button, Flex, Space, Spin, Typography} from 'antd';
-import {FolderAddOutlined, FolderOpenOutlined} from '@ant-design/icons';
+import {Breadcrumb, Button, Divider, Flex, Space, Spin, Typography} from 'antd';
+import {FolderAddOutlined, FolderOpenOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 
 const {Title} = Typography;
@@ -216,35 +216,74 @@ export default function Page() {
   ];
 
   return (
-      <>
-        <Flex justify="space-between" align="center">
-          <Space>
-            <Button
-                variant="outlined"
-                icon={<FolderAddOutlined/>}
-                onClick={() => setCreateModalVisible(true)}
-            >
-              Create new
-            </Button>
+      <Space direction="vertical" style={{width: '100%'}}>
+        <Flex align="center">
+          <Flex justify="flex-start" style={{width: '200px'}}>
+            <Title level={4}>
+              <Space>
+                Catalogs
+                <FolderOpenOutlined/>
+              </Space>
+            </Title>
+          </Flex>
+          <Flex justify="center" style={{width: 'calc(100% - 200px)'}}>
             <Breadcrumb separator={">"} items={breadcrumbItems}/>
-          </Space>
-          <Title level={4}>
-            <Space>
-              Catalogs
-              <FolderOpenOutlined/>
-            </Space>
-          </Title>
+          </Flex>
         </Flex>
+
+        <Button
+            variant="outlined"
+            icon={<FolderAddOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+        >
+          New catalog
+        </Button>
+
         <Catalogs
             catalogs={catalogs}
             onRowClick={handleCatalogRowClick}
             selectedCatalog={selectedCatalog}
         />
+
+        {selectedCatalog && (
+            <>
+              <Divider orientation="left">Catalog roles</Divider>
+              <Button
+                  variant="outlined"
+                  icon={<UsergroupAddOutlined/>}
+                  onClick={() => setCreateModalVisible(true)}
+              >
+                New catalog role
+              </Button>
+              <CatalogRoles
+                  roles={catalogRoles}
+                  loading={rolesLoading}
+                  onRowClick={handleCatalogRoleRowClick}
+                  selectedCatalogRole={selectedCatalogRole}
+              />
+            </>
+        )}
+
+
+        {selectedCatalog && selectedCatalogRole && (
+            <>
+              <Divider orientation="left">Principal Roles</Divider>
+              <PrincipalRoles roles={principalRoles} loading={principalRolesLoading}/>
+            </>
+        )}
+
+        {selectedCatalog && selectedCatalogRole && (
+            <>
+              <Divider orientation="left">Privileges</Divider>
+              <Grants grants={grants} loading={grantsLoading}/>
+            </>
+        )}
+
         <CreateCatalogModal
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
         />
-      </>
+      </Space>
   )
 }

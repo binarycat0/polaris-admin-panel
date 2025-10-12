@@ -4,12 +4,12 @@ import {usePathname, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {Layout, Menu} from 'antd';
 import {
-  DatabaseOutlined,
+  FolderOpenOutlined,
   HomeOutlined,
   LoginOutlined,
   SafetyOutlined,
-  TagsFilled,
-  TeamOutlined
+  TeamOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import {type AuthStatus, checkAuthStatus} from '@/utils/auth';
 
@@ -138,18 +138,21 @@ export default function Navigation() {
     ...(authStatus.isAuthenticated && !authStatus.isExpired ? [
       {
         key: 'catalogs',
-        icon: <DatabaseOutlined/>,
+        icon: <FolderOpenOutlined/>,
         label: 'Catalogs',
       },
       {
         key: 'principals',
-        icon: <TeamOutlined/>,
+        icon: <UserOutlined/>,
         label: 'Principals',
       },
       {
         key: 'principal-roles',
-        icon: <TagsFilled/>,
+        icon: <TeamOutlined/>,
         label: 'Principal Roles',
+      },
+      {
+        type: 'divider',
       },
       {
         key: 'privileges',
@@ -161,11 +164,10 @@ export default function Navigation() {
 
   return (
       <Sider className="left-side-panel-sider" width="250">
-        <Menu
-            className="left-side-panel-menu"
+        <Menu className="left-side-panel-menu"
             mode="inline"
-            selectedKeys={[getSelectedKey()]}
             items={menuItems}
+            selectedKeys={[getSelectedKey()]}
             onClick={handleMenuClick}
         />
       </Sider>

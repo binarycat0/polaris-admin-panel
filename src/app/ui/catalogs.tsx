@@ -70,26 +70,6 @@ export default function Catalogs({
       width: 200,
     },
     {
-      title: 'Roles',
-      key: 'roles',
-      width: 120,
-      render: (_, record) => (
-          <Button
-              variant="outlined"
-              size="small"
-              icon={<TeamOutlined/>}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onShowRoles) {
-                  onShowRoles(record.name);
-                }
-              }}
-          >
-            Show Roles
-          </Button>
-      ),
-    },
-    {
       title: (
           <Space><FileUnknownOutlined/>Version</Space>
       ),
