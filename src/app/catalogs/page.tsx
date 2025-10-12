@@ -5,6 +5,7 @@ import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
+import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
 import {useCallback, useEffect, useState} from 'react'
 import {Breadcrumb, Button, Divider, Flex, Space, Spin, Typography} from 'antd';
 import {FolderAddOutlined, FolderOpenOutlined, UsergroupAddOutlined} from '@ant-design/icons';
@@ -24,6 +25,7 @@ export default function Page() {
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
@@ -191,6 +193,18 @@ export default function Page() {
     refreshCatalogs();
   };
 
+  const handleCreateCatalogRoleSuccess = async () => {
+    if (selectedCatalog) {
+      setRolesLoading(true);
+      try {
+        const roles = await getCatalogRoles(selectedCatalog);
+        setCatalogRoles(roles);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
         <Spin size="large"/>
@@ -198,9 +212,6 @@ export default function Page() {
   }
 
   const breadcrumbItems = [
-    {
-      title: 'Catalogs',
-    },
     ...(
         selectedCatalog ? [
           {
@@ -217,19 +228,15 @@ export default function Page() {
 
   return (
       <Space direction="vertical" style={{width: '100%'}}>
-        <Flex align="center">
-          <Flex justify="flex-start" style={{width: '200px'}}>
-            <Title level={4}>
-              <Space>
-                Catalogs
-                <FolderOpenOutlined/>
-              </Space>
-            </Title>
-          </Flex>
-          <Flex justify="center" style={{width: 'calc(100% - 200px)'}}>
-            <Breadcrumb separator={">"} items={breadcrumbItems}/>
-          </Flex>
-        </Flex>
+        <Space>
+          <Title level={4} style={{marginBottom: 0}}>
+            <Space>
+              Catalogs
+              <FolderOpenOutlined/>
+            </Space>
+          </Title>
+          <Breadcrumb separator={">"} items={breadcrumbItems}/>
+        </Space>
 
         <Button
             variant="outlined"
@@ -251,7 +258,7 @@ export default function Page() {
               <Button
                   variant="outlined"
                   icon={<UsergroupAddOutlined/>}
-                  onClick={() => setCreateModalVisible(true)}
+                  onClick={() => setCreateCatalogRoleModalVisible(true)}
               >
                 New catalog role
               </Button>
@@ -267,7 +274,7 @@ export default function Page() {
 
         {selectedCatalog && selectedCatalogRole && (
             <>
-              <Divider orientation="left">Principal Roles</Divider>
+              <Divider orientation="left">Principal Roles Assigned to Catalog Role</Divider>
               <PrincipalRoles roles={principalRoles} loading={principalRolesLoading}/>
             </>
         )}
@@ -283,6 +290,13 @@ export default function Page() {
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
+        />
+
+        <CreateCatalogRoleModal
+            visible={createCatalogRoleModalVisible}
+            catalogName={selectedCatalog}
+            onClose={() => setCreateCatalogRoleModalVisible(false)}
+            onSuccess={handleCreateCatalogRoleSuccess}
         />
       </Space>
   )

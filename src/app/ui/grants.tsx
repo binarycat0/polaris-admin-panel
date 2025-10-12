@@ -1,5 +1,5 @@
 'use client'
-import {List, Space, Spin, Tag, Typography} from 'antd'
+import {Divider, List, Space, Spin, Tag, Typography} from 'antd'
 import {
   EyeOutlined,
   FolderOutlined,
@@ -97,13 +97,13 @@ export default function Grants({grants, loading}: GrantsProps) {
 
           return (
               <div key={type}>
-                <Title level={5}>
+                <Divider orientation="left">
                   <Space>
                     {getTypeIcon(type)}
                     {type.charAt(0).toUpperCase() + type.slice(1)} Grants
                     <Tag color={getTypeColor(type)}>{typeGrants.length}</Tag>
                   </Space>
-                </Title>
+                </Divider>
 
                 <List
                     bordered
@@ -121,26 +121,17 @@ export default function Grants({grants, loading}: GrantsProps) {
                         <List.Item key={`${type}-${index}`}>
                           <Space direction="vertical" style={{width: '100%'}}>
                           </Space>
-                            {grant.privilege && (
-                                <Text code>
-                                  {grant.privilege}
-                                </Text>
-                            )}
+                          {grant.privilege && (
+                              <Text code>
+                                {grant.privilege}
+                              </Text>
+                          )}
                         </List.Item>
                     )}
                 />
               </div>
           );
         })}
-
-        {grants.length === 0 && !loading && (
-            <div style={{textAlign: 'center', padding: '40px'}}>
-              <Space direction="vertical">
-                <KeyOutlined style={{fontSize: 48, color: '#d9d9d9'}}/>
-                <Text type="secondary">No grants found for this catalog role</Text>
-              </Space>
-            </div>
-        )}
       </Space>
   );
 }
