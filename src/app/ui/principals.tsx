@@ -1,12 +1,12 @@
 'use client'
-import {Table, Typography, Tag, Tooltip, Button, Space, Flex} from 'antd'
+import {Button, Flex, Space, Table, Tag, Tooltip, Typography} from 'antd'
 import {
-  UserOutlined,
   CalendarOutlined,
-  SettingOutlined,
   IdcardOutlined,
+  SettingOutlined,
   TeamOutlined,
-  PlusOutlined
+  UserAddOutlined,
+  UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
@@ -175,20 +175,20 @@ export default function Principals({principals, loading, onViewRoles, onRefresh}
 
   return (
       <>
-        <Flex justify="space-between" align="center">
+        <Flex justify="space-between" align="flex-start">
+          <Button
+              variant="outlined"
+              icon={<UserAddOutlined/>}
+              onClick={() => setCreateModalVisible(true)}
+          >
+            Create new
+          </Button>
           <Title level={4}>
             <Space>
               Principals
               <UserOutlined/>
             </Space>
           </Title>
-          <Button
-            type="primary"
-            icon={<PlusOutlined/>}
-            onClick={() => setCreateModalVisible(true)}
-          >
-            Create new principal
-          </Button>
         </Flex>
 
         <Table
@@ -205,7 +205,7 @@ export default function Principals({principals, loading, onViewRoles, onRefresh}
             }}
             locale={{
               emptyText: (
-                  <Space>
+                  <Space direction="vertical">
                     <UserOutlined/>
                     <Text type="secondary">No principals found</Text>
                   </Space>

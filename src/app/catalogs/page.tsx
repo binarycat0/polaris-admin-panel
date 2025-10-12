@@ -1,14 +1,16 @@
 'use client'
 
 import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
-import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
-import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
-import Grants, {Grant} from "@/app/ui/grants"
+import {CatalogRole} from "@/app/ui/catalog-roles"
+import {PrincipalRole} from "@/app/ui/principal-roles"
+import {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import {useCallback, useEffect, useState} from 'react'
-import {Breadcrumb, Col, Divider, FloatButton, Row, Spin} from 'antd';
-import {PlusCircleTwoTone} from '@ant-design/icons';
+import {Breadcrumb, Button, Flex, Space, Spin, Typography} from 'antd';
+import {FolderAddOutlined, FolderOpenOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+
+const {Title} = Typography;
 
 export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
@@ -215,57 +217,29 @@ export default function Page() {
 
   return (
       <>
-        <Breadcrumb separator={">"} items={breadcrumbItems}/>
-        <Divider/>
-        <Row gutter={16} className="catalogs-panel-content">
-          <Col span={12}>
-            <Row className="catalogs-panel-catalogs">
-              <Col style={{position: 'relative', overflow: 'hidden'}}
-              >
-                <FloatButton
-                    className="catalogs-panel-catalogs-add-button"
-                    type="default"
-                    icon={<PlusCircleTwoTone/>}
-                    onClick={() => setCreateModalVisible(true)}
-                />
-                <Catalogs
-                    catalogs={catalogs}
-                    onRowClick={handleCatalogRowClick}
-                    selectedCatalog={selectedCatalog}
-                />
-              </Col>
-            </Row>
-            <Row className="catalogs-panel-catalog-roles">
-              <Col>
-                {selectedCatalog && (
-                    <CatalogRoles
-                        roles={catalogRoles}
-                        loading={rolesLoading}
-                        onRowClick={handleCatalogRoleRowClick}
-                        selectedCatalogRole={selectedCatalogRole}
-                    />
-                )}
-              </Col>
-            </Row>
-          </Col>
-          <Col span={12}>
-            <Row className="catalogs-panel-catalog-role-principal-roles">
-              <Col>
-                {selectedCatalog && selectedCatalogRole && (
-                    <PrincipalRoles roles={principalRoles} loading={principalRolesLoading}/>
-                )}
-              </Col>
-            </Row>
-            <Row className="catalogs-panel-catalog-role-grants">
-              <Col>
-                {selectedCatalog && selectedCatalogRole && (
-                    <Grants grants={grants} loading={grantsLoading}/>
-                )}
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-
+        <Flex justify="space-between" align="center">
+          <Space>
+            <Button
+                variant="outlined"
+                icon={<FolderAddOutlined/>}
+                onClick={() => setCreateModalVisible(true)}
+            >
+              Create new
+            </Button>
+            <Breadcrumb separator={">"} items={breadcrumbItems}/>
+          </Space>
+          <Title level={4}>
+            <Space>
+              Catalogs
+              <FolderOpenOutlined/>
+            </Space>
+          </Title>
+        </Flex>
+        <Catalogs
+            catalogs={catalogs}
+            onRowClick={handleCatalogRowClick}
+            selectedCatalog={selectedCatalog}
+        />
         <CreateCatalogModal
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}

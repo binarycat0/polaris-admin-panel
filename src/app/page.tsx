@@ -48,7 +48,7 @@ export default function Home() {
   }, []);
 
   return (
-      <Flex id="home-page" justify="center" align="center" style={{height: '100%'}}>
+      <Flex id="home-page" justify="space-around" align="center" style={{height: '100%'}}>
         <Space direction="vertical" align="center">
           <Title level={1}>Apache Polaris Management Panel</Title>
           {

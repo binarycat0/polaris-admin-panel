@@ -6,6 +6,7 @@ import {
   HomeOutlined,
   SettingOutlined,
   TeamOutlined,
+  UsergroupAddOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
@@ -180,12 +181,17 @@ export default function PrincipalRolesList({
 
   return (
       <>
-        <Title level={4}>
-          <Space>
-            Principal Roles
-            <TeamOutlined/>
-          </Space>
-        </Title>
+        <Flex justify="space-between" align="flex-start">
+          <Button variant="outlined" icon={<UsergroupAddOutlined/>}>
+            Create new
+          </Button>
+          <Title level={4}>
+            <Space>
+              Principal Roles
+              <TeamOutlined/>
+            </Space>
+          </Title>
+        </Flex>
 
         <Table
             columns={columns}
