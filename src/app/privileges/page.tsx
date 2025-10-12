@@ -32,11 +32,6 @@ interface Privilege {
 
 const tablePrivileges: Privilege[] = [
   {
-    key: '1',
-    privilege: TablePrivileges.TABLE_CREATE,
-    description: TablePrivilegeDescriptions.TABLE_CREATE,
-  },
-  {
     key: '2',
     privilege: TablePrivileges.TABLE_DROP,
     description: TablePrivilegeDescriptions.TABLE_DROP,
@@ -89,11 +84,6 @@ const tablePrivileges: Privilege[] = [
 ];
 
 const viewPrivileges: Privilege[] = [
-  {
-    key: '1',
-    privilege: ViewPrivileges.VIEW_CREATE,
-    description: ViewPrivilegeDescriptions.VIEW_CREATE,
-  },
   {
     key: '2',
     privilege: ViewPrivileges.VIEW_DROP,
@@ -218,11 +208,6 @@ const catalogPrivileges: Privilege[] = [
 ];
 
 const policyPrivileges: Privilege[] = [
-  {
-    key: '1',
-    privilege: PolicyPrivileges.POLICY_CREATE,
-    description: PolicyPrivilegeDescriptions.POLICY_CREATE,
-  },
   {
     key: '2',
     privilege: PolicyPrivileges.POLICY_READ,
