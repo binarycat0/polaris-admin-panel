@@ -8,6 +8,7 @@ import {
   EditOutlined,
   HomeOutlined,
   IdcardOutlined,
+  ReloadOutlined,
   SettingOutlined,
   TeamOutlined,
   UserAddOutlined,
@@ -16,6 +17,7 @@ import {
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
 import CreatePrincipalModal from './create-principal-modal'
+import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
 
 const {Text, Title} = Typography;
 
@@ -51,6 +53,7 @@ interface PrincipalsProps {
   rolesLoading?: Record<string, boolean>;
   onEdit?: (principalName: string) => void;
   onDelete?: (principalName: string) => void;
+  onResetCredentials?: (principalName: string) => void;
   onEditPrincipalRole?: (principalName: string, roleName: string) => void;
   onDeletePrincipalRole?: (principalName: string, roleName: string) => void;
 }
@@ -70,15 +73,32 @@ export default function Principals({
                                      rolesLoading = {},
                                      onEdit,
                                      onDelete,
+                                     onResetCredentials,
                                      onEditPrincipalRole,
                                      onDeletePrincipalRole
                                    }: PrincipalsProps) {
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
 
   const handleCreateSuccess = () => {
     if (onRefresh) {
       onRefresh();
     }
+  };
+
+  const handleResetSuccess = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
+    if (onResetCredentials && selectedPrincipalForReset) {
+      onResetCredentials(selectedPrincipalForReset);
+    }
+  };
+
+  const handleResetClick = (principalName: string) => {
+    setSelectedPrincipalForReset(principalName);
+    setResetModalVisible(true);
   };
 
   const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
@@ -362,6 +382,14 @@ export default function Principals({
             },
           },
           {
+            key: 'reset',
+            label: 'Reset Secret',
+            icon: <ReloadOutlined/>,
+            onClick: () => {
+              handleResetClick(record.name);
+            },
+          },
+          {
             type: 'divider',
           },
           {
@@ -496,6 +524,16 @@ export default function Principals({
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
+        />
+
+        <ResetPrincipalCredentialsModal
+            visible={resetModalVisible}
+            principalName={selectedPrincipalForReset}
+            onClose={() => {
+              setResetModalVisible(false);
+              setSelectedPrincipalForReset(null);
+            }}
+            onSuccess={handleResetSuccess}
         />
       </>
   );

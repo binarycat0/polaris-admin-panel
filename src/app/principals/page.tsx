@@ -102,6 +102,11 @@ export default function Page() {
     }
   };
 
+  const handleResetCredentials = async (principalName: string) => {
+    console.log('Credentials reset for principal:', principalName);
+    await handleRefresh();
+  };
+
   useEffect(() => {
     async function fetchPrincipals() {
       setLoading(true);
@@ -154,6 +159,7 @@ export default function Page() {
           expandedRowKeys={expandedRowKeys}
           principalRoles={principalRoles}
           rolesLoading={rolesLoading}
+          onResetCredentials={handleResetCredentials}
       />
   );
 }
