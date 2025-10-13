@@ -2,6 +2,10 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Demo
+
+[Watch Demo](https://github.com/binarycat0/polaris-admin-panel/releases/download/0.0.1-dev/Screen.Recording.2025-10-13.at.17.38.41.mov)
+
 ## Setup ENV variables
 
 Create .env file and add the following variables:
