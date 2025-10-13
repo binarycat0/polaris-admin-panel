@@ -30,7 +30,7 @@ export default function CreatePrincipalModal({
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const handleSubmit = async (values: PrincipalFormValues) => {
-    console.log('Step 1: Form submitted with values:', values);
+
     setLoading(true);
 
     try {
@@ -52,7 +52,7 @@ export default function CreatePrincipalModal({
         credentialRotationRequired: values.credentialRotationRequired || false,
       };
 
-      console.log('Step 2: Sending request with payload:', payload);
+
 
       const data = await authenticatedFetch('/api/principals', {
         method: 'POST',
@@ -60,16 +60,16 @@ export default function CreatePrincipalModal({
       });
 
       if (!data) {
-        console.log('Step 2 failed: No data returned');
+
         return;
       }
 
-      console.log('Step 2 complete: Received response:', data);
+
 
       const response = data as PrincipalWithCredentials;
 
       if (response.credentials) {
-        console.log('Step 3: Closing create modal and showing credentials modal');
+
         form.resetFields();
         onClose();
         setCreatedPrincipal(response);
@@ -94,7 +94,7 @@ export default function CreatePrincipalModal({
   };
 
   const handleCredentialsClose = () => {
-    console.log('Step 4: User acknowledged credentials, closing credentials modal and reloading list');
+
     setShowCredentials(false);
     setCreatedPrincipal(null);
     onSuccess();
@@ -122,7 +122,7 @@ export default function CreatePrincipalModal({
               layout="vertical"
               onFinish={handleSubmit}
               onFinishFailed={(errorInfo) => {
-                console.log('Form validation failed:', errorInfo);
+
                 message.error('Please fill in all required fields');
               }}
               autoComplete="off"

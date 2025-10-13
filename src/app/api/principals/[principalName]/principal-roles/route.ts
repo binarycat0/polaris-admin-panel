@@ -64,3 +64,65 @@ export async function GET(
   }
 }
 
+export async function PUT(
+    request: NextRequest,
+    {params}: { params: Promise<{ principalName: string }> }
+) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader) {
+      return NextResponse.json(
+          {
+            error: {
+              message: 'Authorization header is required',
+              type: 'UnauthorizedError',
+              code: 401
+            }
+          },
+          {status: 401}
+      );
+    }
+
+    const {principalName} = await params;
+    const url = apiManagementPrincipalPrincipalRolesUrl(principalName);
+
+    console.log('Assigning principal role to principal:', principalName);
+
+    const body = await request.json();
+    console.log('Request body:', body);
+
+    const realmHeaders = getRealmHeadersFromRequest(request);
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+        ...realmHeaders,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to assign principal role',
+          type: 'AssignError',
+          code: response.status
+        }
+      }));
+      console.error('Backend error response:', data);
+      return NextResponse.json(data, {status: response.status});
+    }
+
+    console.log('Principal role assigned successfully');
+    return NextResponse.json({success: true}, {status: 201});
+  } catch (error) {
+    console.error('Assign principal role proxy error:', error);
+    return NextResponse.json(
+        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
+        {status: 500}
+    );
+  }
+}

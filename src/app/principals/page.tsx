@@ -6,6 +6,7 @@ import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
 import CreatePrincipalModal from '@/app/ui/create-principal-modal';
+import AssignPrincipalRoleModal from '@/app/ui/assign-principal-role-modal';
 
 const {Title} = Typography;
 
@@ -22,6 +23,8 @@ export default function Page() {
   const [principalRoles, setPrincipalRoles] = useState<Record<string, PrincipalRoleItem[]>>({});
   const [rolesLoading, setRolesLoading] = useState<Record<string, boolean>>({});
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [assignRoleModalVisible, setAssignRoleModalVisible] = useState(false);
+  const [selectedPrincipalForRole, setSelectedPrincipalForRole] = useState<string | null>(null);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
@@ -130,6 +133,49 @@ export default function Page() {
     }
   };
 
+  const handleAddRole = (principalName: string) => {
+    setSelectedPrincipalForRole(principalName);
+    setAssignRoleModalVisible(true);
+  };
+
+  const handleAssignRoleSuccess = async () => {
+    if (selectedPrincipalForRole) {
+      // Refresh the principal roles for the selected principal
+      setRolesLoading(prev => ({...prev, [selectedPrincipalForRole]: true}));
+      try {
+        const roles = await getPrincipalRoles(selectedPrincipalForRole);
+        setPrincipalRoles(prev => ({...prev, [selectedPrincipalForRole]: roles}));
+      } finally {
+        setRolesLoading(prev => ({...prev, [selectedPrincipalForRole]: false}));
+      }
+    }
+  };
+
+  const handleDeletePrincipalRole = async (principalName: string, roleName: string) => {
+    try {
+      await authenticatedFetch(
+          `/api/principals/${encodeURIComponent(principalName)}/principal-roles/${encodeURIComponent(roleName)}`,
+          {
+            method: 'DELETE',
+          }
+      );
+
+      message.success(`Role "${roleName}" removed from principal "${principalName}" successfully!`);
+
+      // Refresh the principal roles for the selected principal
+      setRolesLoading(prev => ({...prev, [principalName]: true}));
+      try {
+        const roles = await getPrincipalRoles(principalName);
+        setPrincipalRoles(prev => ({...prev, [principalName]: roles}));
+      } finally {
+        setRolesLoading(prev => ({...prev, [principalName]: false}));
+      }
+    } catch (error) {
+      console.error('Error removing principal role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   useEffect(() => {
     async function fetchPrincipals() {
       setLoading(true);
@@ -199,12 +245,24 @@ export default function Page() {
             rolesLoading={rolesLoading}
             onResetCredentials={handleResetCredentials}
             onDelete={handleDeletePrincipal}
+            onAddRole={handleAddRole}
+            onDeletePrincipalRole={handleDeletePrincipalRole}
         />
 
         <CreatePrincipalModal
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
+        />
+
+        <AssignPrincipalRoleModal
+            visible={assignRoleModalVisible}
+            principalName={selectedPrincipalForRole}
+            onClose={() => {
+              setAssignRoleModalVisible(false);
+              setSelectedPrincipalForRole(null);
+            }}
+            onSuccess={handleAssignRoleSuccess}
         />
       </Space>
   );
