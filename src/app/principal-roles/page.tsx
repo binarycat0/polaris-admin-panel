@@ -1,7 +1,7 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {Button, Flex, Space, Spin, Typography} from 'antd';
+import {Button, Flex, message, Space, Spin, Typography} from 'antd';
 import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
@@ -103,6 +103,50 @@ export default function Page() {
     }
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const rolesData = await getPrincipalRoles();
+      setPrincipalRoles(rolesData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePrincipalRole = async (principalRoleName: string) => {
+    try {
+      await authenticatedFetch(`/api/principal-roles/${encodeURIComponent(principalRoleName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Principal role "${principalRoleName}" deleted successfully!`);
+      await handleRefresh();
+    } catch (error) {
+      console.error('Error deleting principal role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
+  const handleDeletePrincipal = async (principalRoleName: string, principalName: string) => {
+    try {
+      await authenticatedFetch(
+        `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
+
+      // Refresh the principals list for this role
+      const principalsData = await getPrincipals(principalRoleName);
+      setPrincipals(prev => ({...prev, [principalRoleName]: principalsData}));
+    } catch (error) {
+      console.error('Error removing principal from role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   useEffect(() => {
     async function fetchPrincipalRoles() {
       setLoading(true);
@@ -165,6 +209,8 @@ export default function Page() {
             expandedRowKeys={expandedRowKeys}
             principals={principals}
             principalsLoading={principalsLoading}
+            onDelete={handleDeletePrincipalRole}
+            onDeletePrincipal={handleDeletePrincipal}
         />
       </>
   );

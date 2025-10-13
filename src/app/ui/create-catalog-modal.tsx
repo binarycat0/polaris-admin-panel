@@ -11,10 +11,11 @@ import {
   Select,
   Space,
   Tabs,
+  type TabsProps,
   Typography
 } from 'antd'
 import {CloudOutlined, FolderOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
-import {useState} from 'react'
+import {useState, type ReactNode} from 'react'
 
 const {Text} = Typography;
 
@@ -60,6 +61,48 @@ interface CatalogFormValues {
   roleSessionName?: string;
 }
 
+interface StorageConfigInfo {
+  storageType: 'S3' | 'AZURE' | 'GCS' | 'FILE';
+  allowedLocations: string[];
+  roleArn?: string;
+  externalId?: string;
+  userArn?: string;
+  region?: string;
+  tenantId?: string;
+  multiTenantAppName?: string;
+  gcsServiceAccount?: string;
+}
+
+interface AuthenticationParameters {
+  authenticationType: 'OAUTH' | 'BEARER' | 'SIGV4' | 'IMPLICIT';
+  tokenUri?: string;
+  clientId?: string;
+  clientSecret?: string;
+  scopes?: string[];
+  bearerToken?: string;
+  roleArn?: string;
+  signingRegion?: string;
+  externalId?: string;
+  roleSessionName?: string;
+  signingName?: string;
+}
+
+interface ConnectionConfigInfo {
+  connectionType: 'ICEBERG_REST' | 'HADOOP' | 'HIVE';
+  uri?: string;
+  remoteCatalogName?: string;
+  warehouse?: string;
+  authenticationParameters?: AuthenticationParameters;
+}
+
+interface CatalogPayload {
+  type: 'INTERNAL' | 'EXTERNAL';
+  name: string;
+  properties: Record<string, string>;
+  storageConfigInfo: StorageConfigInfo;
+  connectionConfigInfo?: ConnectionConfigInfo;
+}
+
 export default function CreateCatalogModal({visible, onClose, onSuccess}: CreateCatalogModalProps) {
   const [form] = Form.useForm<CatalogFormValues>();
   const [loading, setLoading] = useState(false);
@@ -84,7 +127,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         });
       }
 
-      const storageConfigInfo: any = {
+      const storageConfigInfo: StorageConfigInfo = {
         storageType: values.storageType,
         allowedLocations: values.allowedLocations,
       };
@@ -101,7 +144,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         if (values.gcsServiceAccount) storageConfigInfo.gcsServiceAccount = values.gcsServiceAccount;
       }
 
-      const catalog: any = {
+      const catalog: CatalogPayload = {
         type: values.type,
         name: values.name,
         properties,
@@ -109,7 +152,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       };
 
       if (values.type === 'EXTERNAL' && values.connectionType) {
-        const connectionConfigInfo: any = {
+        const connectionConfigInfo: ConnectionConfigInfo = {
           connectionType: values.connectionType,
         };
 
@@ -122,7 +165,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         }
 
         if (values.authenticationType) {
-          const authenticationParameters: any = {
+          const authenticationParameters: AuthenticationParameters = {
             authenticationType: values.authenticationType,
           };
 
@@ -147,13 +190,13 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         catalog.connectionConfigInfo = connectionConfigInfo;
       }
 
-      const payload = {
+      const payload: { catalog: CatalogPayload } = {
         catalog,
       };
 
-      const token = localStorage.getItem('access_token');
-      const realmHeaderName = localStorage.getItem('realm_header_name');
-      const realmHeaderValue = localStorage.getItem('realm_header_value');
+      const token: string | null = localStorage.getItem('access_token');
+      const realmHeaderName: string | null = localStorage.getItem('realm_header_name');
+      const realmHeaderValue: string | null = localStorage.getItem('realm_header_value');
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -198,7 +241,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
     onClose();
   };
 
-  const storageS3MenuChildren = (
+  const storageS3MenuChildren: ReactNode = (
       <>
         <Form.Item
             label="Allowed Locations"
@@ -227,7 +270,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       </>
   )
 
-  const storageAzureMenuChildren = (
+  const storageAzureMenuChildren: ReactNode = (
       <>
         <Form.Item
             label="Allowed Locations"
@@ -257,7 +300,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       </>
   )
 
-  const storageGCSMenuChildren = (
+  const storageGCSMenuChildren: ReactNode = (
       <>
         <Form.Item
             label="Allowed Locations"
@@ -277,7 +320,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       </>
   )
 
-  const storageFileMenuChildren = (
+  const storageFileMenuChildren: ReactNode = (
       <>
         <Form.Item
             label="Allowed Locations"
@@ -294,7 +337,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
       </>
   )
 
-  const storageTypeItems = [
+  const storageTypeItems: TabsProps['items'] = [
     {
       key: 'S3',
       label: 'AWS S3',

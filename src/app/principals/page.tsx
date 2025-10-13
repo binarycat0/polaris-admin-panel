@@ -1,7 +1,7 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {Spin} from 'antd';
+import {message, Spin} from 'antd';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
 
@@ -107,6 +107,20 @@ export default function Page() {
     await handleRefresh();
   };
 
+  const handleDeletePrincipal = async (principalName: string) => {
+    try {
+      await authenticatedFetch(`/api/principals/${encodeURIComponent(principalName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Principal "${principalName}" deleted successfully!`);
+      await handleRefresh();
+    } catch (error) {
+      console.error('Error deleting principal:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   useEffect(() => {
     async function fetchPrincipals() {
       setLoading(true);
@@ -160,6 +174,7 @@ export default function Page() {
           principalRoles={principalRoles}
           rolesLoading={rolesLoading}
           onResetCredentials={handleResetCredentials}
+          onDelete={handleDeletePrincipal}
       />
   );
 }

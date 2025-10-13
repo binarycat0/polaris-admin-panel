@@ -18,6 +18,7 @@ import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
 import CreatePrincipalModal from './create-principal-modal'
 import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
+import DeleteConfirmationModal from './delete-confirmation-modal'
 
 const {Text, Title} = Typography;
 
@@ -80,6 +81,8 @@ export default function Principals({
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedPrincipalForDelete, setSelectedPrincipalForDelete] = useState<string | null>(null);
 
   const handleCreateSuccess = () => {
     if (onRefresh) {
@@ -99,6 +102,17 @@ export default function Principals({
   const handleResetClick = (principalName: string) => {
     setSelectedPrincipalForReset(principalName);
     setResetModalVisible(true);
+  };
+
+  const handleDeleteClick = (principalName: string) => {
+    setSelectedPrincipalForDelete(principalName);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async (principalName: string) => {
+    if (onDelete) {
+      await onDelete(principalName);
+    }
   };
 
   const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
@@ -398,9 +412,7 @@ export default function Principals({
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDelete) {
-                onDelete(record.name);
-              }
+              handleDeleteClick(record.name);
             },
           },
         ];
@@ -534,6 +546,19 @@ export default function Principals({
               setSelectedPrincipalForReset(null);
             }}
             onSuccess={handleResetSuccess}
+        />
+
+        <DeleteConfirmationModal
+            visible={deleteModalVisible}
+            entityType="Principal"
+            entityName={selectedPrincipalForDelete}
+            onClose={() => {
+              setDeleteModalVisible(false);
+              setSelectedPrincipalForDelete(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            description=""
+            warningMessage="This will permanently remove the principal and revoke all access."
         />
       </>
   );

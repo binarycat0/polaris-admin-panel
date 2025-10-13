@@ -13,6 +13,8 @@ import {
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
+import {useState} from 'react'
+import DeleteConfirmationModal from './delete-confirmation-modal'
 
 const {Text, Title} = Typography;
 
@@ -68,6 +70,38 @@ export default function PrincipalRolesList({
                                              onEditPrincipal,
                                              onDeletePrincipal,
                                            }: PrincipalRolesListProps) {
+  const [deleteRoleModalVisible, setDeleteRoleModalVisible] = useState(false);
+  const [selectedRoleForDelete, setSelectedRoleForDelete] = useState<string | null>(null);
+  const [deletePrincipalModalVisible, setDeletePrincipalModalVisible] = useState(false);
+  const [selectedPrincipalForDelete, setSelectedPrincipalForDelete] = useState<{
+    principalRoleName: string;
+    principalName: string;
+  } | null>(null);
+
+  const handleDeleteRoleClick = (roleName: string) => {
+    setSelectedRoleForDelete(roleName);
+    setDeleteRoleModalVisible(true);
+  };
+
+  const handleDeleteRoleConfirm = async (roleName: string) => {
+    if (onDelete) {
+      await onDelete(roleName);
+    }
+  };
+
+  const handleDeletePrincipalClick = (principalRoleName: string, principalName: string) => {
+    setSelectedPrincipalForDelete({principalRoleName, principalName});
+    setDeletePrincipalModalVisible(true);
+  };
+
+  const handleDeletePrincipalConfirm = async () => {
+    if (onDeletePrincipal && selectedPrincipalForDelete) {
+      await onDeletePrincipal(
+          selectedPrincipalForDelete.principalRoleName,
+          selectedPrincipalForDelete.principalName
+      );
+    }
+  };
 
   const getPrincipalsColumns = (principalRoleName: string): ColumnsType<PrincipalItem> => [
     {
@@ -178,9 +212,7 @@ export default function PrincipalRolesList({
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDeletePrincipal) {
-                onDeletePrincipal(principalRoleName, record.name);
-              }
+              handleDeletePrincipalClick(principalRoleName, record.name);
             },
           },
         ];
@@ -338,9 +370,7 @@ export default function PrincipalRolesList({
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDelete) {
-                onDelete(record.name);
-              }
+              handleDeleteRoleClick(record.name);
             },
           },
         ];
@@ -359,7 +389,8 @@ export default function PrincipalRolesList({
   ];
 
   return (
-      <Table
+      <>
+        <Table
             columns={columns}
             dataSource={roles}
             rowKey="name"
@@ -443,7 +474,34 @@ export default function PrincipalRolesList({
               ),
             }}
             size="small"
-      />
+        />
+
+        <DeleteConfirmationModal
+            visible={deleteRoleModalVisible}
+            entityType="Principal Role"
+            entityName={selectedRoleForDelete}
+            onClose={() => {
+              setDeleteRoleModalVisible(false);
+              setSelectedRoleForDelete(null);
+            }}
+            onConfirm={handleDeleteRoleConfirm}
+            description=""
+            warningMessage="This will permanently remove the principal role and all associated permissions."
+        />
+
+        <DeleteConfirmationModal
+            visible={deletePrincipalModalVisible}
+            entityType="Principal"
+            entityName={selectedPrincipalForDelete?.principalName || null}
+            onClose={() => {
+              setDeletePrincipalModalVisible(false);
+              setSelectedPrincipalForDelete(null);
+            }}
+            onConfirm={handleDeletePrincipalConfirm}
+            description=""
+            warningMessage="This will remove the principal from this principal role."
+        />
+      </>
   );
 }
 

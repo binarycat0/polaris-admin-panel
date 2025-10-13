@@ -55,9 +55,9 @@ export default function ResetPrincipalCredentialsModal({
         body: JSON.stringify(payload),
       });
 
-      // @ts-ignore
-      if (!data || data.error) {
-        setErrorMessage(`Failed to reset credentials. ${data.error?.message}`);
+      if (!data || (typeof data === 'object' && 'error' in data)) {
+        const errorData = data as { error?: { message?: string } };
+        setErrorMessage(`Failed to reset credentials. ${errorData.error?.message || 'Unknown error'}`);
         return;
       }
 

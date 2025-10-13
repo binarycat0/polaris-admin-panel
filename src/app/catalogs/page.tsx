@@ -7,7 +7,7 @@ import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
 import {useCallback, useEffect, useState} from 'react'
-import {Breadcrumb, Button, Divider, Flex, Space, Spin, Typography} from 'antd';
+import {Breadcrumb, Button, Divider, Flex, message, Space, Spin, Typography} from 'antd';
 import {FolderAddOutlined, FolderOpenOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 
@@ -95,7 +95,7 @@ export default function Page() {
 
   async function getPrincipalRoles(catalogName: string, catalogRoleName: string): Promise<PrincipalRoleItem[]> {
     try {
-      const data = await authenticatedFetch(`/api/principal-roles/${catalogName}/${catalogRoleName}`);
+      const data = await authenticatedFetch(`/api/catalogs/${catalogName}/catalog-roles/${catalogRoleName}/principal-roles`);
 
       if (!data) {
         return []; // Authentication failed, user redirected
@@ -255,6 +255,48 @@ export default function Page() {
     }
   };
 
+  const handleDeletePrincipalRole = async (principalRoleName: string) => {
+    if (!selectedCatalog || !selectedCatalogRole) return;
+
+    try {
+      await authenticatedFetch(
+        `/api/principal-roles/${encodeURIComponent(selectedCatalog)}/${encodeURIComponent(selectedCatalogRole)}/${encodeURIComponent(principalRoleName)}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      message.success(`Principal role "${principalRoleName}" removed from catalog role "${selectedCatalogRole}" successfully!`);
+
+      // Refresh the principal roles list
+      const roles = await getPrincipalRoles(selectedCatalog, selectedCatalogRole);
+      setPrincipalRoles(roles);
+    } catch (error) {
+      console.error('Error removing principal role from catalog role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
+  const handleDeletePrincipal = async (principalRoleName: string, principalName: string) => {
+    try {
+      await authenticatedFetch(
+        `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
+
+      // Refresh the principals list for this role
+      const principalsData = await getPrincipals(principalRoleName);
+      setPrincipals(prev => ({...prev, [principalRoleName]: principalsData}));
+    } catch (error) {
+      console.error('Error removing principal from role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   const refreshCatalogs = useCallback(async () => {
     setLoading(true);
     const catalogsData = await getCatalogs();
@@ -401,6 +443,8 @@ export default function Page() {
                   expandedRowKeys={expandedPrincipalRoleKeys}
                   principals={principals}
                   principalsLoading={principalsLoading}
+                  onDelete={handleDeletePrincipalRole}
+                  onDeletePrincipal={handleDeletePrincipal}
               />
             </>
         )}
