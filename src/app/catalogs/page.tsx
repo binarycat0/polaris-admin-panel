@@ -25,7 +25,6 @@ export default function Page() {
   const [catalogRoles, setCatalogRoles] = useState<CatalogRole[]>([]);
   const [rolesLoading, setRolesLoading] = useState(false);
   const [selectedCatalogRole, setSelectedCatalogRole] = useState<string | null>(() => {
-    // Restore selected catalog role from localStorage on initial load
     if (typeof window !== 'undefined') {
       return localStorage.getItem('selected_catalog_role');
     }
@@ -47,12 +46,11 @@ export default function Page() {
       const data = await authenticatedFetch('/api/catalogs');
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
-      console.log('API Response:', data); // Debug log to see the response structure
+      console.log('API Response:', data);
 
-      // Handle different possible response structures
       if (Array.isArray(data)) {
         return data;
       } else if (data && typeof data === 'object' && 'catalogs' in data && Array.isArray((data as {
@@ -68,7 +66,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
@@ -78,12 +75,11 @@ export default function Page() {
       const data = await authenticatedFetch(`/api/catalog-roles/${catalogName}`);
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Catalog Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -93,7 +89,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }

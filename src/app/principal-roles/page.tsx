@@ -12,7 +12,6 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [principalRoles, setPrincipalRoles] = useState<PrincipalRoleItem[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>(() => {
-    // Restore expanded principal role from localStorage on initial load
     if (typeof window !== 'undefined') {
       const savedPrincipalRole = localStorage.getItem('expanded_principal_role');
       return savedPrincipalRole ? [savedPrincipalRole] : [];
@@ -28,12 +27,11 @@ export default function Page() {
       const data = await authenticatedFetch('/api/principal-roles');
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principal Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -43,7 +41,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);

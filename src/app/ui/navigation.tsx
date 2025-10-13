@@ -62,7 +62,6 @@ export default function Navigation() {
     };
 
     const handleStorageChange = (e: StorageEvent) => {
-      // Check if auth-related keys were removed
       if (e.key === 'access_token' || e.key === null) {
         const newStatus = checkAuthStatus();
         setAuthStatus(newStatus);

@@ -66,7 +66,6 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
       });
 
       if (!data) {
-        // Authentication failed or error occurred, authenticatedFetch already handled it
         return;
       }
 

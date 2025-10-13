@@ -14,7 +14,7 @@ export interface Grant {
   privilege?: string;
   type?: string;
 
-  [key: string]: unknown; // Allow additional properties
+  [key: string]: unknown;
 }
 
 interface GrantsProps {
@@ -22,7 +22,6 @@ interface GrantsProps {
   loading: boolean;
 }
 
-// Group grants by type
 const groupGrantsByType = (grants: Grant[]): Record<string, Grant[]> => {
   const grouped: Record<string, Grant[]> = {
     catalog: [],
@@ -42,7 +41,6 @@ const groupGrantsByType = (grants: Grant[]): Record<string, Grant[]> => {
   return grouped;
 };
 
-// Get icon for grant type
 const getTypeIcon = (type: string) => {
   switch (type) {
     case 'catalog':

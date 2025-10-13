@@ -9,7 +9,6 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [principals, setPrincipals] = useState<Principal[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>(() => {
-    // Restore expanded principal from localStorage on initial load
     if (typeof window !== 'undefined') {
       const savedPrincipal = localStorage.getItem('expanded_principal');
       return savedPrincipal ? [savedPrincipal] : [];
@@ -25,12 +24,11 @@ export default function Page() {
       const data = await authenticatedFetch('/api/principals');
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principals API Response:', data);
 
-      // Handle the response structure { principals: [...] }
       if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
         principals: unknown
       }).principals)) {
@@ -40,7 +38,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
@@ -50,12 +47,11 @@ export default function Page() {
       const data = await authenticatedFetch(`/api/principals/${encodeURIComponent(principalName)}/principal-roles`);
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principal Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -65,31 +61,24 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
 
   const handleRowClick = async (principalName: string) => {
-    // Toggle expansion
     const isExpanded = expandedRowKeys.includes(principalName);
 
     if (isExpanded) {
-      // Collapse the row
       setExpandedRowKeys([]);
-      // Clear from localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('expanded_principal');
       }
     } else {
-      // Expand the row (only one row at a time)
       setExpandedRowKeys([principalName]);
-      // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('expanded_principal', principalName);
       }
 
-      // Load roles if not already loaded
       if (!principalRoles[principalName]) {
         setRolesLoading(prev => ({...prev, [principalName]: true}));
 

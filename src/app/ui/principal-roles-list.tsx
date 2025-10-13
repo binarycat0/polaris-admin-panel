@@ -69,7 +69,6 @@ export default function PrincipalRolesList({
                                              onDeletePrincipal,
                                            }: PrincipalRolesListProps) {
 
-  // Columns for the principals expandable table
   const getPrincipalsColumns = (principalRoleName: string): ColumnsType<PrincipalItem> => [
     {
       title: "Name",

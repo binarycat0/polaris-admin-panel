@@ -34,7 +34,6 @@ export default function CreatePrincipalModal({
     setLoading(true);
 
     try {
-      // Step 1: Prepare the payload
       const properties: Record<string, string> = {};
 
       if (values.properties && values.properties.length > 0) {
@@ -55,41 +54,35 @@ export default function CreatePrincipalModal({
 
       console.log('Step 2: Sending request with payload:', payload);
 
-      // Step 2: Send the request and wait for response
       const data = await authenticatedFetch('/api/principals', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
 
       if (!data) {
-        // Authentication failed or error occurred, authenticatedFetch already handled it
         console.log('Step 2 failed: No data returned');
         return;
       }
 
       console.log('Step 2 complete: Received response:', data);
 
-      // Type-safe response handling
       const response = data as PrincipalWithCredentials;
 
-      // Step 3: Close create modal and show credentials modal
       if (response.credentials) {
         console.log('Step 3: Closing create modal and showing credentials modal');
         form.resetFields();
-        onClose(); // Close the create modal first
+        onClose();
         setCreatedPrincipal(response);
         setShowCredentials(true);
-        // Note: We'll call onSuccess() after user closes the credentials modal
       } else {
         console.warn('No credentials in response - this is unexpected!');
         message.success('Principal created successfully (but no credentials returned)!');
         form.resetFields();
-        onSuccess(); // Reload list
+        onSuccess();
         onClose();
       }
     } catch (error) {
       console.error('Error creating principal:', error);
-      // Error message already shown by authenticatedFetch
     } finally {
       setLoading(false);
     }
@@ -104,7 +97,7 @@ export default function CreatePrincipalModal({
     console.log('Step 4: User acknowledged credentials, closing credentials modal and reloading list');
     setShowCredentials(false);
     setCreatedPrincipal(null);
-    onSuccess(); // Step 4: Reload the principals list
+    onSuccess();
   };
 
   return (

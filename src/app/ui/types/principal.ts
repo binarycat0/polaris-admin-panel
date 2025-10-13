@@ -1,5 +1,3 @@
-// Shared types for Principal-related components based on OpenAPI schema
-
 export interface Principal {
   name: string;
   clientId?: string;

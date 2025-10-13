@@ -81,7 +81,6 @@ export default function Principals({
     }
   };
 
-  // Columns for the principal-roles expandable table
   const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
     {
       title: "Name",
@@ -314,7 +313,6 @@ export default function Principals({
           </Space>
       ),
       key: 'properties',
-      // width: 150,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
 
