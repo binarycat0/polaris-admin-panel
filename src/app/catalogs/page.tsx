@@ -8,6 +8,8 @@ import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
 import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
 import RemoveCatalogRoleModal from "@/app/ui/remove-catalog-role-modal"
+import AddPrivilegeModal from "@/app/ui/add-privilege-modal"
+import RemovePrivilegeModal from "@/app/ui/remove-privilege-modal"
 import {useCallback, useEffect, useState} from 'react'
 import {Breadcrumb, Button, Divider, message, Space, Spin, Typography, Flex} from 'antd';
 import {
@@ -49,6 +51,8 @@ export default function Page() {
   const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
   const [assignCatalogRoleModalVisible, setAssignCatalogRoleModalVisible] = useState(false);
   const [removeCatalogRoleModalVisible, setRemoveCatalogRoleModalVisible] = useState(false);
+  const [addPrivilegeModalVisible, setAddPrivilegeModalVisible] = useState(false);
+  const [removePrivilegeModalVisible, setRemovePrivilegeModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
@@ -410,6 +414,40 @@ export default function Page() {
     }
   };
 
+  const handleAddPrivilege = () => {
+    setAddPrivilegeModalVisible(true);
+  };
+
+  const handleRemovePrivilege = () => {
+    setRemovePrivilegeModalVisible(true);
+  };
+
+  const handleAddPrivilegeSuccess = async () => {
+    if (selectedCatalog && selectedCatalogRole) {
+      // Refresh the grants list
+      setGrantsLoading(true);
+      try {
+        const grantsData = await getGrants(selectedCatalog, selectedCatalogRole);
+        setGrants(grantsData);
+      } finally {
+        setGrantsLoading(false);
+      }
+    }
+  };
+
+  const handleRemovePrivilegeSuccess = async () => {
+    if (selectedCatalog && selectedCatalogRole) {
+      // Refresh the grants list
+      setGrantsLoading(true);
+      try {
+        const grantsData = await getGrants(selectedCatalog, selectedCatalogRole);
+        setGrants(grantsData);
+      } finally {
+        setGrantsLoading(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
         <Spin size="large"/>
@@ -515,6 +553,25 @@ export default function Page() {
         {selectedCatalog && selectedCatalogRole && (
             <>
               <Divider orientation="left">Privileges</Divider>
+              <Flex justify="flex-end" align="center" style={{width: '100%'}}>
+                <Space>
+                  <Button
+                      type="default"
+                      icon={<PlusOutlined/>}
+                      onClick={handleAddPrivilege}
+                  >
+                    Add Privilege
+                  </Button>
+                  <Button
+                      danger
+                      icon={<MinusOutlined/>}
+                      onClick={handleRemovePrivilege}
+                      disabled={grants.length === 0}
+                  >
+                    Remove Privilege
+                  </Button>
+                </Space>
+              </Flex>
               <Grants grants={grants} loading={grantsLoading}/>
             </>
         )}
@@ -547,6 +604,23 @@ export default function Page() {
             assignedPrincipalRoles={principalRoles}
             onClose={() => setRemoveCatalogRoleModalVisible(false)}
             onSuccess={handleRemoveCatalogRoleSuccess}
+        />
+
+        <AddPrivilegeModal
+            visible={addPrivilegeModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={selectedCatalogRole}
+            onClose={() => setAddPrivilegeModalVisible(false)}
+            onSuccess={handleAddPrivilegeSuccess}
+        />
+
+        <RemovePrivilegeModal
+            visible={removePrivilegeModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={selectedCatalogRole}
+            grants={grants}
+            onClose={() => setRemovePrivilegeModalVisible(false)}
+            onSuccess={handleRemovePrivilegeSuccess}
         />
       </Space>
   )
