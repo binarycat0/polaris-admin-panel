@@ -2,7 +2,7 @@
 
 import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
 import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
-import PrincipalRoles, {PrincipalRole} from "@/app/ui/principal-roles"
+import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/principal-roles-list"
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
@@ -17,7 +17,6 @@ export default function Page() {
   const [catalogs, setCatalogs] = useState<CatalogEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCatalog, setSelectedCatalog] = useState<string | null>(() => {
-    // Restore selected catalog from localStorage on initial load
     if (typeof window !== 'undefined') {
       return localStorage.getItem('selected_catalog');
     }
@@ -32,8 +31,11 @@ export default function Page() {
     }
     return null;
   });
-  const [principalRoles, setPrincipalRoles] = useState<PrincipalRole[]>([]);
+  const [principalRoles, setPrincipalRoles] = useState<PrincipalRoleItem[]>([]);
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
+  const [expandedPrincipalRoleKeys, setExpandedPrincipalRoleKeys] = useState<string[]>([]);
+  const [principals, setPrincipals] = useState<Record<string, PrincipalItem[]>>({});
+  const [principalsLoading, setPrincipalsLoading] = useState<Record<string, boolean>>({});
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -96,7 +98,7 @@ export default function Page() {
     }
   }
 
-  async function getPrincipalRoles(catalogName: string, catalogRoleName: string): Promise<PrincipalRole[]> {
+  async function getPrincipalRoles(catalogName: string, catalogRoleName: string): Promise<PrincipalRoleItem[]> {
     try {
       const data = await authenticatedFetch(`/api/principal-roles/${catalogName}/${catalogRoleName}`);
 
@@ -110,7 +112,7 @@ export default function Page() {
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
-        return (data as { roles: PrincipalRole[] }).roles;
+        return (data as { roles: PrincipalRoleItem[] }).roles;
       } else {
         console.error('Unexpected principal roles response structure:', data);
         return [];
@@ -120,6 +122,31 @@ export default function Page() {
       return [];
     }
   }
+
+  const getPrincipals = useCallback(async (principalRoleName: string): Promise<PrincipalItem[]> => {
+    try {
+      const data = await authenticatedFetch(`/api/principal-role-principals/${encodeURIComponent(principalRoleName)}`);
+
+      if (!data) {
+        return []; // Authentication failed, user redirected
+      }
+
+      console.log('Principals API Response:', data);
+
+      // Handle the response structure { principals: [...] }
+      if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
+        principals: unknown
+      }).principals)) {
+        return (data as { principals: PrincipalItem[] }).principals;
+      } else {
+        console.error('Unexpected principals response structure:', data);
+        return [];
+      }
+    } catch {
+      // Error handling is done in authenticatedFetch
+      return [];
+    }
+  }, [authenticatedFetch]);
 
   const handleCatalogRowClick = async (catalogName: string) => {
     setSelectedCatalog(catalogName);
@@ -186,6 +213,10 @@ export default function Page() {
       localStorage.setItem('selected_catalog_role', catalogRoleName);
     }
 
+    // Clear expanded principal roles and principals data
+    setExpandedPrincipalRoleKeys([]);
+    setPrincipals({});
+
     setPrincipalRolesLoading(true);
     setGrantsLoading(true);
 
@@ -201,6 +232,31 @@ export default function Page() {
     } finally {
       setPrincipalRolesLoading(false);
       setGrantsLoading(false);
+    }
+  };
+
+  const handlePrincipalRoleRowClick = async (principalRoleName: string) => {
+    // Toggle expansion
+    const isExpanded = expandedPrincipalRoleKeys.includes(principalRoleName);
+
+    if (isExpanded) {
+      // Collapse the row
+      setExpandedPrincipalRoleKeys([]);
+    } else {
+      // Expand the row (only one row at a time)
+      setExpandedPrincipalRoleKeys([principalRoleName]);
+
+      // Load principals if not already loaded
+      if (!principals[principalRoleName]) {
+        setPrincipalsLoading(prev => ({...prev, [principalRoleName]: true}));
+
+        try {
+          const principalsData = await getPrincipals(principalRoleName);
+          setPrincipals(prev => ({...prev, [principalRoleName]: principalsData}));
+        } finally {
+          setPrincipalsLoading(prev => ({...prev, [principalRoleName]: false}));
+        }
+      }
     }
   };
 
@@ -343,7 +399,14 @@ export default function Page() {
         {selectedCatalog && selectedCatalogRole && (
             <>
               <Divider orientation="left">Principal Roles Assigned to Catalog Role</Divider>
-              <PrincipalRoles roles={principalRoles} loading={principalRolesLoading}/>
+              <PrincipalRolesList
+                  roles={principalRoles}
+                  loading={principalRolesLoading}
+                  onRowClick={handlePrincipalRoleRowClick}
+                  expandedRowKeys={expandedPrincipalRoleKeys}
+                  principals={principals}
+                  principalsLoading={principalsLoading}
+              />
             </>
         )}
 

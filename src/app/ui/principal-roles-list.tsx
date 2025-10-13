@@ -10,7 +10,6 @@ import {
   IdcardOutlined,
   SettingOutlined,
   TeamOutlined,
-  UsergroupAddOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
@@ -67,7 +66,7 @@ export default function PrincipalRolesList({
                                              onEdit,
                                              onDelete,
                                              onEditPrincipal,
-                                             onDeletePrincipal
+                                             onDeletePrincipal,
                                            }: PrincipalRolesListProps) {
 
   // Columns for the principals expandable table
@@ -284,7 +283,7 @@ export default function PrincipalRolesList({
       ),
       key: 'properties',
       width: 250,
-      render: (_, record) => {
+      render: (_: unknown, record: PrincipalRoleItem) => {
         const properties = Object.entries(record.properties || {});
 
         if (properties.length === 0) {
@@ -319,8 +318,7 @@ export default function PrincipalRolesList({
       title: 'Actions',
       key: 'actions',
       width: 100,
-      fixed: 'right',
-      render: (_, record) => {
+      render: (_: unknown, record: PrincipalRoleItem) => {
         const items: MenuProps['items'] = [
           {
             key: 'edit',
@@ -358,24 +356,11 @@ export default function PrincipalRolesList({
             </Dropdown>
         );
       },
-    },
+    }
   ];
 
   return (
-      <>
-        <Flex justify="space-between" align="flex-start">
-          <Button variant="outlined" icon={<UsergroupAddOutlined/>}>
-            Create new
-          </Button>
-          <Title level={4}>
-            <Space>
-              Principal Roles
-              <TeamOutlined/>
-            </Space>
-          </Title>
-        </Flex>
-
-        <Table
+      <Table
             columns={columns}
             dataSource={roles}
             rowKey="name"
@@ -388,8 +373,8 @@ export default function PrincipalRolesList({
                 }
               },
               expandedRowRender: (record) => {
-                const principalsList = principals[record.name] || [];
-                const loading = principalsLoading[record.name] || false;
+                const principalsList = principals?.[record.name] || [];
+                const loading = principalsLoading?.[record.name] || false;
 
                 if (loading) {
                   return (
@@ -424,7 +409,8 @@ export default function PrincipalRolesList({
                             emptyText: (
                                 <Space>
                                   <UserOutlined/>
-                                  <Text type="secondary">No principals found for this principal role</Text>
+                                  <Text type="secondary">No principals found for this principal
+                                    role</Text>
                                 </Space>
                             ),
                           }}
@@ -457,8 +443,8 @@ export default function PrincipalRolesList({
                   </Space>
               ),
             }}
-        />
-      </>
+            size="small"
+      />
   );
 }
 
