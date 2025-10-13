@@ -1,9 +1,13 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {message, Spin} from 'antd';
+import {Button, Flex, message, Space, Spin, Typography} from 'antd';
+import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
+import CreatePrincipalModal from '@/app/ui/create-principal-modal';
+
+const {Title} = Typography;
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
@@ -17,6 +21,7 @@ export default function Page() {
   });
   const [principalRoles, setPrincipalRoles] = useState<Record<string, PrincipalRoleItem[]>>({});
   const [rolesLoading, setRolesLoading] = useState<Record<string, boolean>>({});
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
@@ -102,6 +107,10 @@ export default function Page() {
     }
   };
 
+  const handleCreateSuccess = () => {
+    handleRefresh();
+  };
+
   const handleResetCredentials = async (principalName: string) => {
     console.log('Credentials reset for principal:', principalName);
     await handleRefresh();
@@ -165,16 +174,38 @@ export default function Page() {
   }
 
   return (
-      <Principals
-          principals={principals}
-          loading={loading}
-          onRowClick={handleRowClick}
-          onRefresh={handleRefresh}
-          expandedRowKeys={expandedRowKeys}
-          principalRoles={principalRoles}
-          rolesLoading={rolesLoading}
-          onResetCredentials={handleResetCredentials}
-          onDelete={handleDeletePrincipal}
-      />
+      <Space direction="vertical" style={{width: '100%'}}>
+        <Title level={4} style={{marginBottom: 0}}>
+          <Space>
+            Principals
+            <UserOutlined/>
+          </Space>
+        </Title>
+        <Button
+            variant="outlined"
+            icon={<UserAddOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+        >
+          New principal
+        </Button>
+
+        <Principals
+            principals={principals}
+            loading={loading}
+            onRowClick={handleRowClick}
+            onRefresh={handleRefresh}
+            expandedRowKeys={expandedRowKeys}
+            principalRoles={principalRoles}
+            rolesLoading={rolesLoading}
+            onResetCredentials={handleResetCredentials}
+            onDelete={handleDeletePrincipal}
+        />
+
+        <CreatePrincipalModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
+        />
+      </Space>
   );
 }

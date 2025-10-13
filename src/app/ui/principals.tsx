@@ -11,12 +11,10 @@ import {
   ReloadOutlined,
   SettingOutlined,
   TeamOutlined,
-  UserAddOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
-import CreatePrincipalModal from './create-principal-modal'
 import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
 import DeleteConfirmationModal from './delete-confirmation-modal'
 
@@ -78,17 +76,10 @@ export default function Principals({
                                      onEditPrincipalRole,
                                      onDeletePrincipalRole
                                    }: PrincipalsProps) {
-  const [createModalVisible, setCreateModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedPrincipalForDelete, setSelectedPrincipalForDelete] = useState<string | null>(null);
-
-  const handleCreateSuccess = () => {
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
 
   const handleResetSuccess = () => {
     if (onRefresh) {
@@ -432,22 +423,6 @@ export default function Principals({
 
   return (
       <>
-        <Flex justify="space-between" align="flex-start">
-          <Button
-              variant="outlined"
-              icon={<UserAddOutlined/>}
-              onClick={() => setCreateModalVisible(true)}
-          >
-            Create new
-          </Button>
-          <Title level={4}>
-            <Space>
-              Principals
-              <UserOutlined/>
-            </Space>
-          </Title>
-        </Flex>
-
         <Table
             columns={columns}
             dataSource={principals}
@@ -497,7 +472,8 @@ export default function Principals({
                             emptyText: (
                                 <Space>
                                   <TeamOutlined/>
-                                  <Text type="secondary">No principal roles found for this principal</Text>
+                                  <Text type="secondary">No principal roles found for this
+                                    principal</Text>
                                 </Space>
                             ),
                           }}
@@ -530,12 +506,6 @@ export default function Principals({
                   </Space>
               ),
             }}
-        />
-
-        <CreatePrincipalModal
-            visible={createModalVisible}
-            onClose={() => setCreateModalVisible(false)}
-            onSuccess={handleCreateSuccess}
         />
 
         <ResetPrincipalCredentialsModal

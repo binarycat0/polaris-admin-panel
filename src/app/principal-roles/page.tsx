@@ -5,6 +5,7 @@ import {Button, Flex, message, Space, Spin, Typography} from 'antd';
 import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
+import CreatePrincipalRoleModal from '@/app/ui/create-principal-role-modal';
 
 const {Title} = Typography;
 
@@ -20,6 +21,7 @@ export default function Page() {
   });
   const [principals, setPrincipals] = useState<Record<string, PrincipalItem[]>>({});
   const [principalsLoading, setPrincipalsLoading] = useState<Record<string, boolean>>({});
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipalRoles = useCallback(async (): Promise<PrincipalRoleItem[]> => {
@@ -130,10 +132,10 @@ export default function Page() {
   const handleDeletePrincipal = async (principalRoleName: string, principalName: string) => {
     try {
       await authenticatedFetch(
-        `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
-        {
-          method: 'DELETE',
-        }
+          `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
+          {
+            method: 'DELETE',
+          }
       );
 
       message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
@@ -145,6 +147,10 @@ export default function Page() {
       console.error('Error removing principal from role:', error);
       throw error; // Re-throw to let the modal handle the error display
     }
+  };
+
+  const handleCreateSuccess = async () => {
+    await handleRefresh();
   };
 
   useEffect(() => {
@@ -189,18 +195,20 @@ export default function Page() {
   }
 
   return (
-      <>
-        <Flex justify="space-between" align="flex-start">
-          <Button variant="outlined" icon={<UsergroupAddOutlined/>}>
-            Create new
-          </Button>
-          <Title level={4}>
-            <Space>
-              Principal Roles
-              <TeamOutlined/>
-            </Space>
-          </Title>
-        </Flex>
+      <Space direction="vertical" style={{width: '100%'}}>
+        <Title level={4} style={{ marginBottom: '0px' }}>
+          <Space>
+            Principal Roles
+            <TeamOutlined/>
+          </Space>
+        </Title>
+        <Button
+            variant="outlined"
+            icon={<UsergroupAddOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+        >
+          New principal role
+        </Button>
 
         <PrincipalRolesList
             roles={principalRoles}
@@ -212,6 +220,12 @@ export default function Page() {
             onDelete={handleDeletePrincipalRole}
             onDeletePrincipal={handleDeletePrincipal}
         />
-      </>
+
+        <CreatePrincipalRoleModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
+        />
+      </Space>
   );
 }
