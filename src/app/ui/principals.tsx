@@ -451,7 +451,7 @@ export default function Principals({
                         <Space>
                           {onAddRole && (
                               <Button
-                                  type="primary"
+                                  type="default"
                                   size="small"
                                   icon={<PlusOutlined/>}
                                   onClick={(e) => {

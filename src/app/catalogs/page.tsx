@@ -6,9 +6,17 @@ import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/pri
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
+import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
+import RemoveCatalogRoleModal from "@/app/ui/remove-catalog-role-modal"
 import {useCallback, useEffect, useState} from 'react'
-import {Breadcrumb, Button, Divider, Flex, message, Space, Spin, Typography} from 'antd';
-import {FolderAddOutlined, FolderOpenOutlined, UsergroupAddOutlined} from '@ant-design/icons';
+import {Breadcrumb, Button, Divider, message, Space, Spin, Typography, Flex} from 'antd';
+import {
+  FolderAddOutlined,
+  FolderOpenOutlined,
+  MinusOutlined,
+  PlusOutlined,
+  UsergroupAddOutlined
+} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 
 const {Title} = Typography;
@@ -39,6 +47,8 @@ export default function Page() {
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
+  const [assignCatalogRoleModalVisible, setAssignCatalogRoleModalVisible] = useState(false);
+  const [removeCatalogRoleModalVisible, setRemoveCatalogRoleModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
@@ -260,10 +270,10 @@ export default function Page() {
 
     try {
       await authenticatedFetch(
-        `/api/principal-roles/${encodeURIComponent(selectedCatalog)}/${encodeURIComponent(selectedCatalogRole)}/${encodeURIComponent(principalRoleName)}`,
-        {
-          method: 'DELETE',
-        }
+          `/api/principal-roles/${encodeURIComponent(selectedCatalog)}/${encodeURIComponent(selectedCatalogRole)}/${encodeURIComponent(principalRoleName)}`,
+          {
+            method: 'DELETE',
+          }
       );
 
       message.success(`Principal role "${principalRoleName}" removed from catalog role "${selectedCatalogRole}" successfully!`);
@@ -280,10 +290,10 @@ export default function Page() {
   const handleDeletePrincipal = async (principalRoleName: string, principalName: string) => {
     try {
       await authenticatedFetch(
-        `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
-        {
-          method: 'DELETE',
-        }
+          `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
+          {
+            method: 'DELETE',
+          }
       );
 
       message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
@@ -366,6 +376,40 @@ export default function Page() {
     }
   };
 
+  const handleAddCatalogRole = () => {
+    setAssignCatalogRoleModalVisible(true);
+  };
+
+  const handleRemoveCatalogRole = () => {
+    setRemoveCatalogRoleModalVisible(true);
+  };
+
+  const handleAssignCatalogRoleSuccess = async () => {
+    if (selectedCatalog && selectedCatalogRole) {
+      // Refresh the principal roles list
+      setPrincipalRolesLoading(true);
+      try {
+        const roles = await getPrincipalRoles(selectedCatalog, selectedCatalogRole);
+        setPrincipalRoles(roles);
+      } finally {
+        setPrincipalRolesLoading(false);
+      }
+    }
+  };
+
+  const handleRemoveCatalogRoleSuccess = async () => {
+    if (selectedCatalog && selectedCatalogRole) {
+      // Refresh the principal roles list
+      setPrincipalRolesLoading(true);
+      try {
+        const roles = await getPrincipalRoles(selectedCatalog, selectedCatalogRole);
+        setPrincipalRoles(roles);
+      } finally {
+        setPrincipalRolesLoading(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
         <Spin size="large"/>
@@ -436,6 +480,25 @@ export default function Page() {
         {selectedCatalog && selectedCatalogRole && (
             <>
               <Divider orientation="left">Principal Roles Assigned to Catalog Role</Divider>
+              <Flex justify="flex-end" align="center" style={{width: '100%'}}>
+                <Space>
+                  <Button
+                      type="default"
+                      icon={<PlusOutlined/>}
+                      onClick={handleAddCatalogRole}
+                  >
+                    Add Role
+                  </Button>
+                  <Button
+                      danger
+                      icon={<MinusOutlined/>}
+                      onClick={handleRemoveCatalogRole}
+                      disabled={principalRoles.length === 0}
+                  >
+                    Remove Role
+                  </Button>
+                </Space>
+              </Flex>
               <PrincipalRolesList
                   roles={principalRoles}
                   loading={principalRolesLoading}
@@ -467,6 +530,23 @@ export default function Page() {
             catalogName={selectedCatalog}
             onClose={() => setCreateCatalogRoleModalVisible(false)}
             onSuccess={handleCreateCatalogRoleSuccess}
+        />
+
+        <AssignCatalogRoleModal
+            visible={assignCatalogRoleModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={selectedCatalogRole}
+            onClose={() => setAssignCatalogRoleModalVisible(false)}
+            onSuccess={handleAssignCatalogRoleSuccess}
+        />
+
+        <RemoveCatalogRoleModal
+            visible={removeCatalogRoleModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={selectedCatalogRole}
+            assignedPrincipalRoles={principalRoles}
+            onClose={() => setRemoveCatalogRoleModalVisible(false)}
+            onSuccess={handleRemoveCatalogRoleSuccess}
         />
       </Space>
   )
