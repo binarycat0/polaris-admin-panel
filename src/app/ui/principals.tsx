@@ -8,6 +8,7 @@ import {
   EditOutlined,
   HomeOutlined,
   IdcardOutlined,
+  MinusOutlined,
   PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
@@ -55,8 +56,8 @@ interface PrincipalsProps {
   onDelete?: (principalName: string) => void;
   onResetCredentials?: (principalName: string) => void;
   onAddRole?: (principalName: string) => void;
+  onRemoveRole?: (principalName: string) => void;
   onEditPrincipalRole?: (principalName: string, roleName: string) => void;
-  onDeletePrincipalRole?: (principalName: string, roleName: string) => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -76,15 +77,13 @@ export default function Principals({
                                      onDelete,
                                      onResetCredentials,
                                      onAddRole,
-                                     onEditPrincipalRole,
-                                     onDeletePrincipalRole
+                                     onRemoveRole,
+                                     onEditPrincipalRole
                                    }: PrincipalsProps) {
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedPrincipalForDelete, setSelectedPrincipalForDelete] = useState<string | null>(null);
-  const [deleteRoleModalVisible, setDeleteRoleModalVisible] = useState(false);
-  const [selectedRoleForDelete, setSelectedRoleForDelete] = useState<{ principalName: string; roleName: string } | null>(null);
 
   const handleResetSuccess = () => {
     if (onRefresh) {
@@ -108,17 +107,6 @@ export default function Principals({
   const handleDeleteConfirm = async (principalName: string) => {
     if (onDelete) {
       await onDelete(principalName);
-    }
-  };
-
-  const handleDeleteRoleClick = (principalName: string, roleName: string) => {
-    setSelectedRoleForDelete({ principalName, roleName });
-    setDeleteRoleModalVisible(true);
-  };
-
-  const handleDeleteRoleConfirm = async () => {
-    if (onDeletePrincipalRole && selectedRoleForDelete) {
-      await onDeletePrincipalRole(selectedRoleForDelete.principalName, selectedRoleForDelete.roleName);
     }
   };
 
@@ -251,18 +239,6 @@ export default function Principals({
               if (onEditPrincipalRole) {
                 onEditPrincipalRole(principalName, record.name);
               }
-            },
-          },
-          {
-            type: 'divider',
-          },
-          {
-            key: 'delete',
-            label: 'Remove',
-            icon: <DeleteOutlined/>,
-            danger: true,
-            onClick: () => {
-              handleDeleteRoleClick(principalName, record.name);
             },
           },
         ];
@@ -472,19 +448,35 @@ export default function Principals({
                             <Tag color="blue">{roles.length}</Tag>
                           </Space>
                         </Title>
-                        {onAddRole && (
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                icon={<PlusOutlined/>}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onAddRole(record.name);
-                                }}
-                            >
-                              Add Role
-                            </Button>
-                        )}
+                        <Space>
+                          {onAddRole && (
+                              <Button
+                                  type="primary"
+                                  size="small"
+                                  icon={<PlusOutlined/>}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAddRole(record.name);
+                                  }}
+                              >
+                                Add Role
+                              </Button>
+                          )}
+                          {onRemoveRole && (
+                              <Button
+                                  danger
+                                  size="small"
+                                  icon={<MinusOutlined/>}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemoveRole(record.name);
+                                  }}
+                                  disabled={roles.length === 0}
+                              >
+                                Remove Role
+                              </Button>
+                          )}
+                        </Space>
                       </Flex>
                       <Table
                           columns={getRolesColumns(record.name)}
@@ -558,19 +550,6 @@ export default function Principals({
             onConfirm={handleDeleteConfirm}
             description=""
             warningMessage="This will permanently remove the principal and revoke all access."
-        />
-
-        <DeleteConfirmationModal
-            visible={deleteRoleModalVisible}
-            entityType="Role"
-            entityName={selectedRoleForDelete?.roleName || null}
-            onClose={() => {
-              setDeleteRoleModalVisible(false);
-              setSelectedRoleForDelete(null);
-            }}
-            onConfirm={handleDeleteRoleConfirm}
-            description={selectedRoleForDelete ? `Remove role from principal "${selectedRoleForDelete.principalName}"` : ''}
-            warningMessage="This will remove the role assignment from the principal."
         />
       </>
   );
