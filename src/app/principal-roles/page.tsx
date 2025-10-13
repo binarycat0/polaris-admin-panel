@@ -1,9 +1,12 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {Spin} from 'antd';
+import {Button, Flex, Space, Spin, Typography} from 'antd';
+import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
+
+const {Title} = Typography;
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
@@ -145,13 +148,27 @@ export default function Page() {
   }
 
   return (
-      <PrincipalRolesList
-          roles={principalRoles}
-          loading={loading}
-          onRowClick={handleRowClick}
-          expandedRowKeys={expandedRowKeys}
-          principals={principals}
-          principalsLoading={principalsLoading}
-      />
+      <>
+        <Flex justify="space-between" align="flex-start">
+          <Button variant="outlined" icon={<UsergroupAddOutlined/>}>
+            Create new
+          </Button>
+          <Title level={4}>
+            <Space>
+              Principal Roles
+              <TeamOutlined/>
+            </Space>
+          </Title>
+        </Flex>
+
+        <PrincipalRolesList
+            roles={principalRoles}
+            loading={loading}
+            onRowClick={handleRowClick}
+            expandedRowKeys={expandedRowKeys}
+            principals={principals}
+            principalsLoading={principalsLoading}
+        />
+      </>
   );
 }
