@@ -1,20 +1,10 @@
 'use client'
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  message,
-  Modal,
-  Space,
-  Switch,
-  Typography
-} from 'antd'
+import {Button, Divider, Form, Input, message, Modal, Space, Switch} from 'antd'
 import {DeleteOutlined, PlusOutlined, UserOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
-
-const {Text} = Typography;
+import PrincipalCredentialsModal from './principal-credentials-modal'
+import type {PrincipalWithCredentials} from './types/principal'
 
 interface CreatePrincipalModalProps {
   visible: boolean;
@@ -28,15 +18,23 @@ interface PrincipalFormValues {
   properties: { key: string; value: string }[];
 }
 
-export default function CreatePrincipalModal({visible, onClose, onSuccess}: CreatePrincipalModalProps) {
+export default function CreatePrincipalModal({
+                                               visible,
+                                               onClose,
+                                               onSuccess
+                                             }: CreatePrincipalModalProps) {
   const [form] = Form.useForm<PrincipalFormValues>();
   const [loading, setLoading] = useState(false);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [createdPrincipal, setCreatedPrincipal] = useState<PrincipalWithCredentials | null>(null);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const handleSubmit = async (values: PrincipalFormValues) => {
-    console.log('Form submitted with values:', values);
+    console.log('Step 1: Form submitted with values:', values);
     setLoading(true);
+
     try {
+      // Step 1: Prepare the payload
       const properties: Record<string, string> = {};
 
       if (values.properties && values.properties.length > 0) {
@@ -55,8 +53,9 @@ export default function CreatePrincipalModal({visible, onClose, onSuccess}: Crea
         credentialRotationRequired: values.credentialRotationRequired || false,
       };
 
-      console.log('Payload:', payload);
+      console.log('Step 2: Sending request with payload:', payload);
 
+      // Step 2: Send the request and wait for response
       const data = await authenticatedFetch('/api/principals', {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -64,39 +63,30 @@ export default function CreatePrincipalModal({visible, onClose, onSuccess}: Crea
 
       if (!data) {
         // Authentication failed or error occurred, authenticatedFetch already handled it
+        console.log('Step 2 failed: No data returned');
         return;
       }
 
-      // Show success message with credentials
-      if ((data as any).credentials) {
-        Modal.success({
-          title: 'Principal Created Successfully!',
-          width: 600,
-          content: (
-            <div>
-              <p>Principal <strong>{values.name}</strong> has been created.</p>
-              <Divider />
-              <p><strong>Important:</strong> Save these credentials securely. They will not be shown again.</p>
-              <div style={{marginTop: 16}}>
-                <Text strong>Client ID:</Text>
-                <br />
-                <Text code copyable>{(data as any).credentials.clientId}</Text>
-              </div>
-              <div style={{marginTop: 16}}>
-                <Text strong>Client Secret:</Text>
-                <br />
-                <Text code copyable>{(data as any).credentials.clientSecret}</Text>
-              </div>
-            </div>
-          ),
-        });
-      } else {
-        message.success('Principal created successfully!');
-      }
+      console.log('Step 2 complete: Received response:', data);
 
-      form.resetFields();
-      onSuccess();
-      onClose();
+      // Type-safe response handling
+      const response = data as PrincipalWithCredentials;
+
+      // Step 3: Close create modal and show credentials modal
+      if (response.credentials) {
+        console.log('Step 3: Closing create modal and showing credentials modal');
+        form.resetFields();
+        onClose(); // Close the create modal first
+        setCreatedPrincipal(response);
+        setShowCredentials(true);
+        // Note: We'll call onSuccess() after user closes the credentials modal
+      } else {
+        console.warn('No credentials in response - this is unexpected!');
+        message.success('Principal created successfully (but no credentials returned)!');
+        form.resetFields();
+        onSuccess(); // Reload list
+        onClose();
+      }
     } catch (error) {
       console.error('Error creating principal:', error);
       // Error message already shown by authenticatedFetch
@@ -110,115 +100,132 @@ export default function CreatePrincipalModal({visible, onClose, onSuccess}: Crea
     onClose();
   };
 
+  const handleCredentialsClose = () => {
+    console.log('Step 4: User acknowledged credentials, closing credentials modal and reloading list');
+    setShowCredentials(false);
+    setCreatedPrincipal(null);
+    onSuccess(); // Step 4: Reload the principals list
+  };
+
   return (
-      <Modal
-          title={
-            <Space>
-              <UserOutlined />
-              Create New Principal
-            </Space>
-          }
-          open={visible}
-          onCancel={handleCancel}
-          footer={null}
-          width={700}
-          destroyOnHidden
-          centered
-          styles={{body: {maxHeight: '70vh', overflowY: 'auto'}}}
-      >
-        <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-            onFinishFailed={(errorInfo) => {
-              console.log('Form validation failed:', errorInfo);
-              message.error('Please fill in all required fields');
-            }}
-            autoComplete="off"
-            initialValues={{
-              credentialRotationRequired: false,
-            }}
+      <>
+        <Modal
+            title={
+              <Space>
+                <UserOutlined/>
+                Create New Principal
+              </Space>
+            }
+            open={visible}
+            onCancel={handleCancel}
+            footer={null}
+            width={700}
+            destroyOnHidden
+            centered
+            styles={{body: {maxHeight: '70vh', overflowY: 'auto'}}}
         >
-          <Form.Item
-              label="Principal Name"
-              name="name"
-              rules={[
-                {required: true, message: 'Please enter a principal name'},
-                {
-                  pattern: /^(?!\s*[s|S][y|Y][s|S][t|T][e|E][m|M]$).*$/,
-                  message: 'Principal name cannot be "system"',
-                },
-                {min: 1, max: 256, message: 'Name must be between 1 and 256 characters'},
-              ]}
-              tooltip="A unique identifier for the principal"
+          <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              onFinishFailed={(errorInfo) => {
+                console.log('Form validation failed:', errorInfo);
+                message.error('Please fill in all required fields');
+              }}
+              autoComplete="off"
+              initialValues={{
+                credentialRotationRequired: false,
+              }}
           >
-            <Input
-                prefix={<UserOutlined/>}
-                placeholder="Enter principal name (e.g., service-account-1)"
-            />
-          </Form.Item>
+            <Form.Item
+                label="Principal Name"
+                name="name"
+                rules={[
+                  {required: true, message: 'Please enter a principal name'},
+                  {
+                    pattern: /^(?!\s*[s|S][y|Y][s|S][t|T][e|E][m|M]$).*$/,
+                    message: 'Principal name cannot be "system"',
+                  },
+                  {min: 1, max: 256, message: 'Name must be between 1 and 256 characters'},
+                ]}
+                tooltip="A unique identifier for the principal"
+            >
+              <Input
+                  prefix={<UserOutlined/>}
+                  placeholder="Enter principal name (e.g., service-account-1)"
+              />
+            </Form.Item>
 
-          <Form.Item
-              label="Credential Rotation Required"
-              name="credentialRotationRequired"
-              valuePropName="checked"
-              tooltip="If enabled, the initial credentials can only be used to call rotateCredentials"
-          >
-            <Switch />
-          </Form.Item>
+            <Form.Item
+                label="Credential Rotation Required"
+                name="credentialRotationRequired"
+                valuePropName="checked"
+                tooltip="If enabled, the initial credentials can only be used to call rotateCredentials"
+            >
+              <Switch/>
+            </Form.Item>
 
-          <Divider orientation="left">Properties (Optional)</Divider>
+            <Divider orientation="left">Properties (Optional)</Divider>
 
-          <Form.List name="properties">
-            {(fields, {add, remove}) => (
-                <>
-                  {fields.map(({key, name, ...restField}) => (
-                      <Space key={key} style={{display: 'flex', marginBottom: 8}} align="baseline">
-                        <Form.Item
-                            {...restField}
-                            name={[name, 'key']}
-                            rules={[{required: true, message: 'Missing property key'}]}
-                        >
-                          <Input placeholder="Property key"/>
-                        </Form.Item>
-                        <Form.Item
-                            {...restField}
-                            name={[name, 'value']}
-                            rules={[{required: true, message: 'Missing property value'}]}
-                        >
-                          <Input placeholder="Property value"/>
-                        </Form.Item>
-                        <DeleteOutlined onClick={() => remove(name)} style={{color: '#ff4d4f'}}/>
-                      </Space>
-                  ))}
-                  <Form.Item>
-                    <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined/>}
-                    >
-                      Add Property
-                    </Button>
-                  </Form.Item>
-                </>
-            )}
-          </Form.List>
+            <Form.List name="properties">
+              {(fields, {add, remove}) => (
+                  <>
+                    {fields.map(({key, name, ...restField}) => (
+                        <Space key={key} style={{display: 'flex', marginBottom: 8}}
+                               align="baseline">
+                          <Form.Item
+                              {...restField}
+                              name={[name, 'key']}
+                              rules={[{required: true, message: 'Missing property key'}]}
+                          >
+                            <Input placeholder="Property key"/>
+                          </Form.Item>
+                          <Form.Item
+                              {...restField}
+                              name={[name, 'value']}
+                              rules={[{required: true, message: 'Missing property value'}]}
+                          >
+                            <Input placeholder="Property value"/>
+                          </Form.Item>
+                          <DeleteOutlined onClick={() => remove(name)} style={{color: '#ff4d4f'}}/>
+                        </Space>
+                    ))}
+                    <Form.Item>
+                      <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined/>}
+                      >
+                        Add Property
+                      </Button>
+                    </Form.Item>
+                  </>
+              )}
+            </Form.List>
 
-          <Divider />
+            <Divider/>
 
-          <Form.Item style={{marginBottom: 0}}>
-            <Space style={{width: '100%', justifyContent: 'flex-end'}}>
-              <Button onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                Create Principal
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item style={{marginBottom: 0}}>
+              <Space style={{width: '100%', justifyContent: 'flex-end'}}>
+                <Button onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  Create Principal
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Credentials Display Modal */}
+        <PrincipalCredentialsModal
+            visible={showCredentials}
+            principalData={createdPrincipal}
+            onClose={handleCredentialsClose}
+        />
+      </>
   );
 }
 

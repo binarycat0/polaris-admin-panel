@@ -93,8 +93,6 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    console.log('Backend response status:', response.status);
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -102,6 +100,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, {status: response.status});
     }
 
+    console.log('Principal created successfully with credentials');
     return NextResponse.json(data);
   } catch (error) {
     console.error('Create principal proxy error:', error);
