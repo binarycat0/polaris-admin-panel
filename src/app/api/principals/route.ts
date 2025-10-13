@@ -5,7 +5,6 @@ import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching principals from:', apiManagementPrincipalsUrl);
 
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(apiManagementPrincipalsUrl, {
@@ -60,7 +58,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {
@@ -80,7 +77,6 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating principal:', body);
 
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(apiManagementPrincipalsUrl, {
@@ -93,8 +89,6 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    console.log('Backend response status:', response.status);
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -102,6 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, {status: response.status});
     }
 
+    console.log('Principal created successfully with credentials');
     return NextResponse.json(data);
   } catch (error) {
     console.error('Create principal proxy error:', error);

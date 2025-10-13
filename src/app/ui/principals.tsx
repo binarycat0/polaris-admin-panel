@@ -8,14 +8,15 @@ import {
   EditOutlined,
   HomeOutlined,
   IdcardOutlined,
+  ReloadOutlined,
   SettingOutlined,
   TeamOutlined,
-  UserAddOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
-import CreatePrincipalModal from './create-principal-modal'
+import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
+import DeleteConfirmationModal from './delete-confirmation-modal'
 
 const {Text, Title} = Typography;
 
@@ -51,6 +52,7 @@ interface PrincipalsProps {
   rolesLoading?: Record<string, boolean>;
   onEdit?: (principalName: string) => void;
   onDelete?: (principalName: string) => void;
+  onResetCredentials?: (principalName: string) => void;
   onEditPrincipalRole?: (principalName: string, roleName: string) => void;
   onDeletePrincipalRole?: (principalName: string, roleName: string) => void;
 }
@@ -70,18 +72,40 @@ export default function Principals({
                                      rolesLoading = {},
                                      onEdit,
                                      onDelete,
+                                     onResetCredentials,
                                      onEditPrincipalRole,
                                      onDeletePrincipalRole
                                    }: PrincipalsProps) {
-  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedPrincipalForDelete, setSelectedPrincipalForDelete] = useState<string | null>(null);
 
-  const handleCreateSuccess = () => {
+  const handleResetSuccess = () => {
     if (onRefresh) {
       onRefresh();
     }
+    if (onResetCredentials && selectedPrincipalForReset) {
+      onResetCredentials(selectedPrincipalForReset);
+    }
   };
 
-  // Columns for the principal-roles expandable table
+  const handleResetClick = (principalName: string) => {
+    setSelectedPrincipalForReset(principalName);
+    setResetModalVisible(true);
+  };
+
+  const handleDeleteClick = (principalName: string) => {
+    setSelectedPrincipalForDelete(principalName);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async (principalName: string) => {
+    if (onDelete) {
+      await onDelete(principalName);
+    }
+  };
+
   const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
     {
       title: "Name",
@@ -314,7 +338,6 @@ export default function Principals({
           </Space>
       ),
       key: 'properties',
-      // width: 150,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
 
@@ -364,6 +387,14 @@ export default function Principals({
             },
           },
           {
+            key: 'reset',
+            label: 'Reset Secret',
+            icon: <ReloadOutlined/>,
+            onClick: () => {
+              handleResetClick(record.name);
+            },
+          },
+          {
             type: 'divider',
           },
           {
@@ -372,9 +403,7 @@ export default function Principals({
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDelete) {
-                onDelete(record.name);
-              }
+              handleDeleteClick(record.name);
             },
           },
         ];
@@ -394,22 +423,6 @@ export default function Principals({
 
   return (
       <>
-        <Flex justify="space-between" align="flex-start">
-          <Button
-              variant="outlined"
-              icon={<UserAddOutlined/>}
-              onClick={() => setCreateModalVisible(true)}
-          >
-            Create new
-          </Button>
-          <Title level={4}>
-            <Space>
-              Principals
-              <UserOutlined/>
-            </Space>
-          </Title>
-        </Flex>
-
         <Table
             columns={columns}
             dataSource={principals}
@@ -459,7 +472,8 @@ export default function Principals({
                             emptyText: (
                                 <Space>
                                   <TeamOutlined/>
-                                  <Text type="secondary">No principal roles found for this principal</Text>
+                                  <Text type="secondary">No principal roles found for this
+                                    principal</Text>
                                 </Space>
                             ),
                           }}
@@ -494,10 +508,27 @@ export default function Principals({
             }}
         />
 
-        <CreatePrincipalModal
-            visible={createModalVisible}
-            onClose={() => setCreateModalVisible(false)}
-            onSuccess={handleCreateSuccess}
+        <ResetPrincipalCredentialsModal
+            visible={resetModalVisible}
+            principalName={selectedPrincipalForReset}
+            onClose={() => {
+              setResetModalVisible(false);
+              setSelectedPrincipalForReset(null);
+            }}
+            onSuccess={handleResetSuccess}
+        />
+
+        <DeleteConfirmationModal
+            visible={deleteModalVisible}
+            entityType="Principal"
+            entityName={selectedPrincipalForDelete}
+            onClose={() => {
+              setDeleteModalVisible(false);
+              setSelectedPrincipalForDelete(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            description=""
+            warningMessage="This will permanently remove the principal and revoke all access."
         />
       </>
   );

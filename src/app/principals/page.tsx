@@ -1,15 +1,18 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {Spin} from 'antd';
+import {Button, Flex, message, Space, Spin, Typography} from 'antd';
+import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
+import CreatePrincipalModal from '@/app/ui/create-principal-modal';
+
+const {Title} = Typography;
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [principals, setPrincipals] = useState<Principal[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>(() => {
-    // Restore expanded principal from localStorage on initial load
     if (typeof window !== 'undefined') {
       const savedPrincipal = localStorage.getItem('expanded_principal');
       return savedPrincipal ? [savedPrincipal] : [];
@@ -18,6 +21,7 @@ export default function Page() {
   });
   const [principalRoles, setPrincipalRoles] = useState<Record<string, PrincipalRoleItem[]>>({});
   const [rolesLoading, setRolesLoading] = useState<Record<string, boolean>>({});
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
@@ -25,12 +29,11 @@ export default function Page() {
       const data = await authenticatedFetch('/api/principals');
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principals API Response:', data);
 
-      // Handle the response structure { principals: [...] }
       if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
         principals: unknown
       }).principals)) {
@@ -40,7 +43,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
@@ -50,12 +52,11 @@ export default function Page() {
       const data = await authenticatedFetch(`/api/principals/${encodeURIComponent(principalName)}/principal-roles`);
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principal Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -65,31 +66,24 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
 
   const handleRowClick = async (principalName: string) => {
-    // Toggle expansion
     const isExpanded = expandedRowKeys.includes(principalName);
 
     if (isExpanded) {
-      // Collapse the row
       setExpandedRowKeys([]);
-      // Clear from localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('expanded_principal');
       }
     } else {
-      // Expand the row (only one row at a time)
       setExpandedRowKeys([principalName]);
-      // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('expanded_principal', principalName);
       }
 
-      // Load roles if not already loaded
       if (!principalRoles[principalName]) {
         setRolesLoading(prev => ({...prev, [principalName]: true}));
 
@@ -110,6 +104,29 @@ export default function Page() {
       setPrincipals(principalsData);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateSuccess = () => {
+    handleRefresh();
+  };
+
+  const handleResetCredentials = async (principalName: string) => {
+    console.log('Credentials reset for principal:', principalName);
+    await handleRefresh();
+  };
+
+  const handleDeletePrincipal = async (principalName: string) => {
+    try {
+      await authenticatedFetch(`/api/principals/${encodeURIComponent(principalName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Principal "${principalName}" deleted successfully!`);
+      await handleRefresh();
+    } catch (error) {
+      console.error('Error deleting principal:', error);
+      throw error; // Re-throw to let the modal handle the error display
     }
   };
 
@@ -157,14 +174,38 @@ export default function Page() {
   }
 
   return (
-      <Principals
-          principals={principals}
-          loading={loading}
-          onRowClick={handleRowClick}
-          onRefresh={handleRefresh}
-          expandedRowKeys={expandedRowKeys}
-          principalRoles={principalRoles}
-          rolesLoading={rolesLoading}
-      />
+      <Space direction="vertical" style={{width: '100%'}}>
+        <Title level={4} style={{marginBottom: 0}}>
+          <Space>
+            Principals
+            <UserOutlined/>
+          </Space>
+        </Title>
+        <Button
+            variant="outlined"
+            icon={<UserAddOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+        >
+          New principal
+        </Button>
+
+        <Principals
+            principals={principals}
+            loading={loading}
+            onRowClick={handleRowClick}
+            onRefresh={handleRefresh}
+            expandedRowKeys={expandedRowKeys}
+            principalRoles={principalRoles}
+            rolesLoading={rolesLoading}
+            onResetCredentials={handleResetCredentials}
+            onDelete={handleDeletePrincipal}
+        />
+
+        <CreatePrincipalModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
+        />
+      </Space>
   );
 }

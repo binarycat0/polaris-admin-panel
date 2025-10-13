@@ -8,7 +8,6 @@ export async function GET(
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {
@@ -26,7 +25,6 @@ export async function GET(
 
     const {catalogName, catalogRoleName} = await params;
 
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(apiManagementCatalogRolesPrincipalRolesUrl(catalogName, catalogRoleName), {

@@ -1,10 +1,11 @@
 'use client'
 
 import {useCallback, useEffect, useState} from 'react';
-import {Button, Flex, Space, Spin, Typography} from 'antd';
+import {Button, Flex, message, Space, Spin, Typography} from 'antd';
 import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
+import CreatePrincipalRoleModal from '@/app/ui/create-principal-role-modal';
 
 const {Title} = Typography;
 
@@ -12,7 +13,6 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [principalRoles, setPrincipalRoles] = useState<PrincipalRoleItem[]>([]);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>(() => {
-    // Restore expanded principal role from localStorage on initial load
     if (typeof window !== 'undefined') {
       const savedPrincipalRole = localStorage.getItem('expanded_principal_role');
       return savedPrincipalRole ? [savedPrincipalRole] : [];
@@ -21,6 +21,7 @@ export default function Page() {
   });
   const [principals, setPrincipals] = useState<Record<string, PrincipalItem[]>>({});
   const [principalsLoading, setPrincipalsLoading] = useState<Record<string, boolean>>({});
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipalRoles = useCallback(async (): Promise<PrincipalRoleItem[]> => {
@@ -28,12 +29,11 @@ export default function Page() {
       const data = await authenticatedFetch('/api/principal-roles');
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principal Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -43,7 +43,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
@@ -106,6 +105,54 @@ export default function Page() {
     }
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const rolesData = await getPrincipalRoles();
+      setPrincipalRoles(rolesData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePrincipalRole = async (principalRoleName: string) => {
+    try {
+      await authenticatedFetch(`/api/principal-roles/${encodeURIComponent(principalRoleName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Principal role "${principalRoleName}" deleted successfully!`);
+      await handleRefresh();
+    } catch (error) {
+      console.error('Error deleting principal role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
+  const handleDeletePrincipal = async (principalRoleName: string, principalName: string) => {
+    try {
+      await authenticatedFetch(
+          `/api/principal-role-principals/${encodeURIComponent(principalRoleName)}/${encodeURIComponent(principalName)}`,
+          {
+            method: 'DELETE',
+          }
+      );
+
+      message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
+
+      // Refresh the principals list for this role
+      const principalsData = await getPrincipals(principalRoleName);
+      setPrincipals(prev => ({...prev, [principalRoleName]: principalsData}));
+    } catch (error) {
+      console.error('Error removing principal from role:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
+  const handleCreateSuccess = async () => {
+    await handleRefresh();
+  };
+
   useEffect(() => {
     async function fetchPrincipalRoles() {
       setLoading(true);
@@ -148,18 +195,20 @@ export default function Page() {
   }
 
   return (
-      <>
-        <Flex justify="space-between" align="flex-start">
-          <Button variant="outlined" icon={<UsergroupAddOutlined/>}>
-            Create new
-          </Button>
-          <Title level={4}>
-            <Space>
-              Principal Roles
-              <TeamOutlined/>
-            </Space>
-          </Title>
-        </Flex>
+      <Space direction="vertical" style={{width: '100%'}}>
+        <Title level={4} style={{ marginBottom: '0px' }}>
+          <Space>
+            Principal Roles
+            <TeamOutlined/>
+          </Space>
+        </Title>
+        <Button
+            variant="outlined"
+            icon={<UsergroupAddOutlined/>}
+            onClick={() => setCreateModalVisible(true)}
+        >
+          New principal role
+        </Button>
 
         <PrincipalRolesList
             roles={principalRoles}
@@ -168,7 +217,15 @@ export default function Page() {
             expandedRowKeys={expandedRowKeys}
             principals={principals}
             principalsLoading={principalsLoading}
+            onDelete={handleDeletePrincipalRole}
+            onDeletePrincipal={handleDeletePrincipal}
         />
-      </>
+
+        <CreatePrincipalRoleModal
+            visible={createModalVisible}
+            onClose={() => setCreateModalVisible(false)}
+            onSuccess={handleCreateSuccess}
+        />
+      </Space>
   );
 }

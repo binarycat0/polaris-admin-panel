@@ -1,45 +1,34 @@
 'use client'
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  message,
-  Modal,
-  Space,
-  Typography
-} from 'antd'
+import {Button, Divider, Form, Input, message, Modal, Space, Switch} from 'antd'
 import {DeleteOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
-const {Text} = Typography;
-
-interface CreateCatalogRoleModalProps {
+interface CreatePrincipalRoleModalProps {
   visible: boolean;
-  catalogName: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-interface CatalogRoleFormValues {
+interface PrincipalRoleFormValues {
   name: string;
+  federated: boolean;
   properties: { key: string; value: string }[];
 }
 
-export default function CreateCatalogRoleModal({visible, catalogName, onClose, onSuccess}: CreateCatalogRoleModalProps) {
-  const [form] = Form.useForm<CatalogRoleFormValues>();
+export default function CreatePrincipalRoleModal({
+                                                   visible,
+                                                   onClose,
+                                                   onSuccess
+                                                 }: CreatePrincipalRoleModalProps) {
+  const [form] = Form.useForm<PrincipalRoleFormValues>();
   const [loading, setLoading] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
-  const handleSubmit = async (values: CatalogRoleFormValues) => {
-    if (!catalogName) {
-      message.error('No catalog selected');
-      return;
-    }
-
+  const handleSubmit = async (values: PrincipalRoleFormValues) => {
     console.log('Form submitted with values:', values);
     setLoading(true);
+
     try {
       const properties: Record<string, string> = {};
 
@@ -52,31 +41,33 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
       }
 
       const payload = {
-        catalogRole: {
+        principalRole: {
           name: values.name,
+          federated: values.federated || false,
           properties: properties,
         },
       };
 
-      console.log('Payload:', payload);
+      console.log('Sending request with payload:', payload);
 
-      const data = await authenticatedFetch(`/api/catalog-roles/${catalogName}`, {
+      const data = await authenticatedFetch('/api/principal-roles', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
 
       if (!data) {
+        console.log('No data returned');
         return;
       }
 
-      console.log('Catalog role created successfully:', data);
-      message.success(`Catalog role "${values.name}" created successfully!`);
+      console.log('Received response:', data);
+
+      message.success(`Principal role "${values.name}" created successfully!`);
       form.resetFields();
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating catalog role:', error);
-      message.error('Failed to create catalog role. Please try again.');
+      console.error('Error creating principal role:', error);
     } finally {
       setLoading(false);
     }
@@ -92,7 +83,7 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
           title={
             <Space>
               <TeamOutlined/>
-              Create New Catalog Role for {catalogName}
+              Create New Principal Role
             </Space>
           }
           open={visible}
@@ -112,24 +103,36 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
               message.error('Please fill in all required fields');
             }}
             autoComplete="off"
+            initialValues={{
+              federated: false,
+            }}
         >
           <Form.Item
-              label="Catalog Role Name"
+              label="Principal Role Name"
               name="name"
               rules={[
-                {required: true, message: 'Please enter a catalog role name'},
+                {required: true, message: 'Please enter a principal role name'},
                 {
                   pattern: /^(?!\s*[s|S][y|Y][s|S][t|T][e|E][m|M]$).*$/,
-                  message: 'Catalog role name cannot be "system"',
+                  message: 'Principal role name cannot be "system"',
                 },
                 {min: 1, max: 256, message: 'Name must be between 1 and 256 characters'},
               ]}
-              tooltip="A unique identifier for the catalog role"
+              tooltip="A unique identifier for the principal role"
           >
             <Input
                 prefix={<TeamOutlined/>}
-                placeholder="Enter catalog role name (e.g., data-engineer)"
+                placeholder="Enter principal role name (e.g., data-engineers)"
             />
+          </Form.Item>
+
+          <Form.Item
+              label="Federated"
+              name="federated"
+              valuePropName="checked"
+              tooltip="Whether the principal role is a federated role (managed by an external identity provider)"
+          >
+            <Switch/>
           </Form.Item>
 
           <Divider orientation="left">Properties (Optional)</Divider>
@@ -138,7 +141,8 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
             {(fields, {add, remove}) => (
                 <>
                   {fields.map(({key, name, ...restField}) => (
-                      <Space key={key} style={{display: 'flex', marginBottom: 8}} align="baseline">
+                      <Space key={key} style={{display: 'flex', marginBottom: 8}}
+                             align="baseline">
                         <Form.Item
                             {...restField}
                             name={[name, 'key']}
@@ -153,7 +157,7 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
                         >
                           <Input placeholder="Property value"/>
                         </Form.Item>
-                        <DeleteOutlined onClick={() => remove(name)}/>
+                        <DeleteOutlined onClick={() => remove(name)} style={{color: '#ff4d4f'}}/>
                       </Space>
                   ))}
                   <Form.Item>
@@ -170,15 +174,13 @@ export default function CreateCatalogRoleModal({visible, catalogName, onClose, o
             )}
           </Form.List>
 
-          <Divider/>
-
-          <Form.Item style={{marginBottom: 0}}>
+          <Form.Item style={{marginBottom: 0, marginTop: 24}}>
             <Space style={{width: '100%', justifyContent: 'flex-end'}}>
               <Button onClick={handleCancel}>
                 Cancel
               </Button>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Create Catalog Role
+                Create Principal Role
               </Button>
             </Space>
           </Form.Item>

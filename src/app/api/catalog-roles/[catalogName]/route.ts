@@ -8,7 +8,6 @@ export async function GET(
     {params}: { params: Promise<{ catalogName: string }> }
 ) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {
@@ -31,7 +30,6 @@ export async function GET(
     console.log(`Target URL: ${targetUrl}`);
     console.log(`Authorization header present: ${!!authHeader}`);
 
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(targetUrl, {
@@ -58,7 +56,6 @@ export async function GET(
   } catch (error) {
     console.error('Catalog roles proxy error:', error);
 
-    // Provide more detailed error information
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorDetails = {
       message: `Failed to fetch catalog roles: ${errorMessage}`,
@@ -79,7 +76,6 @@ export async function POST(
     {params}: { params: Promise<{ catalogName: string }> }
 ) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {

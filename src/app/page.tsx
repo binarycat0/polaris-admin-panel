@@ -13,11 +13,9 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // Check authentication status when component mounts
     const status = checkAuthStatus();
     setAuthStatus(status);
 
-    // Also check when the page becomes visible (user returns to tab)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const newStatus = checkAuthStatus();
@@ -25,7 +23,6 @@ export default function Home() {
       }
     };
 
-    // Check when window gains focus (user returns from signin page)
     const handleFocus = () => {
       const newStatus = checkAuthStatus();
       setAuthStatus(newStatus);

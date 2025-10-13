@@ -5,7 +5,6 @@ import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching principal roles from:', apiManagementPrincipalRolesUrl);
 
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(apiManagementPrincipalRolesUrl, {
@@ -58,3 +56,53 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader) {
+      return NextResponse.json(
+          {
+            error: {
+              message: 'Authorization header is required',
+              type: 'UnauthorizedError',
+              code: 401
+            }
+          },
+          {status: 401}
+      );
+    }
+
+    const body = await request.json();
+
+    console.log('Creating principal role:', body);
+
+    const realmHeaders = getRealmHeadersFromRequest(request);
+
+    const response = await fetch(apiManagementPrincipalRolesUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+        ...realmHeaders,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Backend error response:', data);
+      return NextResponse.json(data, {status: response.status});
+    }
+
+    console.log('Principal role created successfully');
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Create principal role proxy error:', error);
+    return NextResponse.json(
+        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
+        {status: 500}
+    );
+  }
+}

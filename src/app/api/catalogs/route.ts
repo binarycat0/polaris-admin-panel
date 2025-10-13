@@ -5,7 +5,6 @@ import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header from the incoming request
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader) {

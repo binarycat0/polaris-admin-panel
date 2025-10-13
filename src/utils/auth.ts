@@ -14,7 +14,6 @@ export interface AuthStatus {
  * @returns AuthStatus object with authentication details
  */
 export function checkAuthStatus(): AuthStatus {
-  // Check if we're in a browser environment
   if (typeof window === 'undefined') {
     return {
       isAuthenticated: false,
@@ -26,7 +25,6 @@ export function checkAuthStatus(): AuthStatus {
   const tokenType = localStorage.getItem('token_type');
   const expiresAt = localStorage.getItem('token_expires_at');
 
-  // No token means not authenticated
   if (!accessToken) {
     return {
       isAuthenticated: false,
@@ -34,7 +32,6 @@ export function checkAuthStatus(): AuthStatus {
     };
   }
 
-  // Check if token is expired
   if (expiresAt && Date.now() > parseInt(expiresAt)) {
     return {
       isAuthenticated: false,
@@ -44,7 +41,6 @@ export function checkAuthStatus(): AuthStatus {
     };
   }
 
-  // Token exists and is not expired
   return {
     isAuthenticated: true,
     isExpired: false,
@@ -85,7 +81,6 @@ export function isAuthenticated(): boolean {
 export function handleAuthFailure(router: { push: (url: string) => void }, customMessage?: string): void {
   clearAuthData();
 
-  // Import message dynamically to avoid SSR issues
   if (typeof window !== 'undefined') {
     import('antd').then(({ message }) => {
       message.error(customMessage || 'Authentication failed. Please login again.');
@@ -110,7 +105,6 @@ export function getAuthHeaders(): Record<string, string> | null {
     Authorization: `${authStatus.tokenType} ${authStatus.token}`
   };
 
-  // Add realm headers if they exist
   if (typeof window !== 'undefined') {
     const realmHeaderName = localStorage.getItem('realm_header_name');
     const realmHeaderValue = localStorage.getItem('realm_header_value');
@@ -131,8 +125,6 @@ export function getAuthHeaders(): Record<string, string> | null {
 export function getRealmHeadersFromRequest(request: { headers: { entries: () => IterableIterator<[string, string]> } }): Record<string, string> {
   const headers: Record<string, string> = {};
 
-  // Iterate through all headers to find realm headers
-  // We'll exclude standard HTTP headers and only include custom headers that might be realm-related
   const standardHeaders = new Set([
     'authorization', 'content-type', 'accept', 'user-agent', 'host', 'connection',
     'cache-control', 'pragma', 'accept-encoding', 'accept-language', 'cookie',
@@ -141,7 +133,6 @@ export function getRealmHeadersFromRequest(request: { headers: { entries: () => 
 
   for (const [name, value] of request.headers.entries()) {
     const lowerName = name.toLowerCase();
-    // Include headers that are not standard HTTP headers and might be realm-related
     if (!standardHeaders.has(lowerName) && value) {
       headers[name] = value;
     }

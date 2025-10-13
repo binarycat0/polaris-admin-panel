@@ -2,7 +2,7 @@
 
 import {usePathname, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
-import {Layout, Menu} from 'antd';
+import {Layout, Menu, type MenuProps} from 'antd';
 import {
   FolderOpenOutlined,
   HomeOutlined,
@@ -14,6 +14,8 @@ import {
 import {type AuthStatus, checkAuthStatus} from '@/utils/auth';
 
 const {Sider} = Layout;
+
+type MenuItem = Required<MenuProps>['items'][number];
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -62,7 +64,6 @@ export default function Navigation() {
     };
 
     const handleStorageChange = (e: StorageEvent) => {
-      // Check if auth-related keys were removed
       if (e.key === 'access_token' || e.key === null) {
         const newStatus = checkAuthStatus();
         setAuthStatus(newStatus);
@@ -122,7 +123,7 @@ export default function Navigation() {
     }
   };
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
       key: 'home',
       icon: <HomeOutlined/>,
@@ -152,7 +153,7 @@ export default function Navigation() {
         label: 'Principal Roles',
       },
       {
-        type: 'divider',
+        type: 'divider' as const,
       },
       {
         key: 'privileges',

@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
-import {apiManagementCatalogRolesGrantsUrl} from "@/app/constants";
+import {apiManagementPrincipalsUrl} from "@/app/constants";
 import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 
-export async function GET(
+export async function DELETE(
     request: NextRequest,
-    {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
+    {params}: { params: Promise<{ principalName: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -23,12 +23,15 @@ export async function GET(
       );
     }
 
-    const {catalogName, catalogRoleName} = await params;
+    const {principalName} = await params;
+    const url = `${apiManagementPrincipalsUrl}/${encodeURIComponent(principalName)}`;
+
+    console.log('Deleting principal:', principalName);
 
     const realmHeaders = getRealmHeadersFromRequest(request);
 
-    const response = await fetch(apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName), {
-      method: 'GET',
+    const response = await fetch(url, {
+      method: 'DELETE',
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
@@ -36,18 +39,26 @@ export async function GET(
       },
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to delete principal',
+          type: 'DeleteError',
+          code: response.status
+        }
+      }));
+      console.error('Backend error response:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
-    return NextResponse.json(data);
+    console.log('Principal deleted successfully');
+    return NextResponse.json({success: true}, {status: 200});
   } catch (error) {
-    console.error('Grants proxy error:', error);
+    console.error('Delete principal proxy error:', error);
     return NextResponse.json(
         {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
         {status: 500}
     );
   }
 }
+
