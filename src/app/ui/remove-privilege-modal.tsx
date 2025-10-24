@@ -132,7 +132,7 @@ export default function RemovePrivilegeModal({
           onCancel={handleCancel}
           footer={null}
           width={600}
-          destroyOnClose
+          destroyOnHidden
           centered
       >
         <Form

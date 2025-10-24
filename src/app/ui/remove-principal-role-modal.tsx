@@ -76,7 +76,7 @@ export default function RemovePrincipalRoleModal({
           onCancel={handleCancel}
           footer={null}
           width={500}
-          destroyOnClose
+          destroyOnHidden
           centered
       >
         <Form

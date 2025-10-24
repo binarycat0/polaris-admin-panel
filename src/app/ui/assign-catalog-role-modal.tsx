@@ -142,7 +142,7 @@ export default function AssignCatalogRoleModal({
           onCancel={handleCancel}
           footer={null}
           width={500}
-          destroyOnClose
+          destroyOnHidden
           centered
       >
         <Form
