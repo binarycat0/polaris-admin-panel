@@ -1,6 +1,6 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Button, Dropdown, Table, Tag, Typography, Space} from 'antd'
+import {Button, Dropdown, Table, Tag, Tooltip, Typography, Space, Empty} from 'antd'
 import {
   CalendarOutlined,
   DeleteOutlined,
@@ -104,6 +104,46 @@ export default function CatalogRoles(
       ),
     },
     {
+      title: (
+          <Space>
+            <SettingOutlined/>
+            Properties
+          </Space>
+      ),
+      key: 'properties',
+      width: 250,
+      render: (_: unknown, record: CatalogRole) => {
+        const properties = Object.entries(record.properties || {});
+
+        if (properties.length === 0) {
+          return <Text type="secondary">None</Text>;
+        }
+
+        return (
+            <div>
+              {properties.slice(0, 2).map(([key, value]) => (
+                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
+                    {key}: {value}
+                  </Tag>
+              ))}
+              {properties.length > 2 && (
+                  <Tooltip title={
+                    <div>
+                      {properties.slice(2).map(([key, value]) => (
+                          <div key={key}>{key}: {value}</div>
+                      ))}
+                    </div>
+                  }>
+                    <Tag style={{fontSize: '11px'}}>
+                      +{properties.length - 2} more
+                    </Tag>
+                  </Tooltip>
+              )}
+            </div>
+        );
+      },
+    },
+    {
       title: 'Actions',
       key: 'actions',
       width: 100,
@@ -180,10 +220,10 @@ export default function CatalogRoles(
           }}
           locale={{
             emptyText: (
-                <Space>
-                  <TeamOutlined/>
-                  <Text type="secondary">No roles found for this catalog</Text>
-                </Space>
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={<Text type="secondary">No roles found for this catalog</Text>}
+                />
             ),
           }}
           size="small"

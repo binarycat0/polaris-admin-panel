@@ -6,6 +6,7 @@ import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/pri
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
+import EditCatalogRoleModal from "@/app/ui/edit-catalog-role-modal"
 import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
 import RemoveCatalogRoleModal from "@/app/ui/remove-catalog-role-modal"
 import AddPrivilegeModal from "@/app/ui/add-privilege-modal"
@@ -49,6 +50,8 @@ export default function Page() {
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
+  const [editCatalogRoleModalVisible, setEditCatalogRoleModalVisible] = useState(false);
+  const [editingCatalogRole, setEditingCatalogRole] = useState<CatalogRole | null>(null);
   const [assignCatalogRoleModalVisible, setAssignCatalogRoleModalVisible] = useState(false);
   const [removeCatalogRoleModalVisible, setRemoveCatalogRoleModalVisible] = useState(false);
   const [addPrivilegeModalVisible, setAddPrivilegeModalVisible] = useState(false);
@@ -380,6 +383,27 @@ export default function Page() {
     }
   };
 
+  const handleEditCatalogRole = (catalogRoleName: string) => {
+    // Find the catalog role to edit
+    const roleToEdit = catalogRoles.find(role => role.name === catalogRoleName);
+    if (roleToEdit) {
+      setEditingCatalogRole(roleToEdit);
+      setEditCatalogRoleModalVisible(true);
+    }
+  };
+
+  const handleEditCatalogRoleSuccess = async () => {
+    if (selectedCatalog) {
+      setRolesLoading(true);
+      try {
+        const roles = await getCatalogRoles(selectedCatalog);
+        setCatalogRoles(roles);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+  };
+
   const handleAddCatalogRole = () => {
     setAssignCatalogRoleModalVisible(true);
   };
@@ -510,6 +534,7 @@ export default function Page() {
                   loading={rolesLoading}
                   onRowClick={handleCatalogRoleRowClick}
                   selectedCatalogRole={selectedCatalogRole}
+                  onEdit={handleEditCatalogRole}
               />
             </>
         )}
@@ -587,6 +612,18 @@ export default function Page() {
             catalogName={selectedCatalog}
             onClose={() => setCreateCatalogRoleModalVisible(false)}
             onSuccess={handleCreateCatalogRoleSuccess}
+        />
+
+        <EditCatalogRoleModal
+            visible={editCatalogRoleModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={editingCatalogRole?.name || null}
+            currentCatalogRole={editingCatalogRole}
+            onClose={() => {
+              setEditCatalogRoleModalVisible(false);
+              setEditingCatalogRole(null);
+            }}
+            onSuccess={handleEditCatalogRoleSuccess}
         />
 
         <AssignCatalogRoleModal

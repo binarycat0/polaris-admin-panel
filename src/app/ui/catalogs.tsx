@@ -1,6 +1,6 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Button, Dropdown, Space, Table, Tag, Typography} from 'antd'
+import {Button, Dropdown, Space, Table, Tag, Typography, Empty} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -203,10 +203,10 @@ export default function Catalogs({
           }}
           locale={{
             emptyText: (
-                <Space>
-                  <FolderOutlined/>
-                  <Text type="secondary">There are no catalogs available at the moment.</Text>
-                </Space>
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={<Text type="secondary">No catalogs found</Text>}
+                />
             ),
           }}
           size="small"

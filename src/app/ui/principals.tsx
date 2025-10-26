@@ -1,6 +1,6 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography} from 'antd'
+import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography, Empty} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -461,11 +461,10 @@ export default function Principals({
                           }}
                           locale={{
                             emptyText: (
-                                <Space>
-                                  <TeamOutlined/>
-                                  <Text type="secondary">No principal roles found for this
-                                    principal</Text>
-                                </Space>
+                                <Empty
+                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                    description={<Text type="secondary">No principal roles assigned</Text>}
+                                />
                             ),
                           }}
                           size="small"
@@ -491,10 +490,10 @@ export default function Principals({
             }}
             locale={{
               emptyText: (
-                  <Space direction="vertical">
-                    <UserOutlined/>
-                    <Text type="secondary">No principals found</Text>
-                  </Space>
+                  <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<Text type="secondary">No principals found</Text>}
+                  />
               ),
             }}
         />
