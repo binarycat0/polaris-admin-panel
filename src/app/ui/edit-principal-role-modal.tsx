@@ -111,7 +111,7 @@ export default function EditPrincipalRoleModal({
           onCancel={handleCancel}
           footer={null}
           width={600}
-          destroyOnClose
+          destroyOnHidden
           centered
       >
         <Form

@@ -1,6 +1,18 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography, Empty} from 'antd'
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Flex,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  Empty
+} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -109,8 +121,11 @@ export default function PrincipalRolesList({
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#1890ff'}}>{name}</Text>
+      render: (name: string, record) => (
+          <Space>
+            <Text strong style={{color: '#1890ff'}}>{name}</Text>
+            <Text type="secondary">ver. {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -125,16 +140,6 @@ export default function PrincipalRolesList({
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
           <Text code>{clientId}</Text>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 90,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="blue">v{version}</Tag>
       ),
     },
     {
@@ -194,43 +199,23 @@ export default function PrincipalRolesList({
       key: 'name',
       width: 250,
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong className="principal-roles-text">{name}</Text>
+      render: (name: string, record) => (
+          <Space>
+            <Text strong className="principal-roles-text">{name}</Text>
+            <Text type="secondary">ver. {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
       title: 'Type',
       dataIndex: 'federated',
       key: 'federated',
-      width: 150,
+      width: 100,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
-          <Flex align="center">
-            <Badge
-                status={federated ? "processing" : "default"}
-                text={federated ? (
-                    <Space>
-                      <CloudOutlined/>
-                      Federated
-                    </Space>
-                ) : (
-                    <Space>
-                      <HomeOutlined/>
-                      Local
-                    </Space>
-                )}
-            />
-          </Flex>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="purple">v{version}</Tag>
+          <Text>
+            {federated ? 'Federated' : 'Local'}
+          </Text>
       ),
     },
     {
@@ -379,7 +364,7 @@ export default function PrincipalRolesList({
                           <UserOutlined/>
                           Principals for:
                           {record.name}
-                          <Tag color="blue">{principalsList.length}</Tag>
+                          {principalsList.length}
                         </Space>
                       </Title>
                       <Table
@@ -397,7 +382,8 @@ export default function PrincipalRolesList({
                             emptyText: (
                                 <Empty
                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                    description={<Text type="secondary">No principals assigned</Text>}
+                                    description={<Text type="secondary">No principals
+                                      assigned</Text>}
                                 />
                             ),
                           }}

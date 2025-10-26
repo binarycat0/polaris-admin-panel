@@ -1,6 +1,18 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography, Empty} from 'antd'
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Flex,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  Empty
+} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -116,8 +128,11 @@ export default function Principals({
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#722ed1'}}>{name}</Text>
+      render: (name: string, record) => (
+          <Space>
+            <Text strong style={{color: '#722ed1'}}>{name}</Text>
+            <Text type="secondary">ver. {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -127,32 +142,9 @@ export default function Principals({
       width: 140,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
-          <Flex align="center">
-            <Badge
-                status={federated ? "processing" : "default"}
-                text={federated ? (
-                    <Space>
-                      <CloudOutlined/>
-                      Federated
-                    </Space>
-                ) : (
-                    <Space>
-                      <HomeOutlined/>
-                      Local
-                    </Space>
-                )}
-            />
-          </Flex>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="purple">v{version}</Tag>
+          <Text>
+            {federated ? 'Federated' : 'Local'}
+          </Text>
       ),
     },
     {
@@ -232,8 +224,11 @@ export default function Principals({
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#1890ff'}}>{name}</Text>
+      render: (_, record) => (
+          <Space>
+            <Text strong style={{color: '#1890ff'}}>{record.name}</Text>
+            <Text type="secondary">ver. {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -248,16 +243,6 @@ export default function Principals({
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
           <Text code>{clientId}</Text>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="blue">v{version}</Tag>
       ),
     },
     {
@@ -415,7 +400,7 @@ export default function Principals({
                             <TeamOutlined/>
                             Principal Roles for:
                             {record.name}
-                            <Tag color="blue">{roles.length}</Tag>
+                            {roles.length}
                           </Space>
                         </Title>
                         <Space>
@@ -463,7 +448,8 @@ export default function Principals({
                             emptyText: (
                                 <Empty
                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                    description={<Text type="secondary">No principal roles assigned</Text>}
+                                    description={<Text type="secondary">No principal roles
+                                      assigned</Text>}
                                 />
                             ),
                           }}
