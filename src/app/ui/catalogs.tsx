@@ -64,22 +64,13 @@ export default function Catalogs({
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#1890ff'}}>{name}</Text>
+      render: (name: string, record) => (
+          <Space>
+            <Text strong style={{color: '#1890ff'}}>{name}</Text>
+            <Text type="secondary">ver. {record.entityVersion}</Text>
+          </Space>
       ),
       width: 200,
-    },
-    {
-      title: (
-          <Space><FileUnknownOutlined/>Version</Space>
-      ),
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="blue">v{version}</Tag>
-      ),
     },
     {
       title: (
