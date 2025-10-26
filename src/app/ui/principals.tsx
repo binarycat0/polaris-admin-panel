@@ -224,36 +224,6 @@ export default function Principals({
         );
       },
     },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      fixed: 'right',
-      render: (_, record) => {
-        const items: MenuProps['items'] = [
-          {
-            key: 'edit',
-            label: 'Edit',
-            icon: <EditOutlined/>,
-            onClick: () => {
-              if (onEditPrincipalRole) {
-                onEditPrincipalRole(principalName, record.name);
-              }
-            },
-          },
-        ];
-
-        return (
-            <Dropdown menu={{items}} trigger={['click']}>
-              <Button
-                  size="small"
-                  icon={<SettingOutlined/>}
-                  onClick={(e) => e.stopPropagation()}
-              />
-            </Dropdown>
-        );
-      },
-    },
   ];
 
   const columns: ColumnsType<Principal> = [

@@ -185,49 +185,7 @@ export default function PrincipalRolesList({
             </div>
         );
       },
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      fixed: 'right',
-      render: (_, record) => {
-        const items: MenuProps['items'] = [
-          {
-            key: 'edit',
-            label: 'Edit',
-            icon: <EditOutlined/>,
-            onClick: () => {
-              if (onEditPrincipal) {
-                onEditPrincipal(principalRoleName, record.name);
-              }
-            },
-          },
-          {
-            type: 'divider',
-          },
-          {
-            key: 'delete',
-            label: 'Delete',
-            icon: <DeleteOutlined/>,
-            danger: true,
-            onClick: () => {
-              handleDeletePrincipalClick(principalRoleName, record.name);
-            },
-          },
-        ];
-
-        return (
-            <Dropdown menu={{items}} trigger={['click']}>
-              <Button
-                  size="small"
-                  icon={<SettingOutlined/>}
-                  onClick={(e) => e.stopPropagation()}
-              />
-            </Dropdown>
-        );
-      },
-    },
+    }
   ];
   const columns: ColumnsType<PrincipalRoleItem> = [
     {
@@ -499,7 +457,7 @@ export default function PrincipalRolesList({
             }}
             onConfirm={handleDeletePrincipalConfirm}
             description=""
-            warningMessage="This will remove the principal from this principal role."
+            warningMessage="This will unassign the principal from this principal role."
         />
       </>
   );
