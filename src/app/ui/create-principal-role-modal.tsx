@@ -26,7 +26,6 @@ export default function CreatePrincipalRoleModal({
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const handleSubmit = async (values: PrincipalRoleFormValues) => {
-    console.log('Form submitted with values:', values);
     setLoading(true);
 
     try {
@@ -43,12 +42,10 @@ export default function CreatePrincipalRoleModal({
       const payload = {
         principalRole: {
           name: values.name,
-          federated: values.federated || false,
+          federated: values.federated ?? false,
           properties: properties,
         },
       };
-
-      console.log('Sending request with payload:', payload);
 
       const data = await authenticatedFetch('/api/principal-roles', {
         method: 'POST',
@@ -56,11 +53,8 @@ export default function CreatePrincipalRoleModal({
       });
 
       if (!data) {
-        console.log('No data returned');
         return;
       }
-
-      console.log('Received response:', data);
 
       message.success(`Principal role "${values.name}" created successfully!`);
       form.resetFields();

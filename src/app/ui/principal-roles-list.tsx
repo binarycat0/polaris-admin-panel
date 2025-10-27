@@ -61,7 +61,6 @@ interface PrincipalRolesListProps {
   principalsLoading?: Record<string, boolean>;
   onEdit?: (principalRoleName: string) => void;
   onDelete?: (principalRoleName: string) => void;
-  onEditPrincipal?: (principalRoleName: string, principalName: string) => void;
   onDeletePrincipal?: (principalRoleName: string, principalName: string) => void;
 }
 
@@ -79,7 +78,6 @@ export default function PrincipalRolesList({
                                              principalsLoading = {},
                                              onEdit,
                                              onDelete,
-                                             onEditPrincipal,
                                              onDeletePrincipal,
                                            }: PrincipalRolesListProps) {
   const [deleteRoleModalVisible, setDeleteRoleModalVisible] = useState(false);
