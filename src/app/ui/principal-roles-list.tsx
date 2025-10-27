@@ -1,6 +1,18 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography} from 'antd'
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Flex,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  Empty
+} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -49,7 +61,6 @@ interface PrincipalRolesListProps {
   principalsLoading?: Record<string, boolean>;
   onEdit?: (principalRoleName: string) => void;
   onDelete?: (principalRoleName: string) => void;
-  onEditPrincipal?: (principalRoleName: string, principalName: string) => void;
   onDeletePrincipal?: (principalRoleName: string, principalName: string) => void;
 }
 
@@ -67,7 +78,6 @@ export default function PrincipalRolesList({
                                              principalsLoading = {},
                                              onEdit,
                                              onDelete,
-                                             onEditPrincipal,
                                              onDeletePrincipal,
                                            }: PrincipalRolesListProps) {
   const [deleteRoleModalVisible, setDeleteRoleModalVisible] = useState(false);
@@ -108,9 +118,13 @@ export default function PrincipalRolesList({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#1890ff'}}>{name}</Text>
+      render: (name: string, record) => (
+          <Space direction="vertical">
+            <Text strong style={{color: '#1890ff'}}>{name}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -122,31 +136,28 @@ export default function PrincipalRolesList({
       ),
       dataIndex: 'clientId',
       key: 'clientId',
+      width: 200,
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
-          <Text code>{clientId}</Text>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 90,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="blue">v{version}</Tag>
+          <Text strong>{clientId}</Text>
       ),
     },
     {
       title: (
-          <Space><CalendarOutlined/>Created</Space>
+          <Space>
+            <CalendarOutlined/>
+            Created / Last Updated
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
+          </Space>
       ),
     },
     {
@@ -154,7 +165,6 @@ export default function PrincipalRolesList({
           <Space><SettingOutlined/>Properties</Space>
       ),
       key: 'properties',
-      width: 200,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
 
@@ -185,124 +195,50 @@ export default function PrincipalRolesList({
             </div>
         );
       },
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      fixed: 'right',
-      render: (_, record) => {
-        const items: MenuProps['items'] = [
-          {
-            key: 'edit',
-            label: 'Edit',
-            icon: <EditOutlined/>,
-            onClick: () => {
-              if (onEditPrincipal) {
-                onEditPrincipal(principalRoleName, record.name);
-              }
-            },
-          },
-          {
-            type: 'divider',
-          },
-          {
-            key: 'delete',
-            label: 'Delete',
-            icon: <DeleteOutlined/>,
-            danger: true,
-            onClick: () => {
-              handleDeletePrincipalClick(principalRoleName, record.name);
-            },
-          },
-        ];
-
-        return (
-            <Dropdown menu={{items}} trigger={['click']}>
-              <Button
-                  size="small"
-                  icon={<SettingOutlined/>}
-                  onClick={(e) => e.stopPropagation()}
-              />
-            </Dropdown>
-        );
-      },
-    },
+    }
   ];
   const columns: ColumnsType<PrincipalRoleItem> = [
     {
       title: "Name",
       dataIndex: 'name',
       key: 'name',
-      width: 250,
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong className="principal-roles-text">{name}</Text>
+      render: (name: string, record) => (
+          <Space direction="vertical">
+            <Text strong className="principal-roles-text">{name}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
       title: 'Type',
       dataIndex: 'federated',
       key: 'federated',
-      width: 150,
+      width: 140,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
-          <Flex align="center">
-            <Badge
-                status={federated ? "processing" : "default"}
-                text={federated ? (
-                    <Space>
-                      <CloudOutlined/>
-                      Federated
-                    </Space>
-                ) : (
-                    <Space>
-                      <HomeOutlined/>
-                      Local
-                    </Space>
-                )}
-            />
-          </Flex>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="purple">v{version}</Tag>
+          <Text>
+            {federated ? 'Federated' : 'Local'}
+          </Text>
       ),
     },
     {
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
       render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(timestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -313,7 +249,6 @@ export default function PrincipalRolesList({
           </Space>
       ),
       key: 'properties',
-      width: 250,
       render: (_: unknown, record: PrincipalRoleItem) => {
         const properties = Object.entries(record.properties || {});
 
@@ -418,10 +353,10 @@ export default function PrincipalRolesList({
                     <div style={{padding: '0 10px'}}>
                       <Title level={5} style={{marginBottom: 16}}>
                         <Space>
+                          <Tag>{principalsList.length}</Tag>
                           <UserOutlined/>
                           Principals for:
                           {record.name}
-                          <Tag color="blue">{principalsList.length}</Tag>
                         </Space>
                       </Title>
                       <Table
@@ -437,11 +372,11 @@ export default function PrincipalRolesList({
                           }}
                           locale={{
                             emptyText: (
-                                <Space>
-                                  <UserOutlined/>
-                                  <Text type="secondary">No principals found for this principal
-                                    role</Text>
-                                </Space>
+                                <Empty
+                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                    description={<Text type="secondary">No principals
+                                      assigned</Text>}
+                                />
                             ),
                           }}
                           size="small"
@@ -467,10 +402,10 @@ export default function PrincipalRolesList({
             }}
             locale={{
               emptyText: (
-                  <Space>
-                    <TeamOutlined/>
-                    <Text type="secondary">No principal roles found</Text>
-                  </Space>
+                  <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<Text type="secondary">No principal roles found</Text>}
+                  />
               ),
             }}
             size="small"
@@ -499,7 +434,7 @@ export default function PrincipalRolesList({
             }}
             onConfirm={handleDeletePrincipalConfirm}
             description=""
-            warningMessage="This will remove the principal from this principal role."
+            warningMessage="This will unassign the principal from this principal role."
         />
       </>
   );

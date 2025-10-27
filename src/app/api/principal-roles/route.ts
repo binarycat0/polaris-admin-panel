@@ -75,8 +75,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    console.log('Creating principal role:', body);
-
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(apiManagementPrincipalRolesUrl, {
@@ -92,14 +90,11 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Backend error response:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
-    console.log('Principal role created successfully');
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Create principal role proxy error:', error);
     return NextResponse.json(
         {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
         {status: 500}

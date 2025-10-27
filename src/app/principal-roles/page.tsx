@@ -6,6 +6,7 @@ import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
 import CreatePrincipalRoleModal from '@/app/ui/create-principal-role-modal';
+import EditPrincipalRoleModal from '@/app/ui/edit-principal-role-modal';
 
 const {Title} = Typography;
 
@@ -22,6 +23,8 @@ export default function Page() {
   const [principals, setPrincipals] = useState<Record<string, PrincipalItem[]>>({});
   const [principalsLoading, setPrincipalsLoading] = useState<Record<string, boolean>>({});
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedPrincipalRoleForEdit, setSelectedPrincipalRoleForEdit] = useState<PrincipalRoleItem | null>(null);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipalRoles = useCallback(async (): Promise<PrincipalRoleItem[]> => {
@@ -153,6 +156,18 @@ export default function Page() {
     await handleRefresh();
   };
 
+  const handleEditPrincipalRole = (principalRoleName: string) => {
+    const principalRole = principalRoles.find(pr => pr.name === principalRoleName);
+    if (principalRole) {
+      setSelectedPrincipalRoleForEdit(principalRole);
+      setEditModalVisible(true);
+    }
+  };
+
+  const handleEditSuccess = async () => {
+    await handleRefresh();
+  };
+
   useEffect(() => {
     async function fetchPrincipalRoles() {
       setLoading(true);
@@ -217,6 +232,7 @@ export default function Page() {
             expandedRowKeys={expandedRowKeys}
             principals={principals}
             principalsLoading={principalsLoading}
+            onEdit={handleEditPrincipalRole}
             onDelete={handleDeletePrincipalRole}
             onDeletePrincipal={handleDeletePrincipal}
         />
@@ -225,6 +241,21 @@ export default function Page() {
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
+        />
+
+        <EditPrincipalRoleModal
+            visible={editModalVisible}
+            principalRoleName={selectedPrincipalRoleForEdit?.name || null}
+            currentPrincipalRole={selectedPrincipalRoleForEdit ? {
+              name: selectedPrincipalRoleForEdit.name,
+              entityVersion: selectedPrincipalRoleForEdit.entityVersion,
+              properties: selectedPrincipalRoleForEdit.properties
+            } : null}
+            onClose={() => {
+              setEditModalVisible(false);
+              setSelectedPrincipalRoleForEdit(null);
+            }}
+            onSuccess={handleEditSuccess}
         />
       </Space>
   );

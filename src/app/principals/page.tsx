@@ -6,6 +6,7 @@ import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
 import CreatePrincipalModal from '@/app/ui/create-principal-modal';
+import EditPrincipalModal from '@/app/ui/edit-principal-modal';
 import AssignPrincipalRoleModal from '@/app/ui/assign-principal-role-modal';
 import RemovePrincipalRoleModal from '@/app/ui/remove-principal-role-modal';
 
@@ -24,9 +25,11 @@ export default function Page() {
   const [principalRoles, setPrincipalRoles] = useState<Record<string, PrincipalRoleItem[]>>({});
   const [rolesLoading, setRolesLoading] = useState<Record<string, boolean>>({});
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [assignRoleModalVisible, setAssignRoleModalVisible] = useState(false);
   const [removeRoleModalVisible, setRemoveRoleModalVisible] = useState(false);
   const [selectedPrincipalForRole, setSelectedPrincipalForRole] = useState<string | null>(null);
+  const [selectedPrincipalForEdit, setSelectedPrincipalForEdit] = useState<Principal | null>(null);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
@@ -171,6 +174,18 @@ export default function Page() {
     }
   };
 
+  const handleEditPrincipal = (principalName: string) => {
+    const principal = principals.find(p => p.name === principalName);
+    if (principal) {
+      setSelectedPrincipalForEdit(principal);
+      setEditModalVisible(true);
+    }
+  };
+
+  const handleEditSuccess = async () => {
+    await handleRefresh();
+  };
+
   useEffect(() => {
     async function fetchPrincipals() {
       setLoading(true);
@@ -238,6 +253,7 @@ export default function Page() {
             expandedRowKeys={expandedRowKeys}
             principalRoles={principalRoles}
             rolesLoading={rolesLoading}
+            onEdit={handleEditPrincipal}
             onResetCredentials={handleResetCredentials}
             onDelete={handleDeletePrincipal}
             onAddRole={handleAddRole}
@@ -248,6 +264,17 @@ export default function Page() {
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
+        />
+
+        <EditPrincipalModal
+            visible={editModalVisible}
+            principalName={selectedPrincipalForEdit?.name || null}
+            currentPrincipal={selectedPrincipalForEdit}
+            onClose={() => {
+              setEditModalVisible(false);
+              setSelectedPrincipalForEdit(null);
+            }}
+            onSuccess={handleEditSuccess}
         />
 
         <AssignPrincipalRoleModal

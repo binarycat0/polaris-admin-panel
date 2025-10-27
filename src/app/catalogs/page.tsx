@@ -5,7 +5,9 @@ import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/principal-roles-list"
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
+import EditCatalogModal from "@/app/ui/edit-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
+import EditCatalogRoleModal from "@/app/ui/edit-catalog-role-modal"
 import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
 import RemoveCatalogRoleModal from "@/app/ui/remove-catalog-role-modal"
 import AddPrivilegeModal from "@/app/ui/add-privilege-modal"
@@ -48,7 +50,11 @@ export default function Page() {
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editCatalogModalVisible, setEditCatalogModalVisible] = useState(false);
+  const [editingCatalog, setEditingCatalog] = useState<CatalogEntity | null>(null);
   const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
+  const [editCatalogRoleModalVisible, setEditCatalogRoleModalVisible] = useState(false);
+  const [editingCatalogRole, setEditingCatalogRole] = useState<CatalogRole | null>(null);
   const [assignCatalogRoleModalVisible, setAssignCatalogRoleModalVisible] = useState(false);
   const [removeCatalogRoleModalVisible, setRemoveCatalogRoleModalVisible] = useState(false);
   const [addPrivilegeModalVisible, setAddPrivilegeModalVisible] = useState(false);
@@ -368,6 +374,50 @@ export default function Page() {
     refreshCatalogs();
   };
 
+  const handleEditCatalog = (catalogName: string) => {
+    // Find the catalog to edit
+    const catalogToEdit = catalogs.find(catalog => catalog.name === catalogName);
+    if (catalogToEdit) {
+      setEditingCatalog(catalogToEdit);
+      setEditCatalogModalVisible(true);
+    }
+  };
+
+  const handleEditCatalogSuccess = async () => {
+    refreshCatalogs();
+  };
+
+  const handleDeleteCatalog = async (catalogName: string) => {
+    try {
+      await authenticatedFetch(`/api/catalogs/${encodeURIComponent(catalogName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Catalog "${catalogName}" deleted successfully!`);
+
+      // Clear selected catalog if it was the one deleted
+      if (selectedCatalog === catalogName) {
+        setSelectedCatalog(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog');
+        }
+        setSelectedCatalogRole(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog_role');
+        }
+        setCatalogRoles([]);
+        setPrincipalRoles([]);
+        setGrants([]);
+      }
+
+      // Refresh catalogs list
+      refreshCatalogs();
+    } catch (error) {
+      console.error('Error deleting catalog:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   const handleCreateCatalogRoleSuccess = async () => {
     if (selectedCatalog) {
       setRolesLoading(true);
@@ -377,6 +427,64 @@ export default function Page() {
       } finally {
         setRolesLoading(false);
       }
+    }
+  };
+
+  const handleEditCatalogRole = (catalogRoleName: string) => {
+    // Find the catalog role to edit
+    const roleToEdit = catalogRoles.find(role => role.name === catalogRoleName);
+    if (roleToEdit) {
+      setEditingCatalogRole(roleToEdit);
+      setEditCatalogRoleModalVisible(true);
+    }
+  };
+
+  const handleEditCatalogRoleSuccess = async () => {
+    if (selectedCatalog) {
+      setRolesLoading(true);
+      try {
+        const roles = await getCatalogRoles(selectedCatalog);
+        setCatalogRoles(roles);
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteCatalogRole = async (catalogRoleName: string) => {
+    if (!selectedCatalog) return;
+
+    try {
+      await authenticatedFetch(
+          `/api/catalogs/${encodeURIComponent(selectedCatalog)}/catalog-roles/${encodeURIComponent(catalogRoleName)}`,
+          {
+            method: 'DELETE',
+          }
+      );
+
+      message.success(`Catalog role "${catalogRoleName}" deleted successfully!`);
+
+      // Clear selected catalog role if it was the one deleted
+      if (selectedCatalogRole === catalogRoleName) {
+        setSelectedCatalogRole(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog_role');
+        }
+        setPrincipalRoles([]);
+        setGrants([]);
+      }
+
+      // Refresh catalog roles list
+      setRolesLoading(true);
+      try {
+        const roles = await getCatalogRoles(selectedCatalog);
+        setCatalogRoles(roles);
+      } finally {
+        setRolesLoading(false);
+      }
+    } catch (error) {
+      console.error('Error deleting catalog role:', error);
+      throw error; // Re-throw to let the modal handle the error display
     }
   };
 
@@ -473,14 +581,12 @@ export default function Page() {
       <Space direction="vertical" style={{width: '100%'}}>
         <Space>
           <Title level={4} style={{marginBottom: 0}}>
-            <Space>
-              Catalogs
-              <FolderOpenOutlined/>
-            </Space>
+            <FolderOpenOutlined/>
           </Title>
           <Breadcrumb separator={">"} items={breadcrumbItems}/>
         </Space>
 
+        <Divider orientation="left">Catalogs</Divider>
         <Button
             variant="outlined"
             icon={<FolderAddOutlined/>}
@@ -488,11 +594,12 @@ export default function Page() {
         >
           New catalog
         </Button>
-
         <Catalogs
             catalogs={catalogs}
             onRowClick={handleCatalogRowClick}
             selectedCatalog={selectedCatalog}
+            onEdit={handleEditCatalog}
+            onDelete={handleDeleteCatalog}
         />
 
         {selectedCatalog && (
@@ -510,6 +617,8 @@ export default function Page() {
                   loading={rolesLoading}
                   onRowClick={handleCatalogRoleRowClick}
                   selectedCatalogRole={selectedCatalogRole}
+                  onEdit={handleEditCatalogRole}
+                  onDelete={handleDeleteCatalogRole}
               />
             </>
         )}
@@ -582,11 +691,36 @@ export default function Page() {
             onSuccess={handleCreateSuccess}
         />
 
+        {editingCatalog && (
+            <EditCatalogModal
+                visible={editCatalogModalVisible}
+                catalogName={editingCatalog?.name || null}
+                currentCatalog={editingCatalog}
+                onClose={() => {
+                  setEditCatalogModalVisible(false);
+                  setEditingCatalog(null);
+                }}
+                onSuccess={handleEditCatalogSuccess}
+            />
+        )}
+
         <CreateCatalogRoleModal
             visible={createCatalogRoleModalVisible}
             catalogName={selectedCatalog}
             onClose={() => setCreateCatalogRoleModalVisible(false)}
             onSuccess={handleCreateCatalogRoleSuccess}
+        />
+
+        <EditCatalogRoleModal
+            visible={editCatalogRoleModalVisible}
+            catalogName={selectedCatalog}
+            catalogRoleName={editingCatalogRole?.name || null}
+            currentCatalogRole={editingCatalogRole}
+            onClose={() => {
+              setEditCatalogRoleModalVisible(false);
+              setEditingCatalogRole(null);
+            }}
+            onSuccess={handleEditCatalogRoleSuccess}
         />
 
         <AssignCatalogRoleModal

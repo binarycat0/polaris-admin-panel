@@ -78,7 +78,7 @@ export default function RemoveCatalogRoleModal({
           onCancel={handleCancel}
           footer={null}
           width={500}
-          destroyOnClose
+          destroyOnHidden
           centered
       >
         <Form

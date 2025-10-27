@@ -1,6 +1,18 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Badge, Button, Dropdown, Flex, Space, Spin, Table, Tag, Tooltip, Typography} from 'antd'
+import {
+  Badge,
+  Button,
+  Dropdown,
+  Flex,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  Empty
+} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -115,9 +127,13 @@ export default function Principals({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#722ed1'}}>{name}</Text>
+      render: (name: string, record) => (
+          <Space direction="vertical">
+            <Text strong style={{color: '#722ed1'}}>{name}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -127,62 +143,27 @@ export default function Principals({
       width: 140,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
-          <Flex align="center">
-            <Badge
-                status={federated ? "processing" : "default"}
-                text={federated ? (
-                    <Space>
-                      <CloudOutlined/>
-                      Federated
-                    </Space>
-                ) : (
-                    <Space>
-                      <HomeOutlined/>
-                      Local
-                    </Space>
-                )}
-            />
-          </Flex>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="purple">v{version}</Tag>
+          <Text>
+            {federated ? 'Federated' : 'Local'}
+          </Text>
       ),
     },
     {
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -224,36 +205,6 @@ export default function Principals({
         );
       },
     },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      fixed: 'right',
-      render: (_, record) => {
-        const items: MenuProps['items'] = [
-          {
-            key: 'edit',
-            label: 'Edit',
-            icon: <EditOutlined/>,
-            onClick: () => {
-              if (onEditPrincipalRole) {
-                onEditPrincipalRole(principalName, record.name);
-              }
-            },
-          },
-        ];
-
-        return (
-            <Dropdown menu={{items}} trigger={['click']}>
-              <Button
-                  size="small"
-                  icon={<SettingOutlined/>}
-                  onClick={(e) => e.stopPropagation()}
-              />
-            </Dropdown>
-        );
-      },
-    },
   ];
 
   const columns: ColumnsType<Principal> = [
@@ -261,9 +212,13 @@ export default function Principals({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string) => (
-          <Text strong style={{color: '#1890ff'}}>{name}</Text>
+      render: (_, record) => (
+          <Space direction="vertical">
+            <Text strong style={{color: '#1890ff'}}>{record.name}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
+          </Space>
       ),
     },
     {
@@ -275,49 +230,28 @@ export default function Principals({
       ),
       dataIndex: 'clientId',
       key: 'clientId',
+      width: 200,
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
-          <Text code>{clientId}</Text>
-      ),
-    },
-    {
-      title: 'Version',
-      dataIndex: 'entityVersion',
-      key: 'entityVersion',
-      width: 100,
-      sorter: (a, b) => a.entityVersion - b.entityVersion,
-      render: (version: number) => (
-          <Tag color="blue">v{version}</Tag>
+          <Text strong>{clientId}</Text>
       ),
     },
     {
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -442,10 +376,10 @@ export default function Principals({
                       <Flex justify="space-between" align="center" style={{marginBottom: 16}}>
                         <Title level={5} style={{marginBottom: 0}}>
                           <Space>
+                            <Tag>{roles.length}</Tag>
                             <TeamOutlined/>
                             Principal Roles for:
                             {record.name}
-                            <Tag color="blue">{roles.length}</Tag>
                           </Space>
                         </Title>
                         <Space>
@@ -491,11 +425,11 @@ export default function Principals({
                           }}
                           locale={{
                             emptyText: (
-                                <Space>
-                                  <TeamOutlined/>
-                                  <Text type="secondary">No principal roles found for this
-                                    principal</Text>
-                                </Space>
+                                <Empty
+                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                    description={<Text type="secondary">No principal roles
+                                      assigned</Text>}
+                                />
                             ),
                           }}
                           size="small"
@@ -521,10 +455,10 @@ export default function Principals({
             }}
             locale={{
               emptyText: (
-                  <Space direction="vertical">
-                    <UserOutlined/>
-                    <Text type="secondary">No principals found</Text>
-                  </Space>
+                  <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<Text type="secondary">No principals found</Text>}
+                  />
               ),
             }}
         />

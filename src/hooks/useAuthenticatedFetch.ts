@@ -57,19 +57,30 @@ export function useAuthenticatedFetch() {
 
         if (response.status === 401) {
           handleAuthFailure(router, 'Authentication failed. Please login again.');
-          return errorText;
+          throw new Error(errorText.error?.message || 'Authentication failed');
         }
 
         message.error(errorText.error?.message || 'An unexpected error occurred. Please try again.');
-        return errorText;
+        throw new Error(errorText.error?.message || 'Request failed');
+      }
+
+      // Handle 204 No Content responses
+      if (response.status === 204) {
+        return null;
       }
 
       return await response.json();
     } catch (error) {
       console.error(`Error fetching ${url}:`, error);
-      message.error('An unexpected error occurred. Please try again.');
 
-      return null;
+      // If it's an error we threw (from !response.ok), re-throw it
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      // For unexpected errors (network issues, etc.), show message and throw
+      message.error('An unexpected error occurred. Please try again.');
+      throw new Error('Network error');
     }
   }, [router]);
 

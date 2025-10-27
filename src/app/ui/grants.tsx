@@ -1,5 +1,5 @@
 'use client'
-import {Divider, List, Space, Spin, Tag, Typography} from 'antd'
+import {Empty, Divider, List, Space, Spin, Typography} from 'antd'
 import {
   EyeOutlined,
   FolderOutlined,
@@ -8,7 +8,7 @@ import {
   TableOutlined
 } from '@ant-design/icons'
 
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
 export interface Grant {
   privilege?: string;
@@ -44,34 +44,17 @@ const groupGrantsByType = (grants: Grant[]): Record<string, Grant[]> => {
 const getTypeIcon = (type: string) => {
   switch (type) {
     case 'catalog':
-      return <FolderOutlined style={{fontSize: 16, color: '#1677ff'}}/>;
+      return <FolderOutlined/>;
     case 'namespace':
-      return <FolderOutlined style={{fontSize: 16, color: '#52c41a'}}/>;
+      return <FolderOutlined/>;
     case 'table':
-      return <TableOutlined style={{fontSize: 16, color: '#fa8c16'}}/>;
+      return <TableOutlined/>;
     case 'view':
-      return <EyeOutlined style={{fontSize: 16, color: '#722ed1'}}/>;
+      return <EyeOutlined/>;
     case 'policy':
-      return <SafetyOutlined style={{fontSize: 16, color: '#eb2f96'}}/>;
+      return <SafetyOutlined/>;
     default:
-      return <KeyOutlined style={{fontSize: 16}}/>;
-  }
-};
-
-const getTypeColor = (type: string) => {
-  switch (type) {
-    case 'catalog':
-      return 'blue';
-    case 'namespace':
-      return 'green';
-    case 'table':
-      return 'orange';
-    case 'view':
-      return 'purple';
-    case 'policy':
-      return 'magenta';
-    default:
-      return 'default';
+      return <KeyOutlined/>;
   }
 };
 
@@ -99,20 +82,19 @@ export default function Grants({grants, loading}: GrantsProps) {
                   <Space>
                     {getTypeIcon(type)}
                     {type.charAt(0).toUpperCase() + type.slice(1)} Grants
-                    <Tag color={getTypeColor(type)}>{typeGrants.length}</Tag>
+                    {typeGrants.length}
                   </Space>
                 </Divider>
 
                 <List
-                    bordered
                     size="small"
                     dataSource={hasPrivileges ? typeGrants : []}
                     locale={{
                       emptyText: (
-                          <Space>
-                            <KeyOutlined/>
-                            <Text type="secondary">No {type} privileges granted</Text>
-                          </Space>
+                          <Empty
+                              image={Empty.PRESENTED_IMAGE_SIMPLE}
+                              description={<Text type="secondary">{type} privileges not granted</Text>}
+                          />
                       ),
                     }}
                     renderItem={(grant, index) => (
@@ -120,7 +102,7 @@ export default function Grants({grants, loading}: GrantsProps) {
                           <Space direction="vertical" style={{width: '100%'}}>
                           </Space>
                           {grant.privilege && (
-                              <Text code>
+                              <Text strong>
                                 {grant.privilege}
                               </Text>
                           )}

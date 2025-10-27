@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
-import {apiManagementPrincipalRolesUrl} from "@/app/constants";
+import {apiManagementCatalogRoleUrl} from "@/app/constants";
 import {getRealmHeadersFromRequest} from "@/utils/auth";
 
 
 export async function PUT(
     request: NextRequest,
-    {params}: { params: Promise<{ principalRoleName: string }> }
+    {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -23,17 +23,18 @@ export async function PUT(
       );
     }
 
-    const {principalRoleName} = await params;
-    const url = `${apiManagementPrincipalRolesUrl}/${encodeURIComponent(principalRoleName)}`;
-
-    console.log('Updating principal role:', principalRoleName);
+    const {catalogName, catalogRoleName} = await params;
+    const targetUrl = apiManagementCatalogRoleUrl(catalogName, catalogRoleName);
 
     const body = await request.json();
-    console.log('Request body:', body);
+
+    console.log(`Updating catalog role: ${catalogName}/${catalogRoleName}`);
+    console.log(`Target URL: ${targetUrl}`);
+    console.log(`Request body:`, body);
 
     const realmHeaders = getRealmHeadersFromRequest(request);
 
-    const response = await fetch(url, {
+    const response = await fetch(targetUrl, {
       method: 'PUT',
       headers: {
         'Authorization': authHeader,
@@ -43,25 +44,37 @@ export async function PUT(
       body: JSON.stringify(body),
     });
 
+    console.log(`Response status: ${response.status}`);
+
     if (!response.ok) {
       const data = await response.json().catch(() => ({
         error: {
-          message: 'Failed to update principal role',
+          message: 'Failed to update catalog role',
           type: 'UpdateError',
           code: response.status
         }
       }));
-      console.error('Backend error response:', data);
+      console.error(`Backend API error updating catalog role ${catalogName}/${catalogRoleName}:`, data);
       return NextResponse.json(data, {status: response.status});
     }
 
     const data = await response.json();
-    console.log('Principal role updated successfully:', data);
+    console.log(`Response data:`, data);
+
     return NextResponse.json(data, {status: 200});
   } catch (error) {
-    console.error('Update principal role proxy error:', error);
+    console.error('Update catalog role proxy error:', error);
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorDetails = {
+      message: `Failed to update catalog role: ${errorMessage}`,
+      type: 'InternalServerError',
+      code: 500,
+      details: error instanceof Error ? error.stack : String(error)
+    };
+
     return NextResponse.json(
-        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
+        {error: errorDetails},
         {status: 500}
     );
   }
@@ -69,7 +82,7 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    {params}: { params: Promise<{ principalRoleName: string }> }
+    {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
     const authHeader = request.headers.get('Authorization');
@@ -87,14 +100,15 @@ export async function DELETE(
       );
     }
 
-    const {principalRoleName} = await params;
-    const url = `${apiManagementPrincipalRolesUrl}/${encodeURIComponent(principalRoleName)}`;
+    const {catalogName, catalogRoleName} = await params;
+    const targetUrl = apiManagementCatalogRoleUrl(catalogName, catalogRoleName);
 
-    console.log('Deleting principal role:', principalRoleName);
+    console.log(`Deleting catalog role: ${catalogName}/${catalogRoleName}`);
+    console.log(`Target URL: ${targetUrl}`);
 
     const realmHeaders = getRealmHeadersFromRequest(request);
 
-    const response = await fetch(url, {
+    const response = await fetch(targetUrl, {
       method: 'DELETE',
       headers: {
         'Authorization': authHeader,
@@ -106,7 +120,7 @@ export async function DELETE(
     if (!response.ok) {
       const data = await response.json().catch(() => ({
         error: {
-          message: 'Failed to delete principal role',
+          message: 'Failed to delete catalog role',
           type: 'DeleteError',
           code: response.status
         }
@@ -115,14 +129,13 @@ export async function DELETE(
       return NextResponse.json(data, {status: response.status});
     }
 
-    console.log('Principal role deleted successfully');
-    return NextResponse.json({success: true}, {status: 200});
+    console.log('Catalog role deleted successfully');
+    return new NextResponse(null, {status: 204});
   } catch (error) {
-    console.error('Delete principal role proxy error:', error);
+    console.error('Delete catalog role proxy error:', error);
     return NextResponse.json(
         {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
         {status: 500}
     );
   }
 }
-

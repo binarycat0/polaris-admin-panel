@@ -1,6 +1,8 @@
 export const apiManagementUrl = process.env.POLARIS_MANAGEMENT_API_URL || "http://localhost:8181/api/management/v1";
 export const apiManagementCatalogUrl = apiManagementUrl + "/catalogs";
+export const apiManagementCatalogByNameUrl = (catalogName: string) => apiManagementUrl + `/catalogs/${catalogName}`;
 export const apiManagementCatalogRolesUrl = (catalogName: string) => apiManagementUrl + `/catalogs/${catalogName}/catalog-roles`;
+export const apiManagementCatalogRoleUrl = (catalogName: string, catalogRoleName: string) => apiManagementUrl + `/catalogs/${catalogName}/catalog-roles/${catalogRoleName}`;
 export const apiManagementCatalogRolesPrincipalRolesUrl = (catalogName: string, catalogRoleName: string) => apiManagementUrl + `/catalogs/${catalogName}/catalog-roles/${catalogRoleName}/principal-roles`;
 export const apiManagementCatalogRolesGrantsUrl = (catalogName: string, catalogRoleName: string) => apiManagementUrl + `/catalogs/${catalogName}/catalog-roles/${catalogRoleName}/grants`;
 export const apiManagementPrincipalsUrl = apiManagementUrl + "/principals";

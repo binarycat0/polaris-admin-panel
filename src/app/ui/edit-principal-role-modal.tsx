@@ -1,31 +1,57 @@
 'use client'
-import {Button, Divider, Form, Input, message, Modal, Space, Switch} from 'antd'
-import {DeleteOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
-import {useState} from 'react'
+import {Button, Divider, Form, Input, message, Modal, Space} from 'antd'
+import {DeleteOutlined, EditOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
+import {useEffect, useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
-interface CreatePrincipalRoleModalProps {
+interface EditPrincipalRoleModalProps {
   visible: boolean;
+  principalRoleName: string | null;
+  currentPrincipalRole: {
+    name: string;
+    entityVersion: number;
+    properties: Record<string, string>;
+  } | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 interface PrincipalRoleFormValues {
-  name: string;
-  federated: boolean;
   properties: { key: string; value: string }[];
 }
 
-export default function CreatePrincipalRoleModal({
-                                                   visible,
-                                                   onClose,
-                                                   onSuccess
-                                                 }: CreatePrincipalRoleModalProps) {
+export default function EditPrincipalRoleModal({
+                                                  visible,
+                                                  principalRoleName,
+                                                  currentPrincipalRole,
+                                                  onClose,
+                                                  onSuccess
+                                                }: EditPrincipalRoleModalProps) {
   const [form] = Form.useForm<PrincipalRoleFormValues>();
   const [loading, setLoading] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
+  useEffect(() => {
+    if (visible && currentPrincipalRole) {
+      // Convert properties object to array format for the form
+      const propertiesArray = Object.entries(currentPrincipalRole.properties || {}).map(([key, value]) => ({
+        key,
+        value
+      }));
+      
+      form.setFieldsValue({
+        properties: propertiesArray.length > 0 ? propertiesArray : undefined
+      });
+    }
+  }, [visible, currentPrincipalRole, form]);
+
   const handleSubmit = async (values: PrincipalRoleFormValues) => {
+    if (!principalRoleName || !currentPrincipalRole) {
+      message.error('No principal role selected');
+      return;
+    }
+
+    console.log('Form submitted with values:', values);
     setLoading(true);
 
     try {
@@ -40,15 +66,14 @@ export default function CreatePrincipalRoleModal({
       }
 
       const payload = {
-        principalRole: {
-          name: values.name,
-          federated: values.federated ?? false,
-          properties: properties,
-        },
+        currentEntityVersion: currentPrincipalRole.entityVersion,
+        properties: properties,
       };
 
-      const data = await authenticatedFetch('/api/principal-roles', {
-        method: 'POST',
+      console.log('Updating principal role:', principalRoleName, payload);
+
+      const data = await authenticatedFetch(`/api/principal-roles/${encodeURIComponent(principalRoleName)}`, {
+        method: 'PUT',
         body: JSON.stringify(payload),
       });
 
@@ -56,12 +81,14 @@ export default function CreatePrincipalRoleModal({
         return;
       }
 
-      message.success(`Principal role "${values.name}" created successfully!`);
+      console.log('Principal role updated successfully:', data);
+
+      message.success(`Principal role "${principalRoleName}" updated successfully!`);
       form.resetFields();
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating principal role:', error);
+      console.error('Error updating principal role:', error);
     } finally {
       setLoading(false);
     }
@@ -76,17 +103,16 @@ export default function CreatePrincipalRoleModal({
       <Modal
           title={
             <Space>
-              <TeamOutlined/>
-              Create New Principal Role
+              <EditOutlined/>
+              Edit Principal Role
             </Space>
           }
           open={visible}
           onCancel={handleCancel}
           footer={null}
-          width={700}
+          width={600}
           destroyOnHidden
           centered
-          styles={{body: {maxHeight: '70vh', overflowY: 'auto'}}}
       >
         <Form
             form={form}
@@ -97,61 +123,47 @@ export default function CreatePrincipalRoleModal({
               message.error('Please fill in all required fields');
             }}
             autoComplete="off"
-            initialValues={{
-              federated: false,
-            }}
         >
           <Form.Item
               label="Principal Role Name"
-              name="name"
-              rules={[
-                {required: true, message: 'Please enter a principal role name'},
-                {
-                  pattern: /^(?!\s*[s|S][y|Y][s|S][t|T][e|E][m|M]$).*$/,
-                  message: 'Principal role name cannot be "system"',
-                },
-                {min: 1, max: 256, message: 'Name must be between 1 and 256 characters'},
-              ]}
-              tooltip="A unique identifier for the principal role"
+              tooltip="Principal role name cannot be changed"
           >
             <Input
                 prefix={<TeamOutlined/>}
-                placeholder="Enter principal role name (e.g., data-engineers)"
+                value={principalRoleName || ''}
+                disabled
             />
           </Form.Item>
 
-          <Form.Item
-              label="Federated"
-              name="federated"
-              valuePropName="checked"
-              tooltip="Whether the principal role is a federated role (managed by an external identity provider)"
-          >
-            <Switch/>
-          </Form.Item>
-
-          <Divider orientation="left">Properties (Optional)</Divider>
+          <Divider orientation="left">Properties</Divider>
 
           <Form.List name="properties">
             {(fields, {add, remove}) => (
                 <>
                   {fields.map(({key, name, ...restField}) => (
-                      <Space key={key} style={{display: 'flex', marginBottom: 8}}
-                             align="baseline">
+                      <Space key={key} style={{display: 'flex', marginBottom: 8}} align="baseline">
                         <Form.Item
                             {...restField}
                             name={[name, 'key']}
                             rules={[{required: true, message: 'Missing property key'}]}
+                            style={{marginBottom: 0}}
                         >
-                          <Input placeholder="Property key"/>
+                          <Input placeholder="Key" style={{width: 200}}/>
                         </Form.Item>
                         <Form.Item
                             {...restField}
                             name={[name, 'value']}
                             rules={[{required: true, message: 'Missing property value'}]}
+                            style={{marginBottom: 0}}
                         >
-                          <Input placeholder="Property value"/>
+                          <Input placeholder="Value" style={{width: 250}}/>
                         </Form.Item>
-                        <DeleteOutlined onClick={() => remove(name)} style={{color: '#ff4d4f'}}/>
+                        <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined/>}
+                            onClick={() => remove(name)}
+                        />
                       </Space>
                   ))}
                   <Form.Item>
@@ -174,7 +186,7 @@ export default function CreatePrincipalRoleModal({
                 Cancel
               </Button>
               <Button type="primary" htmlType="submit" loading={loading}>
-                Create Principal Role
+                Update Principal Role
               </Button>
             </Space>
           </Form.Item>
