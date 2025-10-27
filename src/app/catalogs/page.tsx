@@ -1,17 +1,17 @@
 'use client'
 
-import Catalogs, {CatalogEntity} from "@/app/ui/catalogs"
-import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
-import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/principal-roles-list"
-import Grants, {Grant} from "@/app/ui/grants"
-import CreateCatalogModal from "@/app/ui/create-catalog-modal"
-import EditCatalogModal from "@/app/ui/edit-catalog-modal"
-import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
-import EditCatalogRoleModal from "@/app/ui/edit-catalog-role-modal"
-import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
-import RemoveCatalogRoleModal from "@/app/ui/remove-catalog-role-modal"
-import AddPrivilegeModal from "@/app/ui/add-privilege-modal"
-import RemovePrivilegeModal from "@/app/ui/remove-privilege-modal"
+import Catalogs, {CatalogEntity} from "@/app/ui/tables/Catalogs"
+import CatalogRoles, {CatalogRole} from "@/app/ui/tables/CatalogRoles"
+import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/tables/PrincipalRolesList"
+import Grants, {Grant} from "@/app/ui/tables/Grants"
+import CreateCatalogModal from "@/app/ui/modals/catalogs/CreateCatalogModal"
+import EditCatalogModal from "@/app/ui/modals/catalogs/EditCatalogModal"
+import CreateCatalogRoleModal from "@/app/ui/modals/catalog-roles/CreateCatalogRoleModal"
+import EditCatalogRoleModal from "@/app/ui/modals/catalog-roles/EditCatalogRoleModal"
+import AssignCatalogRoleModal from "@/app/ui/modals/catalog-roles/AssignCatalogRoleModal"
+import RemoveCatalogRoleModal from "@/app/ui/modals/catalog-roles/RemoveCatalogRoleModal"
+import AddPrivilegeModal from "@/app/ui/modals/privileges/AddPrivilegeModal"
+import RemovePrivilegeModal from "@/app/ui/modals/privileges/RemovePrivilegeModal"
 import {useCallback, useEffect, useState} from 'react'
 import {Breadcrumb, Button, Divider, message, Space, Spin, Typography, Flex} from 'antd';
 import {

@@ -10,8 +10,8 @@ import {
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
-import DeleteConfirmationModal from '@/app/ui/delete-confirmation-modal'
-import PropertiesCell from '@/app/ui/properties-cell'
+import DeleteConfirmationModal from '@/app/ui/modals/shared/DeleteConfirmationModal'
+import PropertiesCell from '@/app/ui/components/PropertiesCell'
 
 const {Text} = Typography;
 

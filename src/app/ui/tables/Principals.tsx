@@ -24,9 +24,9 @@ import {
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
-import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
-import DeleteConfirmationModal from './delete-confirmation-modal'
-import PropertiesCell from './properties-cell'
+import ResetPrincipalCredentialsModal from '@/app/ui/modals/principals/ResetPrincipalCredentialsModal'
+import DeleteConfirmationModal from '@/app/ui/modals/shared/DeleteConfirmationModal'
+import PropertiesCell from '@/app/ui/components/PropertiesCell'
 
 const {Text, Title} = Typography;
 

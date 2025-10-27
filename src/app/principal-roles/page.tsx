@@ -4,9 +4,9 @@ import {useCallback, useEffect, useState} from 'react';
 import {Button, message, Space, Spin, Typography} from 'antd';
 import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
-import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/principal-roles-list';
-import CreatePrincipalRoleModal from '@/app/ui/create-principal-role-modal';
-import EditPrincipalRoleModal from '@/app/ui/edit-principal-role-modal';
+import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/tables/PrincipalRolesList';
+import CreatePrincipalRoleModal from '@/app/ui/modals/principal-roles/CreatePrincipalRoleModal';
+import EditPrincipalRoleModal from '@/app/ui/modals/principal-roles/EditPrincipalRoleModal';
 
 const {Title} = Typography;
 

@@ -3,7 +3,7 @@ import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {DeleteOutlined, FolderOutlined, TeamOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
-import {Grant} from '@/app/ui/grants'
+import {Grant} from '@/app/ui/tables/Grants'
 
 interface RemovePrivilegeModalProps {
   visible: boolean;

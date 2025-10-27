@@ -2,7 +2,7 @@
 
 import {Button, Flex, Layout, Typography} from 'antd';
 import {LogoutOutlined} from '@ant-design/icons';
-import Navigation from './navigation';
+import Navigation from './Navigation';
 import {useRouter} from 'next/navigation';
 import {AuthStatus, checkAuthStatus, clearAuthData} from "@/utils/auth";
 import {useEffect, useState} from 'react';

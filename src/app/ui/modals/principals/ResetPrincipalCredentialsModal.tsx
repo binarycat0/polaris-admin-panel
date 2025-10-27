@@ -3,8 +3,8 @@ import {Alert, Button, Form, Input, message, Modal, Space, Typography} from 'ant
 import {KeyOutlined, ReloadOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
-import PrincipalCredentialsModal from './principal-credentials-modal'
-import type {PrincipalWithCredentials} from './types/principal'
+import PrincipalCredentialsModal from './PrincipalCredentialsModal'
+import type {PrincipalWithCredentials} from '@/app/ui/types/principal'
 
 const {Text} = Typography
 
