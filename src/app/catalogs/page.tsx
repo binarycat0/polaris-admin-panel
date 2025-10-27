@@ -371,6 +371,37 @@ export default function Page() {
     refreshCatalogs();
   };
 
+  const handleDeleteCatalog = async (catalogName: string) => {
+    try {
+      await authenticatedFetch(`/api/catalogs/${encodeURIComponent(catalogName)}`, {
+        method: 'DELETE',
+      });
+
+      message.success(`Catalog "${catalogName}" deleted successfully!`);
+
+      // Clear selected catalog if it was the one deleted
+      if (selectedCatalog === catalogName) {
+        setSelectedCatalog(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog');
+        }
+        setSelectedCatalogRole(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog_role');
+        }
+        setCatalogRoles([]);
+        setPrincipalRoles([]);
+        setGrants([]);
+      }
+
+      // Refresh catalogs list
+      refreshCatalogs();
+    } catch (error) {
+      console.error('Error deleting catalog:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
   const handleCreateCatalogRoleSuccess = async () => {
     if (selectedCatalog) {
       setRolesLoading(true);
@@ -401,6 +432,43 @@ export default function Page() {
       } finally {
         setRolesLoading(false);
       }
+    }
+  };
+
+  const handleDeleteCatalogRole = async (catalogRoleName: string) => {
+    if (!selectedCatalog) return;
+
+    try {
+      await authenticatedFetch(
+          `/api/catalogs/${encodeURIComponent(selectedCatalog)}/catalog-roles/${encodeURIComponent(catalogRoleName)}`,
+          {
+            method: 'DELETE',
+          }
+      );
+
+      message.success(`Catalog role "${catalogRoleName}" deleted successfully!`);
+
+      // Clear selected catalog role if it was the one deleted
+      if (selectedCatalogRole === catalogRoleName) {
+        setSelectedCatalogRole(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selected_catalog_role');
+        }
+        setPrincipalRoles([]);
+        setGrants([]);
+      }
+
+      // Refresh catalog roles list
+      setRolesLoading(true);
+      try {
+        const roles = await getCatalogRoles(selectedCatalog);
+        setCatalogRoles(roles);
+      } finally {
+        setRolesLoading(false);
+      }
+    } catch (error) {
+      console.error('Error deleting catalog role:', error);
+      throw error; // Re-throw to let the modal handle the error display
     }
   };
 
@@ -517,6 +585,7 @@ export default function Page() {
             catalogs={catalogs}
             onRowClick={handleCatalogRowClick}
             selectedCatalog={selectedCatalog}
+            onDelete={handleDeleteCatalog}
         />
 
         {selectedCatalog && (
@@ -535,6 +604,7 @@ export default function Page() {
                   onRowClick={handleCatalogRoleRowClick}
                   selectedCatalogRole={selectedCatalogRole}
                   onEdit={handleEditCatalogRole}
+                  onDelete={handleDeleteCatalogRole}
               />
             </>
         )}

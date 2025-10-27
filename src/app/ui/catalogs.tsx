@@ -12,6 +12,8 @@ import {
   TeamOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
+import {useState} from 'react'
+import DeleteConfirmationModal from '@/app/ui/delete-confirmation-modal'
 
 const {Text} = Typography;
 
@@ -46,6 +48,9 @@ export default function Catalogs({
                                    onDelete,
                                    onShowRoles
                                  }: CatalogsProps) {
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedCatalogForDelete, setSelectedCatalogForDelete] = useState<string | null>(null);
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -56,6 +61,17 @@ export default function Catalogs({
     });
   };
 
+  const handleDeleteClick = (catalogName: string) => {
+    setSelectedCatalogForDelete(catalogName);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async (catalogName: string) => {
+    if (onDelete) {
+      await onDelete(catalogName);
+    }
+  };
+
   const columns: ColumnsType<CatalogEntity> = [
     {
       title: (
@@ -63,6 +79,7 @@ export default function Catalogs({
       ),
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
           <Space direction="vertical">
@@ -70,7 +87,6 @@ export default function Catalogs({
             <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
-      width: 200,
     },
     {
       title: (
@@ -97,26 +113,20 @@ export default function Catalogs({
     },
     {
       title: (
-          <Space><CalendarOutlined/>Created</Space>
+          <Space>
+            <CalendarOutlined/>
+            Created / Last Updated
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'created',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space><CalendarOutlined/>Last Updated</Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdated',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
+          </Space>
       ),
     },
     {
@@ -145,9 +155,7 @@ export default function Catalogs({
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDelete) {
-                onDelete(record.name);
-              }
+              handleDeleteClick(record.name);
             },
           },
         ];
@@ -166,41 +174,56 @@ export default function Catalogs({
   ];
 
   return (
-      <Table
-          columns={columns}
-          dataSource={catalogs}
-          rowKey="name"
-          scroll={{x: 'max-content'}}
-          onRow={(record) => ({
-            onClick: () => {
-              if (onRowClick) {
-                onRowClick(record.name);
-              }
-            },
-            style: {
-              cursor: onRowClick ? 'pointer' : 'default',
-              backgroundColor: selectedCatalog === record.name ? '#e6f7ff' : undefined,
-            },
-          })}
-          rowClassName={(record) =>
-              selectedCatalog === record.name ? 'selected-row' : ''
-          }
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: false,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} catalogs`,
-          }}
-          locale={{
-            emptyText: (
-                <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={<Text type="secondary">No catalogs found</Text>}
-                />
-            ),
-          }}
-          size="small"
-      />
+      <>
+        <Table
+            columns={columns}
+            dataSource={catalogs}
+            rowKey="name"
+            scroll={{x: 'max-content'}}
+            onRow={(record) => ({
+              onClick: () => {
+                if (onRowClick) {
+                  onRowClick(record.name);
+                }
+              },
+              style: {
+                cursor: onRowClick ? 'pointer' : 'default',
+                backgroundColor: selectedCatalog === record.name ? '#e6f7ff' : undefined,
+              },
+            })}
+            rowClassName={(record) =>
+                selectedCatalog === record.name ? 'selected-row' : ''
+            }
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: false,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} catalogs`,
+            }}
+            locale={{
+              emptyText: (
+                  <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<Text type="secondary">No catalogs found</Text>}
+                  />
+              ),
+            }}
+            size="small"
+        />
+
+        <DeleteConfirmationModal
+            visible={deleteModalVisible}
+            entityType="Catalog"
+            entityName={selectedCatalogForDelete}
+            onClose={() => {
+              setDeleteModalVisible(false);
+              setSelectedCatalogForDelete(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            description=""
+            warningMessage="This will permanently remove the catalog and all associated catalog roles, permissions, and data."
+        />
+      </>
   );
 }

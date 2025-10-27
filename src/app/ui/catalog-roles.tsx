@@ -9,6 +9,8 @@ import {
   TeamOutlined,
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
+import {useState} from 'react'
+import DeleteConfirmationModal from '@/app/ui/delete-confirmation-modal'
 
 const {Text} = Typography;
 
@@ -40,6 +42,9 @@ export default function CatalogRoles(
       onEdit,
       onDelete
     }: CatalogRolesProps) {
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedRoleForDelete, setSelectedRoleForDelete] = useState<string | null>(null);
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -48,6 +53,17 @@ export default function CatalogRoles(
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleDeleteClick = (catalogRoleName: string) => {
+    setSelectedRoleForDelete(catalogRoleName);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async (catalogRoleName: string) => {
+    if (onDelete) {
+      await onDelete(catalogRoleName);
+    }
   };
 
   const columns: ColumnsType<CatalogRole> = [
@@ -60,7 +76,7 @@ export default function CatalogRoles(
       ),
       dataIndex: 'name',
       key: 'name',
-      width: 250,
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
           <Space direction="vertical">
@@ -71,26 +87,20 @@ export default function CatalogRoles(
     },
     {
       title: (
-          <Space><CalendarOutlined/>Created</Space>
+          <Space>
+            <CalendarOutlined/>
+            Created / Last Updated
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'created',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space><CalendarOutlined/>Last Updated</Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdated',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
+          </Space>
       ),
     },
     {
@@ -101,7 +111,6 @@ export default function CatalogRoles(
           </Space>
       ),
       key: 'properties',
-      width: 250,
       render: (_: unknown, record: CatalogRole) => {
         const properties = Object.entries(record.properties || {});
 
@@ -159,9 +168,7 @@ export default function CatalogRoles(
             icon: <DeleteOutlined/>,
             danger: true,
             onClick: () => {
-              if (onDelete) {
-                onDelete(record.name);
-              }
+              handleDeleteClick(record.name);
             },
           },
         ];
@@ -180,43 +187,58 @@ export default function CatalogRoles(
   ];
 
   return (
-      <Table
-          id="catalog-roles-table"
-          columns={columns}
-          dataSource={roles}
-          rowKey="name"
-          loading={loading}
-          scroll={{x: 'max-content'}}
-          onRow={(record) => ({
-            onClick: () => {
-              if (onRowClick) {
-                onRowClick(record.name);
-              }
-            },
-            style: {
-              cursor: onRowClick ? 'pointer' : 'default',
-              backgroundColor: selectedCatalogRole === record.name ? '#f6ffed' : undefined,
-            },
-          })}
-          rowClassName={(record) =>
-              selectedCatalogRole === record.name ? 'selected-catalogs-role-row' : ''
-          }
-          pagination={{
-            pageSize: 5,
-            showSizeChanger: false,
-            showQuickJumper: false,
-            showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} roles`,
-          }}
-          locale={{
-            emptyText: (
-                <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={<Text type="secondary">No roles found for this catalog</Text>}
-                />
-            ),
-          }}
-          size="small"
-      />
+      <>
+        <Table
+            id="catalog-roles-table"
+            columns={columns}
+            dataSource={roles}
+            rowKey="name"
+            loading={loading}
+            scroll={{x: 'max-content'}}
+            onRow={(record) => ({
+              onClick: () => {
+                if (onRowClick) {
+                  onRowClick(record.name);
+                }
+              },
+              style: {
+                cursor: onRowClick ? 'pointer' : 'default',
+                backgroundColor: selectedCatalogRole === record.name ? '#f6ffed' : undefined,
+              },
+            })}
+            rowClassName={(record) =>
+                selectedCatalogRole === record.name ? 'selected-catalogs-role-row' : ''
+            }
+            pagination={{
+              pageSize: 5,
+              showSizeChanger: false,
+              showQuickJumper: false,
+              showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} roles`,
+            }}
+            locale={{
+              emptyText: (
+                  <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={<Text type="secondary">No roles found for this catalog</Text>}
+                  />
+              ),
+            }}
+            size="small"
+        />
+
+        <DeleteConfirmationModal
+            visible={deleteModalVisible}
+            entityType="Catalog Role"
+            entityName={selectedRoleForDelete}
+            onClose={() => {
+              setDeleteModalVisible(false);
+              setSelectedRoleForDelete(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            description=""
+            warningMessage="This will permanently remove the catalog role and all associated permissions."
+        />
+      </>
   );
 }

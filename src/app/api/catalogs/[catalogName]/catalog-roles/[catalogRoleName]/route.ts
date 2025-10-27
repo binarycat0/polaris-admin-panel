@@ -80,3 +80,62 @@ export async function PUT(
   }
 }
 
+export async function DELETE(
+    request: NextRequest,
+    {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
+) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader) {
+      return NextResponse.json(
+          {
+            error: {
+              message: 'Authorization header is required',
+              type: 'UnauthorizedError',
+              code: 401
+            }
+          },
+          {status: 401}
+      );
+    }
+
+    const {catalogName, catalogRoleName} = await params;
+    const targetUrl = apiManagementCatalogRoleUrl(catalogName, catalogRoleName);
+
+    console.log(`Deleting catalog role: ${catalogName}/${catalogRoleName}`);
+    console.log(`Target URL: ${targetUrl}`);
+
+    const realmHeaders = getRealmHeadersFromRequest(request);
+
+    const response = await fetch(targetUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json',
+        ...realmHeaders,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to delete catalog role',
+          type: 'DeleteError',
+          code: response.status
+        }
+      }));
+      console.error('Backend error response:', data);
+      return NextResponse.json(data, {status: response.status});
+    }
+
+    console.log('Catalog role deleted successfully');
+    return new NextResponse(null, {status: 204});
+  } catch (error) {
+    console.error('Delete catalog role proxy error:', error);
+    return NextResponse.json(
+        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
+        {status: 500}
+    );
+  }
+}
