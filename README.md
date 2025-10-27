@@ -112,7 +112,7 @@ docker run -d \
 ```bash
 git clone https://github.com/binarycat0/polaris-admin-panel.git
 cd polaris-admin-panel
-docker build -t polaris-ui:local .
+docker build -f docker/Dockerfile -t polaris-ui:local .
 
 docker run -d \
   --name polaris-ui \
