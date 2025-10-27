@@ -212,3 +212,84 @@ export async function authenticatedFetch(
 
   return fetch(url, fetchOptions);
 }
+
+/**
+ * Handle an authenticated API request with automatic auth validation, body parsing, and error handling
+ * This is a high-level wrapper that handles the complete request flow:
+ * 1. Validates auth header
+ * 2. Parses request body (if needed)
+ * 3. Makes authenticated fetch
+ * 4. Returns NextResponse with proper status codes
+ *
+ * @param request - NextRequest object
+ * @param urlOrFactory - Target backend URL or async function that returns URL (for dynamic routes)
+ * @param method - HTTP method
+ * @param options - Optional configuration
+ * @returns NextResponse with data or error
+ */
+export async function handleAuthenticatedRequest(
+  request: {
+    headers: {
+      get: (name: string) => string | null;
+      entries: () => IterableIterator<[string, string]>;
+    };
+    json: () => Promise<unknown>;
+  },
+  urlOrFactory: string | (() => Promise<string> | string),
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  options?: {
+    parseBody?: boolean; // Whether to parse request body (default: true for POST/PUT/DELETE, false for GET)
+    bodyParser?: () => Promise<unknown>; // Custom body parser function
+  }
+): Promise<Response> {
+  // Import NextResponse dynamically to avoid circular dependencies
+  const { NextResponse } = await import('next/server');
+
+  try {
+    // 1. Validate auth header
+    const authHeader = validateAuthHeader(request);
+    if (!authHeader) {
+      return NextResponse.json(getUnauthorizedError(), { status: 401 });
+    }
+
+    // 2. Resolve URL (if it's a factory function)
+    const url = typeof urlOrFactory === 'function' ? await urlOrFactory() : urlOrFactory;
+
+    // 3. Parse body if needed
+    let body: unknown = undefined;
+    const shouldParseBody = options?.parseBody ?? (method !== 'GET');
+
+    if (shouldParseBody) {
+      if (options?.bodyParser) {
+        body = await options.bodyParser();
+      } else {
+        body = await request.json().catch(() => undefined);
+      }
+    }
+
+    // 4. Make authenticated fetch
+    const response = await authenticatedFetch(url, method, authHeader, request, body);
+
+    // 5. Parse response
+    const data = await response.json();
+
+    // 6. Return with appropriate status
+    if (!response.ok) {
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Authenticated request error:', error);
+    return NextResponse.json(
+      {
+        error: {
+          message: 'Internal server error',
+          type: 'InternalServerError',
+          code: 500
+        }
+      },
+      { status: 500 }
+    );
+  }
+}

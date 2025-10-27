@@ -1,122 +1,48 @@
-import {NextRequest, NextResponse} from 'next/server';
+import {NextRequest} from 'next/server';
 import {apiManagementCatalogRolesGrantsUrl} from "@/app/constants";
-import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
+import {handleAuthenticatedRequest} from "@/utils/auth";
 
 
 export async function GET(
     request: NextRequest,
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
-  try {
-    const authHeader = validateAuthHeader(request);
-
-    if (!authHeader) {
-      return NextResponse.json(getUnauthorizedError(), {status: 401});
-    }
-
-    const {catalogName, catalogRoleName} = await params;
-
-    const response = await authenticatedFetch(
-      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
-      'GET',
-      authHeader,
-      request
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(data, {status: response.status});
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Grants proxy error:', error);
-    return NextResponse.json(
-        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
-        {status: 500}
-    );
-  }
+  return handleAuthenticatedRequest(
+    request,
+    async () => {
+      const {catalogName, catalogRoleName} = await params;
+      return apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName);
+    },
+    'GET'
+  );
 }
 
 export async function PUT(
     request: NextRequest,
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
-  try {
-    const authHeader = validateAuthHeader(request);
-
-    if (!authHeader) {
-      return NextResponse.json(getUnauthorizedError(), {status: 401});
-    }
-
-    const {catalogName, catalogRoleName} = await params;
-    const body = await request.json();
-
-    console.log(`Adding grant to catalog role: ${catalogName}/${catalogRoleName}`);
-    console.log(`Request body:`, body);
-
-    const response = await authenticatedFetch(
-      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
-      'PUT',
-      authHeader,
-      request,
-      body
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(data, {status: response.status});
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Add grant proxy error:', error);
-    return NextResponse.json(
-        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
-        {status: 500}
-    );
-  }
+  return handleAuthenticatedRequest(
+    request,
+    async () => {
+      const {catalogName, catalogRoleName} = await params;
+      console.log(`Adding grant to catalog role: ${catalogName}/${catalogRoleName}`);
+      return apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName);
+    },
+    'PUT'
+  );
 }
 
 export async function DELETE(
     request: NextRequest,
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
-  try {
-    const authHeader = validateAuthHeader(request);
-
-    if (!authHeader) {
-      return NextResponse.json(getUnauthorizedError(), {status: 401});
-    }
-
-    const {catalogName, catalogRoleName} = await params;
-    const body = await request.json();
-
-    console.log(`Removing grant from catalog role: ${catalogName}/${catalogRoleName}`);
-    console.log(`Request body:`, body);
-
-    const response = await authenticatedFetch(
-      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
-      'DELETE',
-      authHeader,
-      request,
-      body
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(data, {status: response.status});
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Remove grant proxy error:', error);
-    return NextResponse.json(
-        {error: {message: 'Internal server error', type: 'InternalServerError', code: 500}},
-        {status: 500}
-    );
-  }
+  return handleAuthenticatedRequest(
+    request,
+    async () => {
+      const {catalogName, catalogRoleName} = await params;
+      console.log(`Removing grant from catalog role: ${catalogName}/${catalogRoleName}`);
+      return apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName);
+    },
+    'DELETE'
+  );
 }
