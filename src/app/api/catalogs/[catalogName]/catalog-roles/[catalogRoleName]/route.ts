@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogRoleUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function PUT(
@@ -8,19 +8,10 @@ export async function PUT(
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = validateAuthHeader(request);
 
     if (!authHeader) {
-      return NextResponse.json(
-          {
-            error: {
-              message: 'Authorization header is required',
-              type: 'UnauthorizedError',
-              code: 401
-            }
-          },
-          {status: 401}
-      );
+      return NextResponse.json(getUnauthorizedError(), {status: 401});
     }
 
     const {catalogName, catalogRoleName} = await params;
@@ -32,17 +23,7 @@ export async function PUT(
     console.log(`Target URL: ${targetUrl}`);
     console.log(`Request body:`, body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(targetUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(targetUrl, 'PUT', authHeader, request, body);
 
     console.log(`Response status: ${response.status}`);
 
@@ -85,19 +66,10 @@ export async function DELETE(
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = validateAuthHeader(request);
 
     if (!authHeader) {
-      return NextResponse.json(
-          {
-            error: {
-              message: 'Authorization header is required',
-              type: 'UnauthorizedError',
-              code: 401
-            }
-          },
-          {status: 401}
-      );
+      return NextResponse.json(getUnauthorizedError(), {status: 401});
     }
 
     const {catalogName, catalogRoleName} = await params;
@@ -106,16 +78,7 @@ export async function DELETE(
     console.log(`Deleting catalog role: ${catalogName}/${catalogRoleName}`);
     console.log(`Target URL: ${targetUrl}`);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(targetUrl, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(targetUrl, 'DELETE', authHeader, request);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({

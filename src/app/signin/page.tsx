@@ -57,12 +57,10 @@ export default function Page() {
           localStorage.setItem('token_expires_at', expiresAt.toString());
         }
 
-        // Save realm settings if provided
         if (values.realmHeaderName && values.realmHeaderValue) {
           localStorage.setItem('realm_header_name', values.realmHeaderName);
           localStorage.setItem('realm_header_value', values.realmHeaderValue);
         } else {
-          // Clear realm settings if not provided
           localStorage.removeItem('realm_header_name');
           localStorage.removeItem('realm_header_value');
         }

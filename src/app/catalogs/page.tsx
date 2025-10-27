@@ -123,7 +123,6 @@ export default function Page() {
 
       console.log('Principal Roles API Response:', data);
 
-      // Handle the response structure { roles: [...] }
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
@@ -133,7 +132,6 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }
@@ -143,12 +141,11 @@ export default function Page() {
       const data = await authenticatedFetch(`/api/principal-role-principals/${encodeURIComponent(principalRoleName)}`);
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principals API Response:', data);
 
-      // Handle the response structure { principals: [...] }
       if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
         principals: unknown
       }).principals)) {

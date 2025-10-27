@@ -68,11 +68,9 @@ export default function AssignCatalogRoleModal({
     }
   }, [authenticatedFetch]);
 
-  // Fetch available principal roles when modal opens and set the catalog role
   useEffect(() => {
     if (visible && catalogName && catalogRoleName) {
       fetchAvailablePrincipalRoles();
-      // Pre-fill the catalog role name
       form.setFieldsValue({
         catalogRoleName: catalogRoleName,
       });

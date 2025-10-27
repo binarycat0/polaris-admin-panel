@@ -397,16 +397,13 @@ export default function EditCatalogModal({
 
           <Divider orientation="left">Storage Configuration</Divider>
 
-          <Form.Item name="storageType" hidden noStyle>
-            <Input/>
-          </Form.Item>
-
           <Tabs
               type="card"
               activeKey={storageType}
               onChange={(key) => {
-                setStorageType(key as 'S3' | 'AZURE' | 'GCS' | 'FILE');
-                form.setFieldValue('storageType', key);
+                const newStorageType = key as 'S3' | 'AZURE' | 'GCS' | 'FILE';
+                setStorageType(newStorageType);
+                form.setFieldsValue({ storageType: newStorageType });
               }}
               items={storageTypeItems}
           />

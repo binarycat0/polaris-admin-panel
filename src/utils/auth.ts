@@ -140,3 +140,150 @@ export function getRealmHeadersFromRequest(request: { headers: { entries: () => 
 
   return headers;
 }
+
+/**
+ * Validate authorization header from request
+ * @param request - NextRequest object
+ * @returns Authorization header string or null if not present
+ */
+export function validateAuthHeader(request: { headers: { get: (name: string) => string | null } }): string | null {
+  return request.headers.get('Authorization');
+}
+
+/**
+ * Get unauthorized error response data
+ * @returns Error object for unauthorized requests
+ */
+export function getUnauthorizedError() {
+  return {
+    error: {
+      message: 'Authorization header is required',
+      type: 'UnauthorizedError',
+      code: 401
+    }
+  };
+}
+
+/**
+ * Create authenticated fetch headers
+ * @param authHeader - Authorization header value
+ * @param request - NextRequest object to extract realm headers from
+ * @returns Headers object with Authorization, Content-Type, and realm headers
+ */
+export function createAuthHeaders(
+  authHeader: string,
+  request: { headers: { entries: () => IterableIterator<[string, string]> } }
+): Record<string, string> {
+  const realmHeaders = getRealmHeadersFromRequest(request);
+
+  return {
+    'Authorization': authHeader,
+    'Content-Type': 'application/json',
+    ...realmHeaders,
+  };
+}
+
+/**
+ * Make an authenticated fetch request to the backend API
+ * @param url - Target URL
+ * @param method - HTTP method (GET, POST, PUT, DELETE)
+ * @param authHeader - Authorization header value
+ * @param request - NextRequest object to extract realm headers from
+ * @param body - Optional request body (will be JSON stringified)
+ * @returns Fetch Response object
+ */
+export async function authenticatedFetch(
+  url: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  authHeader: string,
+  request: { headers: { entries: () => IterableIterator<[string, string]> } },
+  body?: unknown
+): Promise<Response> {
+  const headers = createAuthHeaders(authHeader, request);
+
+  const fetchOptions: RequestInit = {
+    method,
+    headers,
+  };
+
+  if (body !== undefined) {
+    fetchOptions.body = JSON.stringify(body);
+  }
+
+  return fetch(url, fetchOptions);
+}
+
+/**
+ * Handle an authenticated API request with automatic auth validation, body parsing, and error handling
+ * This is a high-level wrapper that handles the complete request flow:
+ * 1. Validates auth header
+ * 2. Parses request body (if needed)
+ * 3. Makes authenticated fetch
+ * 4. Returns NextResponse with proper status codes
+ *
+ * @param request - NextRequest object
+ * @param urlOrFactory - Target backend URL or async function that returns URL (for dynamic routes)
+ * @param method - HTTP method
+ * @param options - Optional configuration
+ * @returns NextResponse with data or error
+ */
+export async function handleAuthenticatedRequest(
+  request: {
+    headers: {
+      get: (name: string) => string | null;
+      entries: () => IterableIterator<[string, string]>;
+    };
+    json: () => Promise<unknown>;
+  },
+  urlOrFactory: string | (() => Promise<string> | string),
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  options?: {
+    parseBody?: boolean;
+    bodyParser?: () => Promise<unknown>;
+  }
+): Promise<Response> {
+  // Import NextResponse dynamically to avoid circular dependencies
+  const { NextResponse } = await import('next/server');
+
+  try {
+    const authHeader = validateAuthHeader(request);
+    if (!authHeader) {
+      return NextResponse.json(getUnauthorizedError(), { status: 401 });
+    }
+
+    const url = typeof urlOrFactory === 'function' ? await urlOrFactory() : urlOrFactory;
+
+    let body: unknown = undefined;
+    const shouldParseBody = options?.parseBody ?? (method !== 'GET');
+
+    if (shouldParseBody) {
+      if (options?.bodyParser) {
+        body = await options.bodyParser();
+      } else {
+        body = await request.json().catch(() => undefined);
+      }
+    }
+
+    const response = await authenticatedFetch(url, method, authHeader, request, body);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Authenticated request error:', error);
+    return NextResponse.json(
+      {
+        error: {
+          message: 'Internal server error',
+          type: 'InternalServerError',
+          code: 500
+        }
+      },
+      { status: 500 }
+    );
+  }
+}

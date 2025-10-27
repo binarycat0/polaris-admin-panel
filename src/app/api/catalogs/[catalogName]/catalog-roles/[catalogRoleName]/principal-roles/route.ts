@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogRolesPrincipalRolesUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(
@@ -8,33 +8,20 @@ export async function GET(
     {params}: { params: Promise<{ catalogName: string; catalogRoleName: string }> }
 ) {
   try {
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = validateAuthHeader(request);
 
     if (!authHeader) {
-      return NextResponse.json(
-          {
-            error: {
-              message: 'Authorization header is required',
-              type: 'UnauthorizedError',
-              code: 401
-            }
-          },
-          {status: 401}
-      );
+      return NextResponse.json(getUnauthorizedError(), {status: 401});
     }
 
     const {catalogName, catalogRoleName} = await params;
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogRolesPrincipalRolesUrl(catalogName, catalogRoleName), {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogRolesPrincipalRolesUrl(catalogName, catalogRoleName),
+      'GET',
+      authHeader,
+      request
+    );
 
     const data = await response.json();
 

@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRolePrincipalsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(
@@ -8,20 +8,10 @@ export async function GET(
     {params}: { params: Promise<{ principalRoleName: string }> }
 ) {
   try {
-    // Get the Authorization header from the incoming request
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = validateAuthHeader(request);
 
     if (!authHeader) {
-      return NextResponse.json(
-          {
-            error: {
-              message: 'Authorization header is required',
-              type: 'UnauthorizedError',
-              code: 401
-            }
-          },
-          {status: 401}
-      );
+      return NextResponse.json(getUnauthorizedError(), {status: 401});
     }
 
     const {principalRoleName} = await params;
@@ -29,17 +19,7 @@ export async function GET(
 
     console.log('Fetching principals for principal role from:', url);
 
-    // Get realm headers from the request
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(url, 'GET', authHeader, request);
 
     const data = await response.json();
 
