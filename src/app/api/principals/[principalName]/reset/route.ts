@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest} from "@/utils/auth";
+import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
 
 
 export async function POST(
@@ -8,19 +8,10 @@ export async function POST(
     {params}: { params: Promise<{ principalName: string }> }
 ) {
   try {
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = validateAuthHeader(request);
 
     if (!authHeader) {
-      return NextResponse.json(
-          {
-            error: {
-              message: 'Authorization header is required',
-              type: 'UnauthorizedError',
-              code: 401
-            }
-          },
-          {status: 401}
-      );
+      return NextResponse.json(getUnauthorizedError(), {status: 401});
     }
 
     const {principalName} = await params;

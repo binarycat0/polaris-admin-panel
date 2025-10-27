@@ -140,3 +140,26 @@ export function getRealmHeadersFromRequest(request: { headers: { entries: () => 
 
   return headers;
 }
+
+/**
+ * Validate authorization header from request
+ * @param request - NextRequest object
+ * @returns Authorization header string or null if not present
+ */
+export function validateAuthHeader(request: { headers: { get: (name: string) => string | null } }): string | null {
+  return request.headers.get('Authorization');
+}
+
+/**
+ * Get unauthorized error response data
+ * @returns Error object for unauthorized requests
+ */
+export function getUnauthorizedError() {
+  return {
+    error: {
+      message: 'Authorization header is required',
+      type: 'UnauthorizedError',
+      code: 401
+    }
+  };
+}
