@@ -1,7 +1,6 @@
 'use client'
 import type {MenuProps} from 'antd'
 import {
-  Badge,
   Button,
   Dropdown,
   Flex,
@@ -9,28 +8,25 @@ import {
   Spin,
   Table,
   Tag,
-  Tooltip,
   Typography,
   Empty
 } from 'antd'
 import {
   CalendarOutlined,
-  CloudOutlined,
   DeleteOutlined,
   EditOutlined,
-  HomeOutlined,
   IdcardOutlined,
   MinusOutlined,
   PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
-  TeamOutlined,
-  UserOutlined
+  TeamOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
 import ResetPrincipalCredentialsModal from './reset-principal-credentials-modal'
 import DeleteConfirmationModal from './delete-confirmation-modal'
+import PropertiesCell from './properties-cell'
 
 const {Text, Title} = Typography;
 
@@ -69,7 +65,6 @@ interface PrincipalsProps {
   onResetCredentials?: (principalName: string) => void;
   onAddRole?: (principalName: string) => void;
   onRemoveRole?: (principalName: string) => void;
-  onEditPrincipalRole?: (principalName: string, roleName: string) => void;
 }
 
 function formatDate(timestamp: number): string {
@@ -89,8 +84,7 @@ export default function Principals({
                                      onDelete,
                                      onResetCredentials,
                                      onAddRole,
-                                     onRemoveRole,
-                                     onEditPrincipalRole
+                                     onRemoveRole
                                    }: PrincipalsProps) {
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [selectedPrincipalForReset, setSelectedPrincipalForReset] = useState<string | null>(null);
@@ -174,36 +168,7 @@ export default function Principals({
           </Space>
       ),
       key: 'properties',
-      render: (_, record) => {
-        const properties = Object.entries(record.properties || {});
-
-        if (properties.length === 0) {
-          return <Text type="secondary">None</Text>;
-        }
-
-        return (
-            <div>
-              {properties.slice(0, 2).map(([key, value]) => (
-                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                    {key}: {value}
-                  </Tag>
-              ))}
-              {properties.length > 2 && (
-                  <Tooltip title={
-                    <div>
-                      {properties.slice(2).map(([key, value]) => (
-                          <div key={key}>{key}: {value}</div>
-                      ))}
-                    </div>
-                  }>
-                    <Tag style={{fontSize: '11px'}}>
-                      +{properties.length - 2} more
-                    </Tag>
-                  </Tooltip>
-              )}
-            </div>
-        );
-      },
+      render: (_, record) => <PropertiesCell properties={record.properties}/>,
     },
   ];
 
@@ -262,36 +227,7 @@ export default function Principals({
           </Space>
       ),
       key: 'properties',
-      render: (_, record) => {
-        const properties = Object.entries(record.properties || {});
-
-        if (properties.length === 0) {
-          return <Text type="secondary">None</Text>;
-        }
-
-        return (
-            <div>
-              {properties.slice(0, 2).map(([key, value]) => (
-                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                    {key}: {value}
-                  </Tag>
-              ))}
-              {properties.length > 2 && (
-                  <Tooltip title={
-                    <div>
-                      {properties.slice(2).map(([key, value]) => (
-                          <div key={key}>{key}: {value}</div>
-                      ))}
-                    </div>
-                  }>
-                    <Tag style={{fontSize: '11px'}}>
-                      +{properties.length - 2} more
-                    </Tag>
-                  </Tooltip>
-              )}
-            </div>
-        );
-      },
+      render: (_, record) => <PropertiesCell properties={record.properties}/>,
     },
     {
       title: 'Actions',

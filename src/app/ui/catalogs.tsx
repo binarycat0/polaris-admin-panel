@@ -1,6 +1,6 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Button, Dropdown, Empty, Space, Table, Tag, Tooltip, Typography} from 'antd'
+import {Button, Dropdown, Empty, Space, Table, Typography} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
@@ -13,6 +13,7 @@ import {
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
 import DeleteConfirmationModal from '@/app/ui/delete-confirmation-modal'
+import PropertiesCell from '@/app/ui/properties-cell'
 
 const {Text} = Typography;
 
@@ -147,36 +148,7 @@ export default function Catalogs({
           </Space>
       ),
       key: 'properties',
-      render: (_: unknown, record: CatalogEntity) => {
-        const properties = Object.entries(record.properties || {});
-
-        if (properties.length === 0) {
-          return <Text type="secondary">None</Text>;
-        }
-
-        return (
-            <div>
-              {properties.slice(0, 2).map(([key, value]) => (
-                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                    {key}: {value}
-                  </Tag>
-              ))}
-              {properties.length > 2 && (
-                  <Tooltip title={
-                    <div>
-                      {properties.slice(2).map(([key, value]) => (
-                          <div key={key}>{key}: {value}</div>
-                      ))}
-                    </div>
-                  }>
-                    <Tag style={{fontSize: '11px'}}>
-                      +{properties.length - 2} more
-                    </Tag>
-                  </Tooltip>
-              )}
-            </div>
-        );
-      },
+      render: (_: unknown, record: CatalogEntity) => <PropertiesCell properties={record.properties}/>,
     },
     {
       title: 'Actions',
