@@ -1,32 +1,27 @@
 'use client'
 import type {MenuProps} from 'antd'
 import {
-  Badge,
   Button,
   Dropdown,
-  Flex,
   Space,
   Spin,
   Table,
   Tag,
-  Tooltip,
   Typography,
   Empty
 } from 'antd'
 import {
   CalendarOutlined,
-  CloudOutlined,
   DeleteOutlined,
   EditOutlined,
-  HomeOutlined,
   IdcardOutlined,
   SettingOutlined,
-  TeamOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
 import DeleteConfirmationModal from './delete-confirmation-modal'
+import PropertiesCell from './properties-cell'
 
 const {Text, Title} = Typography;
 
@@ -165,36 +160,7 @@ export default function PrincipalRolesList({
           <Space><SettingOutlined/>Properties</Space>
       ),
       key: 'properties',
-      render: (_, record) => {
-        const properties = Object.entries(record.properties || {});
-
-        if (properties.length === 0) {
-          return <Text type="secondary">None</Text>;
-        }
-
-        return (
-            <div>
-              {properties.slice(0, 1).map(([key, value]) => (
-                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                    {key}: {value}
-                  </Tag>
-              ))}
-              {properties.length > 1 && (
-                  <Tooltip title={
-                    <div>
-                      {properties.slice(1).map(([key, value]) => (
-                          <div key={key}>{key}: {value}</div>
-                      ))}
-                    </div>
-                  }>
-                    <Tag style={{fontSize: '11px'}}>
-                      +{properties.length - 1} more
-                    </Tag>
-                  </Tooltip>
-              )}
-            </div>
-        );
-      },
+      render: (_, record) => <PropertiesCell properties={record.properties} maxVisible={1}/>,
     }
   ];
   const columns: ColumnsType<PrincipalRoleItem> = [
@@ -249,36 +215,7 @@ export default function PrincipalRolesList({
           </Space>
       ),
       key: 'properties',
-      render: (_: unknown, record: PrincipalRoleItem) => {
-        const properties = Object.entries(record.properties || {});
-
-        if (properties.length === 0) {
-          return <Text type="secondary">None</Text>;
-        }
-
-        return (
-            <div>
-              {properties.slice(0, 2).map(([key, value]) => (
-                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
-                    {key}: {value}
-                  </Tag>
-              ))}
-              {properties.length > 2 && (
-                  <Tooltip title={
-                    <div>
-                      {properties.slice(2).map(([key, value]) => (
-                          <div key={key}>{key}: {value}</div>
-                      ))}
-                    </div>
-                  }>
-                    <Tag style={{fontSize: '11px'}}>
-                      +{properties.length - 2} more
-                    </Tag>
-                  </Tooltip>
-              )}
-            </div>
-        );
-      },
+      render: (_: unknown, record: PrincipalRoleItem) => <PropertiesCell properties={record.properties}/>,
     },
     {
       title: 'Actions',
