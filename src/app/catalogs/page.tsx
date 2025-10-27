@@ -5,6 +5,7 @@ import CatalogRoles, {CatalogRole} from "@/app/ui/catalog-roles"
 import PrincipalRolesList, {PrincipalRoleItem, PrincipalItem} from "@/app/ui/principal-roles-list"
 import Grants, {Grant} from "@/app/ui/grants"
 import CreateCatalogModal from "@/app/ui/create-catalog-modal"
+import EditCatalogModal from "@/app/ui/edit-catalog-modal"
 import CreateCatalogRoleModal from "@/app/ui/create-catalog-role-modal"
 import EditCatalogRoleModal from "@/app/ui/edit-catalog-role-modal"
 import AssignCatalogRoleModal from "@/app/ui/assign-catalog-role-modal"
@@ -49,6 +50,8 @@ export default function Page() {
   const [grants, setGrants] = useState<Grant[]>([]);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editCatalogModalVisible, setEditCatalogModalVisible] = useState(false);
+  const [editingCatalog, setEditingCatalog] = useState<CatalogEntity | null>(null);
   const [createCatalogRoleModalVisible, setCreateCatalogRoleModalVisible] = useState(false);
   const [editCatalogRoleModalVisible, setEditCatalogRoleModalVisible] = useState(false);
   const [editingCatalogRole, setEditingCatalogRole] = useState<CatalogRole | null>(null);
@@ -371,6 +374,19 @@ export default function Page() {
     refreshCatalogs();
   };
 
+  const handleEditCatalog = (catalogName: string) => {
+    // Find the catalog to edit
+    const catalogToEdit = catalogs.find(catalog => catalog.name === catalogName);
+    if (catalogToEdit) {
+      setEditingCatalog(catalogToEdit);
+      setEditCatalogModalVisible(true);
+    }
+  };
+
+  const handleEditCatalogSuccess = async () => {
+    refreshCatalogs();
+  };
+
   const handleDeleteCatalog = async (catalogName: string) => {
     try {
       await authenticatedFetch(`/api/catalogs/${encodeURIComponent(catalogName)}`, {
@@ -582,6 +598,7 @@ export default function Page() {
             catalogs={catalogs}
             onRowClick={handleCatalogRowClick}
             selectedCatalog={selectedCatalog}
+            onEdit={handleEditCatalog}
             onDelete={handleDeleteCatalog}
         />
 
@@ -673,6 +690,19 @@ export default function Page() {
             onClose={() => setCreateModalVisible(false)}
             onSuccess={handleCreateSuccess}
         />
+
+        {editingCatalog && (
+            <EditCatalogModal
+                visible={editCatalogModalVisible}
+                catalogName={editingCatalog?.name || null}
+                currentCatalog={editingCatalog}
+                onClose={() => {
+                  setEditCatalogModalVisible(false);
+                  setEditingCatalog(null);
+                }}
+                onSuccess={handleEditCatalogSuccess}
+            />
+        )}
 
         <CreateCatalogRoleModal
             visible={createCatalogRoleModalVisible}

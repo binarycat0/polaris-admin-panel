@@ -1,15 +1,14 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Button, Dropdown, Space, Table, Tag, Typography, Empty} from 'antd'
+import {Button, Dropdown, Empty, Space, Table, Tag, Tooltip, Typography} from 'antd'
 import {
   CalendarOutlined,
   CloudOutlined,
-  FolderOutlined,
   DeleteOutlined,
   EditOutlined,
-  FileUnknownOutlined,
+  FolderOutlined,
   SettingOutlined,
-  TeamOutlined
+  TagsOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
@@ -19,6 +18,7 @@ const {Text} = Typography;
 
 export interface CatalogEntity {
   name: string;
+  type: 'INTERNAL' | 'EXTERNAL';
   properties: {
     "default-base-location": string;
     [key: string]: string; // Allows additional string properties
@@ -27,7 +27,21 @@ export interface CatalogEntity {
   lastUpdateTimestamp: number;
   entityVersion: number;
   storageConfigInfo: {
-    allowedLocations: string;
+    storageType: 'S3' | 'AZURE' | 'GCS' | 'FILE';
+    allowedLocations?: string[] | string;
+    roleArn?: string;
+    externalId?: string;
+    userArn?: string;
+    region?: string;
+    endpoint?: string;
+    stsEndpoint?: string;
+    stsUnavailable?: boolean;
+    endpointInternal?: string;
+    pathStyleAccess?: boolean;
+    tenantId?: string;
+    multiTenantAppName?: string;
+    consentUrl?: string;
+    gcsServiceAccount?: string;
   };
 }
 
@@ -89,27 +103,23 @@ export default function Catalogs({
       ),
     },
     {
-      title: (
-          <Space><CloudOutlined/>Base Location</Space>
-      ),
-      dataIndex: ['properties', 'default-base-location'],
-      key: 'baseLocation',
-      ellipsis: true,
-      render: (location: string) => (
-          <Text type="secondary">{location}</Text>
-      ),
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      sorter: (a, b) => a.type.localeCompare(b.type),
     },
     {
       title: (
-          <Space><CloudOutlined/>Allowed Location</Space>
+          <Space>
+            <CloudOutlined/>
+            Storage Type
+          </Space>
       ),
-      key: 'allowedLocation',
-      ellipsis: true,
-      render: (_, record) => (
-          <Text type="secondary">
-            {record.storageConfigInfo?.allowedLocations || 'Not specified'}
-          </Text>
-      ),
+      dataIndex: ['storageConfigInfo', 'storageType'],
+      key: 'storageType',
+      width: 180,
+      sorter: (a, b) => (a.storageConfigInfo?.storageType || '').localeCompare(b.storageConfigInfo?.storageType || ''),
     },
     {
       title: (
@@ -128,6 +138,45 @@ export default function Catalogs({
             <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
           </Space>
       ),
+    },
+    {
+      title: (
+          <Space>
+            <TagsOutlined/>
+            Properties
+          </Space>
+      ),
+      key: 'properties',
+      render: (_: unknown, record: CatalogEntity) => {
+        const properties = Object.entries(record.properties || {});
+
+        if (properties.length === 0) {
+          return <Text type="secondary">None</Text>;
+        }
+
+        return (
+            <div>
+              {properties.slice(0, 2).map(([key, value]) => (
+                  <Tag key={key} style={{marginBottom: 2, fontSize: '11px'}}>
+                    {key}: {value}
+                  </Tag>
+              ))}
+              {properties.length > 2 && (
+                  <Tooltip title={
+                    <div>
+                      {properties.slice(2).map(([key, value]) => (
+                          <div key={key}>{key}: {value}</div>
+                      ))}
+                    </div>
+                  }>
+                    <Tag style={{fontSize: '11px'}}>
+                      +{properties.length - 2} more
+                    </Tag>
+                  </Tooltip>
+              )}
+            </div>
+        );
+      },
     },
     {
       title: 'Actions',
