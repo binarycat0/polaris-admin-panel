@@ -1,11 +1,10 @@
 'use client'
 import type {MenuProps} from 'antd'
-import {Button, Dropdown, Table, Tag, Tooltip, Typography, Space, Empty} from 'antd'
+import {Button, Dropdown, Empty, Space, Table, Tag, Tooltip, Typography} from 'antd'
 import {
   CalendarOutlined,
   DeleteOutlined,
   EditOutlined,
-  FileUnknownOutlined,
   SettingOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
@@ -64,9 +63,9 @@ export default function CatalogRoles(
       width: 250,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
-          <Space>
+          <Space direction="vertical">
             <Text strong style={{color: '#1890ff'}}>{name}</Text>
-            <Text type="secondary">ver. {record.entityVersion}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
     },

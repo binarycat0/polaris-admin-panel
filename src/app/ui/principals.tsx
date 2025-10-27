@@ -129,9 +129,9 @@ export default function Principals({
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
-          <Space>
+          <Space direction="vertical">
             <Text strong style={{color: '#722ed1'}}>{name}</Text>
-            <Text type="secondary">ver. {record.entityVersion}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
     },
@@ -225,9 +225,9 @@ export default function Principals({
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (_, record) => (
-          <Space>
+          <Space direction="vertical">
             <Text strong style={{color: '#1890ff'}}>{record.name}</Text>
-            <Text type="secondary">ver. {record.entityVersion}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
     },

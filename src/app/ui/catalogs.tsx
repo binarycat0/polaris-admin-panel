@@ -65,9 +65,9 @@ export default function Catalogs({
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
-          <Space>
+          <Space direction="vertical">
             <Text strong style={{color: '#1890ff'}}>{name}</Text>
-            <Text type="secondary">ver. {record.entityVersion}</Text>
+            <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
       width: 200,
