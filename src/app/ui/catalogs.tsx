@@ -61,7 +61,6 @@ export default function Catalogs({
                                    selectedCatalog,
                                    onEdit,
                                    onDelete,
-                                   onShowRoles
                                  }: CatalogsProps) {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedCatalogForDelete, setSelectedCatalogForDelete] = useState<string | null>(null);

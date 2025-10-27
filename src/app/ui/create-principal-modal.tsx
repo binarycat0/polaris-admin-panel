@@ -121,8 +121,7 @@ export default function CreatePrincipalModal({
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              onFinishFailed={(errorInfo) => {
-
+              onFinishFailed={() => {
                 message.error('Please fill in all required fields');
               }}
               autoComplete="off"

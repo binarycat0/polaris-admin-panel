@@ -1,7 +1,7 @@
 'use client'
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {TeamOutlined, UserAddOutlined} from '@ant-design/icons'
-import {useEffect, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
 interface AssignPrincipalRoleModalProps {
@@ -38,14 +38,7 @@ export default function AssignPrincipalRoleModal({
   const [rolesLoading, setRolesLoading] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
-  // Fetch available principal roles when modal opens
-  useEffect(() => {
-    if (visible) {
-      fetchAvailableRoles();
-    }
-  }, [visible]);
-
-  const fetchAvailableRoles = async () => {
+  const fetchAvailableRoles = useCallback(async () => {
     setRolesLoading(true);
     try {
       const data = await authenticatedFetch('/api/principal-roles');
@@ -68,7 +61,14 @@ export default function AssignPrincipalRoleModal({
     } finally {
       setRolesLoading(false);
     }
-  };
+  }, [authenticatedFetch]);
+
+  // Fetch available principal roles when modal opens
+  useEffect(() => {
+    if (visible) {
+      fetchAvailableRoles();
+    }
+  }, [visible, fetchAvailableRoles]);
 
   const handleSubmit = async (values: PrincipalRoleFormValues) => {
     if (!principalName) {

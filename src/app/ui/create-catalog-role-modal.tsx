@@ -6,14 +6,11 @@ import {
   Input,
   message,
   Modal,
-  Space,
-  Typography
+  Space
 } from 'antd'
 import {DeleteOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
-
-const {Text} = Typography;
 
 interface CreateCatalogRoleModalProps {
   visible: boolean;

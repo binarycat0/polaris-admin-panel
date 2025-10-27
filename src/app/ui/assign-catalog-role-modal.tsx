@@ -1,7 +1,7 @@
 'use client'
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {FolderOutlined, UserAddOutlined} from '@ant-design/icons'
-import {useEffect, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
 interface AssignCatalogRoleModalProps {
@@ -43,18 +43,7 @@ export default function AssignCatalogRoleModal({
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
-  // Fetch available principal roles when modal opens and set the catalog role
-  useEffect(() => {
-    if (visible && catalogName && catalogRoleName) {
-      fetchAvailablePrincipalRoles();
-      // Pre-fill the catalog role name
-      form.setFieldsValue({
-        catalogRoleName: catalogRoleName,
-      });
-    }
-  }, [visible, catalogName, catalogRoleName, form]);
-
-  const fetchAvailablePrincipalRoles = async () => {
+  const fetchAvailablePrincipalRoles = useCallback(async () => {
     setPrincipalRolesLoading(true);
     try {
       const data = await authenticatedFetch('/api/principal-roles');
@@ -77,7 +66,18 @@ export default function AssignCatalogRoleModal({
     } finally {
       setPrincipalRolesLoading(false);
     }
-  };
+  }, [authenticatedFetch]);
+
+  // Fetch available principal roles when modal opens and set the catalog role
+  useEffect(() => {
+    if (visible && catalogName && catalogRoleName) {
+      fetchAvailablePrincipalRoles();
+      // Pre-fill the catalog role name
+      form.setFieldsValue({
+        catalogRoleName: catalogRoleName,
+      });
+    }
+  }, [visible, catalogName, catalogRoleName, form, fetchAvailablePrincipalRoles]);
 
 
 

@@ -94,11 +94,6 @@ export default function PrincipalRolesList({
     }
   };
 
-  const handleDeletePrincipalClick = (principalRoleName: string, principalName: string) => {
-    setSelectedPrincipalForDelete({principalRoleName, principalName});
-    setDeletePrincipalModalVisible(true);
-  };
-
   const handleDeletePrincipalConfirm = async () => {
     if (onDeletePrincipal && selectedPrincipalForDelete) {
       await onDeletePrincipal(
@@ -108,7 +103,7 @@ export default function PrincipalRolesList({
     }
   };
 
-  const getPrincipalsColumns = (principalRoleName: string): ColumnsType<PrincipalItem> => [
+  const getPrincipalsColumns = (): ColumnsType<PrincipalItem> => [
     {
       title: "Name",
       dataIndex: 'name',
@@ -297,7 +292,7 @@ export default function PrincipalRolesList({
                         </Space>
                       </Title>
                       <Table
-                          columns={getPrincipalsColumns(record.name)}
+                          columns={getPrincipalsColumns()}
                           dataSource={principalsList}
                           rowKey="name"
                           pagination={{

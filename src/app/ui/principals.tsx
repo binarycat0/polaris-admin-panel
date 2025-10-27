@@ -116,7 +116,7 @@ export default function Principals({
     }
   };
 
-  const getRolesColumns = (principalName: string): ColumnsType<PrincipalRoleItem> => [
+  const getRolesColumns = (): ColumnsType<PrincipalRoleItem> => [
     {
       title: "Name",
       dataIndex: 'name',
@@ -349,7 +349,7 @@ export default function Principals({
                         </Space>
                       </Flex>
                       <Table
-                          columns={getRolesColumns(record.name)}
+                          columns={getRolesColumns()}
                           dataSource={roles}
                           rowKey="name"
                           pagination={{
