@@ -565,14 +565,12 @@ export default function Page() {
       <Space direction="vertical" style={{width: '100%'}}>
         <Space>
           <Title level={4} style={{marginBottom: 0}}>
-            <Space>
-              Catalogs
-              <FolderOpenOutlined/>
-            </Space>
+            <FolderOpenOutlined/>
           </Title>
           <Breadcrumb separator={">"} items={breadcrumbItems}/>
         </Space>
 
+        <Divider orientation="left">Catalogs</Divider>
         <Button
             variant="outlined"
             icon={<FolderAddOutlined/>}
@@ -580,7 +578,6 @@ export default function Page() {
         >
           New catalog
         </Button>
-
         <Catalogs
             catalogs={catalogs}
             onRowClick={handleCatalogRowClick}
