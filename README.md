@@ -24,7 +24,18 @@ docker run -d \
 
 ### Using Helm
 
+**From GitHub Container Registry (OCI):**
 ```bash
+helm install apache-polaris-ui oci://ghcr.io/binarycat0/apache-polaris-ui \
+  --version 0.1.0 \
+  --set env.POLARIS_MANAGEMENT_API_URL=http://polaris:8181/api/management/v1 \
+  --set env.POLARIS_CATALOG_API_URL=http://polaris:8181/api/catalog/v1
+```
+
+**From local chart:**
+```bash
+git clone https://github.com/binarycat0/polaris-admin-panel.git
+cd polaris-admin-panel
 helm install apache-polaris-ui ./helm/apache-polaris-ui \
   --set env.POLARIS_MANAGEMENT_API_URL=http://polaris:8181/api/management/v1 \
   --set env.POLARIS_CATALOG_API_URL=http://polaris:8181/api/catalog/v1
@@ -101,7 +112,7 @@ docker run -d \
 ```bash
 git clone https://github.com/binarycat0/polaris-admin-panel.git
 cd polaris-admin-panel
-docker build -t polaris-ui:local .
+docker build -f docker/Dockerfile -t polaris-ui:local .
 
 docker run -d \
   --name polaris-ui \
@@ -112,6 +123,14 @@ docker run -d \
 ```
 
 ### Kubernetes/Helm Deployment
+
+**Install from GitHub Container Registry (OCI):**
+```bash
+helm install apache-polaris-ui oci://ghcr.io/binarycat0/apache-polaris-ui \
+  --version 0.1.0 \
+  --set env.POLARIS_MANAGEMENT_API_URL=http://polaris:8181/api/management/v1 \
+  --set env.POLARIS_CATALOG_API_URL=http://polaris:8181/api/catalog/v1
+```
 
 **Install from local chart:**
 ```bash
