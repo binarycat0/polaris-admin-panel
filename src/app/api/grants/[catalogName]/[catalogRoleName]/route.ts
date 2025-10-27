@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogRolesGrantsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(
@@ -16,16 +16,12 @@ export async function GET(
 
     const {catalogName, catalogRoleName} = await params;
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName), {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
+      'GET',
+      authHeader,
+      request
+    );
 
     const data = await response.json();
 
@@ -60,17 +56,13 @@ export async function PUT(
     console.log(`Adding grant to catalog role: ${catalogName}/${catalogRoleName}`);
     console.log(`Request body:`, body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName), {
-      method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
+      'PUT',
+      authHeader,
+      request,
+      body
+    );
 
     const data = await response.json();
 
@@ -105,17 +97,13 @@ export async function DELETE(
     console.log(`Removing grant from catalog role: ${catalogName}/${catalogRoleName}`);
     console.log(`Request body:`, body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName), {
-      method: 'DELETE',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogRolesGrantsUrl(catalogName, catalogRoleName),
+      'DELETE',
+      authHeader,
+      request,
+      body
+    );
 
     const data = await response.json();
 

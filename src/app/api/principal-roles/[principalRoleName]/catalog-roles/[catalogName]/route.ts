@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRoleCatalogRolesUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 export async function PUT(
     request: NextRequest,
@@ -21,17 +21,7 @@ export async function PUT(
     const body = await request.json();
     console.log('Request body:', body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(url, 'PUT', authHeader, request, body);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({

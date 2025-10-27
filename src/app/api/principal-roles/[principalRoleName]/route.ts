@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRolesUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function PUT(
@@ -22,17 +22,7 @@ export async function PUT(
     const body = await request.json();
     console.log('Request body:', body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(url, 'PUT', authHeader, request, body);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({
@@ -74,16 +64,7 @@ export async function DELETE(
 
     console.log('Deleting principal role:', principalRoleName);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(url, 'DELETE', authHeader, request);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({

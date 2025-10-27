@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRolePrincipalsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(
@@ -20,16 +20,7 @@ export async function GET(
     console.log('Fetching principals for principal role from:', url);
 
     // Get realm headers from the request
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(url, 'GET', authHeader, request);
 
     const data = await response.json();
 

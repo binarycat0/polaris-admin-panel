@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(request: NextRequest) {
@@ -13,17 +13,12 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching catalogs from:', apiManagementCatalogUrl);
 
-    // Get realm headers from the request
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogUrl,
+      'GET',
+      authHeader,
+      request
+    );
 
     console.log('Backend response status:', response.status);
 
@@ -56,18 +51,13 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating catalog:', body);
 
-    // Get realm headers from the request
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementCatalogUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(
+      apiManagementCatalogUrl,
+      'POST',
+      authHeader,
+      request,
+      body
+    );
 
     console.log('Backend response status:', response.status);
 

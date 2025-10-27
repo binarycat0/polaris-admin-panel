@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRoleCatalogRoleUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 export async function DELETE(
     request: NextRequest,
@@ -18,16 +18,7 @@ export async function DELETE(
 
     console.log('Revoking catalog role from principal role:', principalRoleName, catalogName, catalogRoleName);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(url, 'DELETE', authHeader, request);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({

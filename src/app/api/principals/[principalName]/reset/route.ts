@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function POST(
@@ -23,17 +23,7 @@ export async function POST(
 
     console.log('Reset request body:', body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(url, 'POST', authHeader, request, body);
 
     const data = await response.json();
 

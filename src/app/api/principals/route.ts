@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalsUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(request: NextRequest) {
@@ -13,16 +13,12 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching principals from:', apiManagementPrincipalsUrl);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementPrincipalsUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(
+      apiManagementPrincipalsUrl,
+      'GET',
+      authHeader,
+      request
+    );
 
     const data = await response.json();
 
@@ -59,17 +55,13 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating principal:', body);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementPrincipalsUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(
+      apiManagementPrincipalsUrl,
+      'POST',
+      authHeader,
+      request,
+      body
+    );
 
     const data = await response.json();
 

@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementPrincipalRolesUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(request: NextRequest) {
@@ -13,16 +13,12 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching principal roles from:', apiManagementPrincipalRolesUrl);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementPrincipalRolesUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(
+      apiManagementPrincipalRolesUrl,
+      'GET',
+      authHeader,
+      request
+    );
 
     const data = await response.json();
 
@@ -57,17 +53,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(apiManagementPrincipalRolesUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(
+      apiManagementPrincipalRolesUrl,
+      'POST',
+      authHeader,
+      request,
+      body
+    );
 
     const data = await response.json();
 

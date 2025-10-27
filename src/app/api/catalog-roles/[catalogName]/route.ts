@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {apiManagementCatalogRolesUrl} from "@/app/constants";
-import {getRealmHeadersFromRequest, validateAuthHeader, getUnauthorizedError} from "@/utils/auth";
+import {authenticatedFetch, getUnauthorizedError, validateAuthHeader} from "@/utils/auth";
 
 
 export async function GET(
@@ -17,16 +17,7 @@ export async function GET(
     const {catalogName} = await params;
     const targetUrl = apiManagementCatalogRolesUrl(catalogName);
 
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(targetUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-    });
+    const response = await authenticatedFetch(targetUrl, 'GET', authHeader, request);
 
     const data = await response.json();
 
@@ -68,17 +59,7 @@ export async function POST(
     const {catalogName} = await params;
     const targetUrl = apiManagementCatalogRolesUrl(catalogName);
     const body = await request.json();
-    const realmHeaders = getRealmHeadersFromRequest(request);
-
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        ...realmHeaders,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await authenticatedFetch(targetUrl, 'POST', authHeader, request, body);
 
     const data = await response.json();
 

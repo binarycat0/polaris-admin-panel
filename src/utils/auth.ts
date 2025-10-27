@@ -163,3 +163,52 @@ export function getUnauthorizedError() {
     }
   };
 }
+
+/**
+ * Create authenticated fetch headers
+ * @param authHeader - Authorization header value
+ * @param request - NextRequest object to extract realm headers from
+ * @returns Headers object with Authorization, Content-Type, and realm headers
+ */
+export function createAuthHeaders(
+  authHeader: string,
+  request: { headers: { entries: () => IterableIterator<[string, string]> } }
+): Record<string, string> {
+  const realmHeaders = getRealmHeadersFromRequest(request);
+
+  return {
+    'Authorization': authHeader,
+    'Content-Type': 'application/json',
+    ...realmHeaders,
+  };
+}
+
+/**
+ * Make an authenticated fetch request to the backend API
+ * @param url - Target URL
+ * @param method - HTTP method (GET, POST, PUT, DELETE)
+ * @param authHeader - Authorization header value
+ * @param request - NextRequest object to extract realm headers from
+ * @param body - Optional request body (will be JSON stringified)
+ * @returns Fetch Response object
+ */
+export async function authenticatedFetch(
+  url: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  authHeader: string,
+  request: { headers: { entries: () => IterableIterator<[string, string]> } },
+  body?: unknown
+): Promise<Response> {
+  const headers = createAuthHeaders(authHeader, request);
+
+  const fetchOptions: RequestInit = {
+    method,
+    headers,
+  };
+
+  if (body !== undefined) {
+    fetchOptions.body = JSON.stringify(body);
+  }
+
+  return fetch(url, fetchOptions);
+}
