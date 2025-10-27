@@ -1,5 +1,5 @@
 {
-  "name": "polaris-roles-manager-ui",
+  "name": "apache-polaris-management-ui",
   "version": "0.1.0",
   "private": true,
   "scripts": {
