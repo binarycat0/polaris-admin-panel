@@ -35,7 +35,6 @@ export default function EditCatalogRoleModal({
 
   useEffect(() => {
     if (visible && currentCatalogRole) {
-      // Convert properties object to array format for the form
       const propertiesArray = Object.entries(currentCatalogRole.properties || {}).map(([key, value]) => ({
         key,
         value

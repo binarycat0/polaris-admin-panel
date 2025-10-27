@@ -238,24 +238,21 @@ export async function handleAuthenticatedRequest(
   urlOrFactory: string | (() => Promise<string> | string),
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   options?: {
-    parseBody?: boolean; // Whether to parse request body (default: true for POST/PUT/DELETE, false for GET)
-    bodyParser?: () => Promise<unknown>; // Custom body parser function
+    parseBody?: boolean;
+    bodyParser?: () => Promise<unknown>;
   }
 ): Promise<Response> {
   // Import NextResponse dynamically to avoid circular dependencies
   const { NextResponse } = await import('next/server');
 
   try {
-    // 1. Validate auth header
     const authHeader = validateAuthHeader(request);
     if (!authHeader) {
       return NextResponse.json(getUnauthorizedError(), { status: 401 });
     }
 
-    // 2. Resolve URL (if it's a factory function)
     const url = typeof urlOrFactory === 'function' ? await urlOrFactory() : urlOrFactory;
 
-    // 3. Parse body if needed
     let body: unknown = undefined;
     const shouldParseBody = options?.parseBody ?? (method !== 'GET');
 
@@ -267,13 +264,10 @@ export async function handleAuthenticatedRequest(
       }
     }
 
-    // 4. Make authenticated fetch
     const response = await authenticatedFetch(url, method, authHeader, request, body);
 
-    // 5. Parse response
     const data = await response.json();
 
-    // 6. Return with appropriate status
     if (!response.ok) {
       return NextResponse.json(data, { status: response.status });
     }

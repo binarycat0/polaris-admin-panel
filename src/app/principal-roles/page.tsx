@@ -55,12 +55,11 @@ export default function Page() {
       const data = await authenticatedFetch(`/api/principal-role-principals/${encodeURIComponent(principalRoleName)}`);
 
       if (!data) {
-        return []; // Authentication failed, user redirected
+        return [];
       }
 
       console.log('Principals API Response:', data);
 
-      // Handle the response structure { principals: [...] }
       if (data && typeof data === 'object' && 'principals' in data && Array.isArray((data as {
         principals: unknown
       }).principals)) {
@@ -70,31 +69,24 @@ export default function Page() {
         return [];
       }
     } catch {
-      // Error handling is done in authenticatedFetch
       return [];
     }
   }, [authenticatedFetch]);
 
   const handleRowClick = async (principalRoleName: string) => {
-    // Toggle expansion
     const isExpanded = expandedRowKeys.includes(principalRoleName);
 
     if (isExpanded) {
-      // Collapse the row
       setExpandedRowKeys([]);
-      // Clear from localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('expanded_principal_role');
       }
     } else {
-      // Expand the row (only one row at a time)
       setExpandedRowKeys([principalRoleName]);
-      // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('expanded_principal_role', principalRoleName);
       }
 
-      // Load principals if not already loaded
       if (!principals[principalRoleName]) {
         setPrincipalsLoading(prev => ({...prev, [principalRoleName]: true}));
 
@@ -128,7 +120,7 @@ export default function Page() {
       await handleRefresh();
     } catch (error) {
       console.error('Error deleting principal role:', error);
-      throw error; // Re-throw to let the modal handle the error display
+      throw error;
     }
   };
 
@@ -143,12 +135,11 @@ export default function Page() {
 
       message.success(`Principal "${principalName}" removed from role "${principalRoleName}" successfully!`);
 
-      // Refresh the principals list for this role
       const principalsData = await getPrincipals(principalRoleName);
       setPrincipals(prev => ({...prev, [principalRoleName]: principalsData}));
     } catch (error) {
       console.error('Error removing principal from role:', error);
-      throw error; // Re-throw to let the modal handle the error display
+      throw error;
     }
   };
 
@@ -182,14 +173,12 @@ export default function Page() {
     fetchPrincipalRoles();
   }, [getPrincipalRoles]);
 
-  // Restore state from localStorage when principal roles are loaded
   useEffect(() => {
     const restoreState = async () => {
       if (principalRoles.length === 0 || loading) return;
 
       const savedPrincipalRole = expandedRowKeys[0];
 
-      // Restore principals if a principal role was expanded
       if (savedPrincipalRole && !principals[savedPrincipalRole]) {
         setPrincipalsLoading(prev => ({...prev, [savedPrincipalRole]: true}));
         try {

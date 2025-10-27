@@ -19,7 +19,6 @@ export async function GET(
 
     console.log('Fetching principal roles for principal from:', url);
 
-    // Get realm headers from the request
     const response = await authenticatedFetch(url, 'GET', authHeader, request);
 
     const data = await response.json();

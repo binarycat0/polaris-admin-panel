@@ -145,7 +145,6 @@ export default function Page() {
 
   const handleAssignRoleSuccess = async () => {
     if (selectedPrincipalForRole) {
-      // Refresh the principal roles for the selected principal
       setRolesLoading(prev => ({...prev, [selectedPrincipalForRole]: true}));
       try {
         const roles = await getPrincipalRoles(selectedPrincipalForRole);
@@ -163,7 +162,6 @@ export default function Page() {
 
   const handleRemoveRoleSuccess = async () => {
     if (selectedPrincipalForRole) {
-      // Refresh the principal roles for the selected principal
       setRolesLoading(prev => ({...prev, [selectedPrincipalForRole]: true}));
       try {
         const roles = await getPrincipalRoles(selectedPrincipalForRole);
@@ -200,7 +198,6 @@ export default function Page() {
     fetchPrincipals();
   }, [getPrincipals]);
 
-  // Restore state from localStorage when principals are loaded
   useEffect(() => {
     const restoreState = async () => {
       if (principals.length === 0 || loading) return;
