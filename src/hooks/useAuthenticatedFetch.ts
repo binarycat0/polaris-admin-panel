@@ -72,9 +72,15 @@ export function useAuthenticatedFetch() {
       return await response.json();
     } catch (error) {
       console.error(`Error fetching ${url}:`, error);
-      message.error('An unexpected error occurred. Please try again.');
 
-      return null;
+      // If it's an error we threw (from !response.ok), re-throw it
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      // For unexpected errors (network issues, etc.), show message and throw
+      message.error('An unexpected error occurred. Please try again.');
+      throw new Error('Network error');
     }
   }, [router]);
 

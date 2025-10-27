@@ -26,10 +26,6 @@ export async function GET(
     const {catalogName} = await params;
     const targetUrl = apiManagementCatalogRolesUrl(catalogName);
 
-    console.log(`Fetching catalog roles for catalog: ${catalogName}`);
-    console.log(`Target URL: ${targetUrl}`);
-    console.log(`Authorization header present: ${!!authHeader}`);
-
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(targetUrl, {
@@ -41,11 +37,7 @@ export async function GET(
       },
     });
 
-    console.log(`Response status: ${response.status}`);
-    console.log(`Response headers:`, Object.fromEntries(response.headers.entries()));
-
     const data = await response.json();
-    console.log(`Response data:`, data);
 
     if (!response.ok) {
       console.error(`Backend API error for catalog ${catalogName}:`, data);
@@ -93,15 +85,7 @@ export async function POST(
 
     const {catalogName} = await params;
     const targetUrl = apiManagementCatalogRolesUrl(catalogName);
-
-    // Get the request body
     const body = await request.json();
-
-    console.log(`Creating catalog role for catalog: ${catalogName}`);
-    console.log(`Target URL: ${targetUrl}`);
-    console.log(`Request body:`, body);
-
-    // Get realm headers from the request
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(targetUrl, {
@@ -114,10 +98,7 @@ export async function POST(
       body: JSON.stringify(body),
     });
 
-    console.log(`Response status: ${response.status}`);
-
     const data = await response.json();
-    console.log(`Response data:`, data);
 
     if (!response.ok) {
       console.error(`Backend API error creating catalog role for ${catalogName}:`, data);

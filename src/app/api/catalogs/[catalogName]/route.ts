@@ -25,10 +25,6 @@ export async function DELETE(
 
     const {catalogName} = await params;
     const url = apiManagementCatalogByNameUrl(catalogName);
-
-    console.log('Deleting catalog:', catalogName);
-    console.log('Target URL:', url);
-
     const realmHeaders = getRealmHeadersFromRequest(request);
 
     const response = await fetch(url, {

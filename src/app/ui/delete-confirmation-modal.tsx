@@ -57,7 +57,9 @@ export default function DeleteConfirmationModal({
       <Modal
           title={
             <Space>
-              <ExclamationCircleOutlined/> Delete
+              Delete
+              <Text underline>{entityName}</Text>
+              {entityType}
             </Space>
           }
           open={visible}
@@ -73,34 +75,24 @@ export default function DeleteConfirmationModal({
             </Button>
           ]}
       >
-        <Space direction="vertical" style={{width: '100%'}} size="middle">
+        <Space direction="vertical">
           {errorMessage && (
               <Alert
                   message="Error"
                   description={errorMessage}
-                  type="warning"
+                  type="error"
                   showIcon
                   closable
                   onClose={() => setErrorMessage(null)}
               />
           )}
 
-          <Alert
-              message={
-                <Text strong>
-                  {entityType}: <Text code>{entityName}</Text>
-                </Text>
-              }
-              type="error"
-              showIcon
-          />
-
           {`Are you sure you want to delete this ${entityType.toLowerCase()}?`}
 
           {description}
 
           {warningMessage && (
-              <Text strong>
+              <Text>
                 {warningMessage}
               </Text>
           )}
