@@ -120,6 +120,7 @@ export default function PrincipalRolesList({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
           <Space direction="vertical">
@@ -137,21 +138,28 @@ export default function PrincipalRolesList({
       ),
       dataIndex: 'clientId',
       key: 'clientId',
+      width: 200,
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
-          <Text code>{clientId}</Text>
+          <Text strong>{clientId}</Text>
       ),
     },
     {
       title: (
-          <Space><CalendarOutlined/>Created</Space>
+          <Space>
+            <CalendarOutlined/>
+            Created / Last Updated
+          </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
+          </Space>
       ),
     },
     {
@@ -159,7 +167,6 @@ export default function PrincipalRolesList({
           <Space><SettingOutlined/>Properties</Space>
       ),
       key: 'properties',
-      width: 200,
       render: (_, record) => {
         const properties = Object.entries(record.properties || {});
 
@@ -197,7 +204,7 @@ export default function PrincipalRolesList({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
-      width: 250,
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
           <Space direction="vertical">
@@ -210,7 +217,7 @@ export default function PrincipalRolesList({
       title: 'Type',
       dataIndex: 'federated',
       key: 'federated',
-      width: 100,
+      width: 140,
       sorter: (a, b) => Number(a.federated) - Number(b.federated),
       render: (federated: boolean) => (
           <Text>
@@ -222,30 +229,18 @@ export default function PrincipalRolesList({
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
       render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(timestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -256,7 +251,6 @@ export default function PrincipalRolesList({
           </Space>
       ),
       key: 'properties',
-      width: 250,
       render: (_: unknown, record: PrincipalRoleItem) => {
         const properties = Object.entries(record.properties || {});
 
@@ -361,10 +355,10 @@ export default function PrincipalRolesList({
                     <div style={{padding: '0 10px'}}>
                       <Title level={5} style={{marginBottom: 16}}>
                         <Space>
+                          <Tag>{principalsList.length}</Tag>
                           <UserOutlined/>
                           Principals for:
                           {record.name}
-                          {principalsList.length}
                         </Space>
                       </Title>
                       <Table

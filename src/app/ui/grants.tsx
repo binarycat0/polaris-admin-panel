@@ -102,7 +102,7 @@ export default function Grants({grants, loading}: GrantsProps) {
                           <Space direction="vertical" style={{width: '100%'}}>
                           </Space>
                           {grant.privilege && (
-                              <Text code>
+                              <Text strong>
                                 {grant.privilege}
                               </Text>
                           )}

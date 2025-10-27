@@ -127,6 +127,7 @@ export default function Principals({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
           <Space direction="vertical">
@@ -151,30 +152,18 @@ export default function Principals({
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(record.createTimestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -223,6 +212,7 @@ export default function Principals({
       title: "Name",
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (_, record) => (
           <Space direction="vertical">
@@ -240,39 +230,28 @@ export default function Principals({
       ),
       dataIndex: 'clientId',
       key: 'clientId',
+      width: 200,
       sorter: (a, b) => a.clientId.localeCompare(b.clientId),
       render: (clientId: string) => (
-          <Text code>{clientId}</Text>
+          <Text strong>{clientId}</Text>
       ),
     },
     {
       title: (
           <Space>
             <CalendarOutlined/>
-            Created
+            Created / Last Updated
           </Space>
       ),
       dataIndex: 'createTimestamp',
       key: 'createTimestamp',
-      width: 180,
+      width: 250,
       sorter: (a, b) => a.createTimestamp - b.createTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
-      ),
-    },
-    {
-      title: (
-          <Space>
-            <CalendarOutlined/>
-            Last Updated
+      render: (timestamp: number, record) => (
+          <Space direction="vertical">
+            <Text type="secondary">{formatDate(timestamp)}</Text>
+            <Text type="secondary">{formatDate(record.lastUpdateTimestamp)}</Text>
           </Space>
-      ),
-      dataIndex: 'lastUpdateTimestamp',
-      key: 'lastUpdateTimestamp',
-      width: 180,
-      sorter: (a, b) => a.lastUpdateTimestamp - b.lastUpdateTimestamp,
-      render: (timestamp: number) => (
-          <Text type="secondary">{formatDate(timestamp)}</Text>
       ),
     },
     {
@@ -397,10 +376,10 @@ export default function Principals({
                       <Flex justify="space-between" align="center" style={{marginBottom: 16}}>
                         <Title level={5} style={{marginBottom: 0}}>
                           <Space>
+                            <Tag>{roles.length}</Tag>
                             <TeamOutlined/>
                             Principal Roles for:
                             {record.name}
-                            {roles.length}
                           </Space>
                         </Title>
                         <Space>
