@@ -9,7 +9,7 @@ import {
   Button
 } from 'antd'
 import {KeyOutlined} from '@ant-design/icons'
-import type {PrincipalWithCredentials} from './types/principal'
+import type {PrincipalWithCredentials} from '@/app/ui/types/principal'
 
 const {Text} = Typography;
 

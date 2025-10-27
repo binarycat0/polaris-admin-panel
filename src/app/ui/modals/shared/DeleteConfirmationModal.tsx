@@ -1,9 +1,9 @@
 'use client'
 import {Alert, Button, Modal, Space, Typography} from 'antd'
-import {DeleteOutlined, ExclamationCircleOutlined} from '@ant-design/icons'
+import {DeleteOutlined} from '@ant-design/icons'
 import {useState} from 'react'
 
-const {Text, Paragraph} = Typography
+const {Text} = Typography
 
 export interface DeleteConfirmationModalProps {
   visible: boolean;

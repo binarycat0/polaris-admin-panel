@@ -1,18 +1,20 @@
 'use client'
 import {Form, Input, message, Modal, Select, Space} from 'antd'
-import {TeamOutlined, UserAddOutlined} from '@ant-design/icons'
-import {useEffect, useState} from 'react'
+import {FolderOutlined, UserAddOutlined} from '@ant-design/icons'
+import {useCallback, useEffect, useState} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
-interface AssignPrincipalRoleModalProps {
+interface AssignCatalogRoleModalProps {
   visible: boolean;
-  principalName: string | null;
+  catalogName: string | null;
+  catalogRoleName: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-interface PrincipalRoleFormValues {
-  roleName: string;
+interface CatalogRoleFormValues {
+  principalRoleName: string;
+  catalogRoleName: string;
 }
 
 interface PrincipalRole {
@@ -26,27 +28,23 @@ interface PrincipalRole {
   entityVersion: number;
 }
 
-export default function AssignPrincipalRoleModal({
-                                                   visible,
-                                                   principalName,
-                                                   onClose,
-                                                   onSuccess
-                                                 }: AssignPrincipalRoleModalProps) {
-  const [form] = Form.useForm<PrincipalRoleFormValues>();
+
+
+export default function AssignCatalogRoleModal({
+                                                  visible,
+                                                  catalogName,
+                                                  catalogRoleName,
+                                                  onClose,
+                                                  onSuccess
+                                                }: AssignCatalogRoleModalProps) {
+  const [form] = Form.useForm<CatalogRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const [availableRoles, setAvailableRoles] = useState<PrincipalRole[]>([]);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [availablePrincipalRoles, setAvailablePrincipalRoles] = useState<PrincipalRole[]>([]);
+  const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
   const {authenticatedFetch} = useAuthenticatedFetch();
 
-  // Fetch available principal roles when modal opens
-  useEffect(() => {
-    if (visible) {
-      fetchAvailableRoles();
-    }
-  }, [visible]);
-
-  const fetchAvailableRoles = async () => {
-    setRolesLoading(true);
+  const fetchAvailablePrincipalRoles = useCallback(async () => {
+    setPrincipalRolesLoading(true);
     try {
       const data = await authenticatedFetch('/api/principal-roles');
 
@@ -57,22 +55,35 @@ export default function AssignPrincipalRoleModal({
       if (data && typeof data === 'object' && 'roles' in data && Array.isArray((data as {
         roles: unknown
       }).roles)) {
-        setAvailableRoles((data as { roles: PrincipalRole[] }).roles);
+        setAvailablePrincipalRoles((data as { roles: PrincipalRole[] }).roles);
       } else {
         console.error('Unexpected principal roles response structure:', data);
-        setAvailableRoles([]);
+        setAvailablePrincipalRoles([]);
       }
     } catch (error) {
       console.error('Error fetching principal roles:', error);
-      message.error('Failed to load available roles');
+      message.error('Failed to load available principal roles');
     } finally {
-      setRolesLoading(false);
+      setPrincipalRolesLoading(false);
     }
-  };
+  }, [authenticatedFetch]);
 
-  const handleSubmit = async (values: PrincipalRoleFormValues) => {
-    if (!principalName) {
-      message.error('No principal selected');
+  // Fetch available principal roles when modal opens and set the catalog role
+  useEffect(() => {
+    if (visible && catalogName && catalogRoleName) {
+      fetchAvailablePrincipalRoles();
+      // Pre-fill the catalog role name
+      form.setFieldsValue({
+        catalogRoleName: catalogRoleName,
+      });
+    }
+  }, [visible, catalogName, catalogRoleName, form, fetchAvailablePrincipalRoles]);
+
+
+
+  const handleSubmit = async (values: CatalogRoleFormValues) => {
+    if (!catalogName) {
+      message.error('No catalog selected');
       return;
     }
 
@@ -81,15 +92,15 @@ export default function AssignPrincipalRoleModal({
 
     try {
       const payload = {
-        principalRole: {
-          name: values.roleName,
+        catalogRole: {
+          name: values.catalogRoleName,
         },
       };
 
       console.log('Sending request with payload:', payload);
 
       const data = await authenticatedFetch(
-          `/api/principals/${encodeURIComponent(principalName)}/principal-roles`,
+          `/api/principal-roles/${encodeURIComponent(values.principalRoleName)}/catalog-roles/${encodeURIComponent(catalogName)}`,
           {
             method: 'PUT',
             body: JSON.stringify(payload),
@@ -103,12 +114,12 @@ export default function AssignPrincipalRoleModal({
 
       console.log('Received response:', data);
 
-      message.success(`Role "${values.roleName}" assigned to principal "${principalName}" successfully!`);
+      message.success(`Catalog role "${values.catalogRoleName}" assigned to principal role "${values.principalRoleName}" successfully!`);
       form.resetFields();
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error assigning principal role:', error);
+      console.error('Error assigning catalog role:', error);
     } finally {
       setLoading(false);
     }
@@ -124,7 +135,7 @@ export default function AssignPrincipalRoleModal({
           title={
             <Space>
               <UserAddOutlined/>
-              Assign Role to Principal
+              Assign Catalog Role to Principal Role
             </Space>
           }
           open={visible}
@@ -145,32 +156,43 @@ export default function AssignPrincipalRoleModal({
             autoComplete="off"
         >
           <Form.Item
-              label="Principal"
-              tooltip="The principal to assign the role to"
+              label="Catalog"
+              tooltip="The catalog containing the role"
           >
             <Input
-                prefix={<TeamOutlined/>}
-                value={principalName || ''}
+                prefix={<FolderOutlined/>}
+                value={catalogName || ''}
                 disabled
             />
           </Form.Item>
 
           <Form.Item
-              label="Role Name"
-              name="roleName"
+              label="Catalog Role"
+              name="catalogRoleName"
+              tooltip="The catalog role to assign to the principal role"
+          >
+            <Input
+                value={catalogRoleName || ''}
+                disabled
+            />
+          </Form.Item>
+
+          <Form.Item
+              label="Principal Role"
+              name="principalRoleName"
               rules={[
-                {required: true, message: 'Please select a role'},
+                {required: true, message: 'Please select a principal role'},
               ]}
-              tooltip="Select the role to assign to this principal"
+              tooltip="Select the principal role to assign the catalog role to"
           >
             <Select
                 showSearch
-                placeholder="Select a role"
-                loading={rolesLoading}
+                placeholder="Select a principal role"
+                loading={principalRolesLoading}
                 filterOption={(input, option) =>
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
-                options={availableRoles.map(role => ({
+                options={availablePrincipalRoles.map(role => ({
                   value: role.name,
                   label: role.name,
                 }))}

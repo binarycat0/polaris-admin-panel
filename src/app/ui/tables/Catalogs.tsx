@@ -3,48 +3,67 @@ import type {MenuProps} from 'antd'
 import {Button, Dropdown, Empty, Space, Table, Typography} from 'antd'
 import {
   CalendarOutlined,
+  CloudOutlined,
   DeleteOutlined,
   EditOutlined,
+  FolderOutlined,
   SettingOutlined,
-  TeamOutlined,
+  TagsOutlined
 } from '@ant-design/icons'
 import type {ColumnsType} from 'antd/es/table'
 import {useState} from 'react'
-import DeleteConfirmationModal from '@/app/ui/delete-confirmation-modal'
-import PropertiesCell from '@/app/ui/properties-cell'
+import DeleteConfirmationModal from '@/app/ui/modals/shared/DeleteConfirmationModal'
+import PropertiesCell from '@/app/ui/components/PropertiesCell'
 
 const {Text} = Typography;
 
-export interface CatalogRole {
+export interface CatalogEntity {
   name: string;
+  type: 'INTERNAL' | 'EXTERNAL';
   properties: {
-    [key: string]: string;
+    "default-base-location": string;
+    [key: string]: string; // Allows additional string properties
   };
   createTimestamp: number;
   lastUpdateTimestamp: number;
   entityVersion: number;
+  storageConfigInfo: {
+    storageType: 'S3' | 'AZURE' | 'GCS' | 'FILE';
+    allowedLocations?: string[];
+    roleArn?: string;
+    externalId?: string;
+    userArn?: string;
+    region?: string;
+    endpoint?: string;
+    stsEndpoint?: string;
+    stsUnavailable?: boolean;
+    endpointInternal?: string;
+    pathStyleAccess?: boolean;
+    tenantId?: string;
+    multiTenantAppName?: string;
+    consentUrl?: string;
+    gcsServiceAccount?: string;
+  };
 }
 
-interface CatalogRolesProps {
-  roles: CatalogRole[];
-  loading: boolean;
-  onRowClick?: (catalogRoleName: string) => void;
-  selectedCatalogRole?: string | null;
-  onEdit?: (catalogRoleName: string) => void;
-  onDelete?: (catalogRoleName: string) => void;
+interface CatalogsProps {
+  catalogs: CatalogEntity[];
+  onRowClick?: (catalogName: string) => void;
+  selectedCatalog?: string | null;
+  onEdit?: (catalogName: string) => void;
+  onDelete?: (catalogName: string) => void;
+  onShowRoles?: (catalogName: string) => void;
 }
 
-export default function CatalogRoles(
-    {
-      roles,
-      loading,
-      onRowClick,
-      selectedCatalogRole,
-      onEdit,
-      onDelete
-    }: CatalogRolesProps) {
+export default function Catalogs({
+                                   catalogs,
+                                   onRowClick,
+                                   selectedCatalog,
+                                   onEdit,
+                                   onDelete,
+                                 }: CatalogsProps) {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedRoleForDelete, setSelectedRoleForDelete] = useState<string | null>(null);
+  const [selectedCatalogForDelete, setSelectedCatalogForDelete] = useState<string | null>(null);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -56,24 +75,21 @@ export default function CatalogRoles(
     });
   };
 
-  const handleDeleteClick = (catalogRoleName: string) => {
-    setSelectedRoleForDelete(catalogRoleName);
+  const handleDeleteClick = (catalogName: string) => {
+    setSelectedCatalogForDelete(catalogName);
     setDeleteModalVisible(true);
   };
 
-  const handleDeleteConfirm = async (catalogRoleName: string) => {
+  const handleDeleteConfirm = async (catalogName: string) => {
     if (onDelete) {
-      await onDelete(catalogRoleName);
+      await onDelete(catalogName);
     }
   };
 
-  const columns: ColumnsType<CatalogRole> = [
+  const columns: ColumnsType<CatalogEntity> = [
     {
       title: (
-          <Space>
-            <TeamOutlined/>
-            Role Name
-          </Space>
+          <Space><FolderOutlined/>Name</Space>
       ),
       dataIndex: 'name',
       key: 'name',
@@ -85,6 +101,25 @@ export default function CatalogRoles(
             <Text type="secondary">version: {record.entityVersion}</Text>
           </Space>
       ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      sorter: (a, b) => a.type.localeCompare(b.type),
+    },
+    {
+      title: (
+          <Space>
+            <CloudOutlined/>
+            Storage Type
+          </Space>
+      ),
+      dataIndex: ['storageConfigInfo', 'storageType'],
+      key: 'storageType',
+      width: 180,
+      sorter: (a, b) => (a.storageConfigInfo?.storageType || '').localeCompare(b.storageConfigInfo?.storageType || ''),
     },
     {
       title: (
@@ -107,12 +142,12 @@ export default function CatalogRoles(
     {
       title: (
           <Space>
-            <SettingOutlined/>
+            <TagsOutlined/>
             Properties
           </Space>
       ),
       key: 'properties',
-      render: (_: unknown, record: CatalogRole) => <PropertiesCell properties={record.properties}/>,
+      render: (_: unknown, record: CatalogEntity) => <PropertiesCell properties={record.properties}/>,
     },
     {
       title: 'Actions',
@@ -161,11 +196,9 @@ export default function CatalogRoles(
   return (
       <>
         <Table
-            id="catalog-roles-table"
             columns={columns}
-            dataSource={roles}
+            dataSource={catalogs}
             rowKey="name"
-            loading={loading}
             scroll={{x: 'max-content'}}
             onRow={(record) => ({
               onClick: () => {
@@ -175,24 +208,24 @@ export default function CatalogRoles(
               },
               style: {
                 cursor: onRowClick ? 'pointer' : 'default',
-                backgroundColor: selectedCatalogRole === record.name ? '#f6ffed' : undefined,
+                backgroundColor: selectedCatalog === record.name ? '#e6f7ff' : undefined,
               },
             })}
             rowClassName={(record) =>
-                selectedCatalogRole === record.name ? 'selected-catalogs-role-row' : ''
+                selectedCatalog === record.name ? 'selected-row' : ''
             }
             pagination={{
-              pageSize: 5,
+              pageSize: 10,
               showSizeChanger: false,
-              showQuickJumper: false,
+              showQuickJumper: true,
               showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} roles`,
+                  `${range[0]}-${range[1]} of ${total} catalogs`,
             }}
             locale={{
               emptyText: (
                   <Empty
                       image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={<Text type="secondary">No roles found for this catalog</Text>}
+                      description={<Text type="secondary">No catalogs found</Text>}
                   />
               ),
             }}
@@ -201,15 +234,15 @@ export default function CatalogRoles(
 
         <DeleteConfirmationModal
             visible={deleteModalVisible}
-            entityType="Catalog Role"
-            entityName={selectedRoleForDelete}
+            entityType="Catalog"
+            entityName={selectedCatalogForDelete}
             onClose={() => {
               setDeleteModalVisible(false);
-              setSelectedRoleForDelete(null);
+              setSelectedCatalogForDelete(null);
             }}
             onConfirm={handleDeleteConfirm}
             description=""
-            warningMessage="This will permanently remove the catalog role and all associated permissions."
+            warningMessage="This will permanently remove the catalog and all associated catalog roles, permissions, and data."
         />
       </>
   );

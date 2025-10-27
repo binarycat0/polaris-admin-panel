@@ -4,11 +4,11 @@ import {useCallback, useEffect, useState} from 'react';
 import {Button, message, Space, Spin, Typography} from 'antd';
 import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
-import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/principals';
-import CreatePrincipalModal from '@/app/ui/create-principal-modal';
-import EditPrincipalModal from '@/app/ui/edit-principal-modal';
-import AssignPrincipalRoleModal from '@/app/ui/assign-principal-role-modal';
-import RemovePrincipalRoleModal from '@/app/ui/remove-principal-role-modal';
+import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/tables/Principals';
+import CreatePrincipalModal from '@/app/ui/modals/principals/CreatePrincipalModal';
+import EditPrincipalModal from '@/app/ui/modals/principals/EditPrincipalModal';
+import AssignPrincipalRoleModal from '@/app/ui/modals/principal-roles/AssignPrincipalRoleModal';
+import RemovePrincipalRoleModal from '@/app/ui/modals/principal-roles/RemovePrincipalRoleModal';
 
 const {Title} = Typography;
 

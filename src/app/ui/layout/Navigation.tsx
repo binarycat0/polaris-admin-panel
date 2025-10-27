@@ -24,57 +24,33 @@ export default function Navigation() {
     isAuthenticated: false,
     isExpired: false
   });
-  const [realmInfo, setRealmInfo] = useState<{
-    headerName: string | null;
-    headerValue: string | null;
-  }>({
-    headerName: null,
-    headerValue: null
-  });
 
   useEffect(() => {
     const status = checkAuthStatus();
     setAuthStatus(status);
 
-    const updateRealmInfo = () => {
-      if (typeof window !== 'undefined') {
-        const headerName = localStorage.getItem('realm_header_name');
-        const headerValue = localStorage.getItem('realm_header_value');
-        setRealmInfo({
-          headerName,
-          headerValue
-        });
-      }
-    };
-
-    updateRealmInfo();
-
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const newStatus = checkAuthStatus();
         setAuthStatus(newStatus);
-        updateRealmInfo();
       }
     };
 
     const handleFocus = () => {
       const newStatus = checkAuthStatus();
       setAuthStatus(newStatus);
-      updateRealmInfo();
     };
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'access_token' || e.key === null) {
         const newStatus = checkAuthStatus();
         setAuthStatus(newStatus);
-        updateRealmInfo();
       }
     };
 
     const handleAuthStateChange = () => {
       const newStatus = checkAuthStatus();
       setAuthStatus(newStatus);
-      updateRealmInfo();
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

@@ -12,7 +12,7 @@ import {
   type TabsProps,
   Typography
 } from 'antd'
-import {CloudOutlined, DeleteOutlined, EditOutlined, FolderOutlined, PlusOutlined} from '@ant-design/icons'
+import {DeleteOutlined, EditOutlined, FolderOutlined, PlusOutlined} from '@ant-design/icons'
 import {useEffect, useState, type ReactNode} from 'react'
 import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
 
