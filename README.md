@@ -41,7 +41,16 @@ helm install apache-polaris-ui ./helm/apache-polaris-ui \
   --set env.POLARIS_CATALOG_API_URL=http://polaris:8181/api/catalog/v1
 ```
 
-
+**Deploy it to an existing deployment**
+```bash
+helm upgrade --install apache-polaris-ui oci://ghcr.io/binarycat0/apache-polaris-ui \
+  --namespace polaris \
+  --set image.tag=latest \
+  --set env.POLARIS_MANAGEMENT_API_URL="http://polaris:8181/api/management/v1" \
+  --set env.POLARIS_CATALOG_API_URL="http://polaris:8181/api/catalog/v1" \
+  --set service.port=3000 \
+  --set service.targetPort=3000
+```
 
 ## Configuration
 
