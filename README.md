@@ -1,13 +1,13 @@
-# [NOT OFFICIAL] Apache Polaris Catalog Management UI
+# [NOT OFFICIAL] Apache Polaris Management UI
 
 [NOT OFFICIAL] This is a simple UI to manage your Apache Polaris Instance.
 It is not official and is not supported by the Apache Polaris team.
 
-A modern web interface for managing Apache Polaris catalogs, principals, and roles with an intuitive UI built with Next.js and Ant Design.
+## Well Known Problems
 
-## Demo
-
-[Watch Demo](https://github.com/binarycat0/polaris-admin-panel/releases/download/0.0.1-dev/Screen.Recording.2025-10-13.at.17.38.41.mov)
+- This solution is not well tested
+    - If you face any bugs the cause could be the UI issues or API either. 
+    - Do not hesitate to open an Issue in this project.
 
 ## Quick Start
 
@@ -198,7 +198,3 @@ kubectl exec -it <pod-name> -- curl http://localhost:3000/api/health
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-See [LICENSE](LICENSE) file for details.
