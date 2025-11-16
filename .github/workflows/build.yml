@@ -10,10 +10,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/apache-polaris-ui
-
+  
 jobs:
   lint:
     name: Lint
