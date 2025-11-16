@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  apache-polaris-ui:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-11-16T14:00:33.458294211Z"
+    description: A Helm chart for Apache Polaris Catalog Management UI
+    digest: f610a53b1b5b14f8fe46c798c6722a7bfeebb4ffe5d47664f9b2529722ad2b84
+    home: https://github.com/binarycat0/polaris-admin-panel
+    keywords:
+    - polaris
+    - catalog
+    - ui
+    maintainers:
+    - name: binarycat0
+    name: apache-polaris-ui
+    sources:
+    - https://github.com/binarycat0/polaris-admin-panel
+    type: application
+    urls:
+    - https://binarycat0.github.io/polaris-admin-panel/apache-polaris-ui-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-11-16T14:00:33.457816757Z"
