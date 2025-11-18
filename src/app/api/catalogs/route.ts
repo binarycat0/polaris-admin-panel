@@ -9,6 +9,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('Creating catalog');
+  console.log('Creating catalog at:', apiManagementCatalogUrl);
   return handleAuthenticatedRequest(request, apiManagementCatalogUrl, 'POST');
 }

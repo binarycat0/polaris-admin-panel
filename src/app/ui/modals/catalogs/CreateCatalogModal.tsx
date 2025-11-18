@@ -1,5 +1,6 @@
 'use client'
 import {
+  Alert,
   Button,
   Divider,
   Flex,
@@ -218,7 +219,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMessage = errorData.error?.message || 'Failed to create catalog';
+        const errorMessage = errorData.error?.message || errorData || 'Failed to create catalog';
         message.error(errorMessage);
         throw new Error(errorMessage);
       }
@@ -246,7 +247,17 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         <Form.Item
             label="Allowed Locations"
             name="allowedLocations"
-            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            rules={[
+              {required: true, message: 'Please enter at least one allowed location'},
+              {
+                validator: (_, value) => {
+                  if (!value || value.length === 0) {
+                    return Promise.reject(new Error('Please enter at least one allowed location'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
             tooltip="Storage locations that are allowed for this catalog"
         >
           <Select
@@ -275,7 +286,17 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         <Form.Item
             label="Allowed Locations"
             name="allowedLocations"
-            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            rules={[
+              {required: true, message: 'Please enter at least one allowed location'},
+              {
+                validator: (_, value) => {
+                  if (!value || value.length === 0) {
+                    return Promise.reject(new Error('Please enter at least one allowed location'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
             tooltip="Storage locations that are allowed for this catalog"
         >
           <Select
@@ -305,7 +326,17 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         <Form.Item
             label="Allowed Locations"
             name="allowedLocations"
-            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            rules={[
+              {required: true, message: 'Please enter at least one allowed location'},
+              {
+                validator: (_, value) => {
+                  if (!value || value.length === 0) {
+                    return Promise.reject(new Error('Please enter at least one allowed location'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
             tooltip="Storage locations that are allowed for this catalog"
         >
           <Select
@@ -322,10 +353,27 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
 
   const storageFileMenuChildren: ReactNode = (
       <>
+        <Alert
+            message="FILE storage is for testing only"
+            description="FILE storage type may be disabled on your Polaris server. If you encounter errors, please use S3, Azure, or GCS storage instead, or enable FILE storage in your Polaris server configuration."
+            type="warning"
+            showIcon
+            style={{marginBottom: 16}}
+        />
         <Form.Item
             label="Allowed Locations"
             name="allowedLocations"
-            rules={[{required: true, message: 'Please enter allowed locations'}]}
+            rules={[
+              {required: true, message: 'Please enter at least one allowed location'},
+              {
+                validator: (_, value) => {
+                  if (!value || value.length === 0) {
+                    return Promise.reject(new Error('Please enter at least one allowed location'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
             tooltip="Storage locations that are allowed for this catalog"
         >
           <Select
@@ -440,13 +488,35 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
 
           <Divider orientation="left">Storage Configuration</Divider>
 
+          {/* Hidden field to store storageType value */}
+          <Form.Item name="storageType" hidden>
+            <Input />
+          </Form.Item>
+
           <Tabs
               type="card"
               activeKey={storageType}
               onChange={(key) => {
                 const newStorageType = key as 'S3' | 'AZURE' | 'GCS' | 'FILE';
                 setStorageType(newStorageType);
-                form.setFieldsValue({ storageType: newStorageType });
+
+                // Clear storage-specific fields when changing storage type
+                const fieldsToReset: Partial<CatalogFormValues> = {
+                  storageType: newStorageType,
+                  allowedLocations: undefined,
+                  // Clear S3 fields
+                  roleArn: undefined,
+                  externalId: undefined,
+                  userArn: undefined,
+                  region: undefined,
+                  // Clear Azure fields
+                  tenantId: undefined,
+                  multiTenantAppName: undefined,
+                  // Clear GCS fields
+                  gcsServiceAccount: undefined,
+                };
+
+                form.setFieldsValue(fieldsToReset);
               }}
               items={storageTypeItems}
           />
