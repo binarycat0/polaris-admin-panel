@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {Button, message, Space, Spin, Typography} from 'antd';
 import {UserAddOutlined, UserOutlined} from '@ant-design/icons';
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth';
 import Principals, {Principal, PrincipalRoleItem} from '@/app/ui/tables/Principals';
 import CreatePrincipalModal from '@/app/ui/modals/principals/CreatePrincipalModal';
 import EditPrincipalModal from '@/app/ui/modals/principals/EditPrincipalModal';
@@ -30,7 +30,7 @@ export default function Page() {
   const [removeRoleModalVisible, setRemoveRoleModalVisible] = useState(false);
   const [selectedPrincipalForRole, setSelectedPrincipalForRole] = useState<string | null>(null);
   const [selectedPrincipalForEdit, setSelectedPrincipalForEdit] = useState<Principal | null>(null);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const getPrincipals = useCallback(async (): Promise<Principal[]> => {
     try {

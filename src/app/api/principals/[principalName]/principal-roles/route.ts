@@ -21,13 +21,19 @@ export async function GET(
 
     const response = await authenticatedFetch(url, 'GET', authHeader, request);
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to fetch principal roles',
+          type: 'FetchError',
+          code: response.status
+        }
+      }));
       console.error('Error fetching principal roles for principal:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error('Principal roles for principal proxy error:', error);
@@ -78,6 +84,12 @@ export async function PUT(
     }
 
     console.log('Principal role assigned successfully');
+
+    // Handle 204 No Content response from backend
+    if (response.status === 204) {
+      return new NextResponse(null, {status: 204});
+    }
+
     return NextResponse.json({success: true}, {status: 201});
   } catch (error) {
     console.error('Assign principal role proxy error:', error);

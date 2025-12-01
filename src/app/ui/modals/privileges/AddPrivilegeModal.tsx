@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {FolderOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 import {
   CatalogPrivileges,
   NamespacePrivileges,
@@ -57,7 +57,7 @@ export default function AddPrivilegeModal({
   const [form] = Form.useForm<PrivilegeFormValues>();
   const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<GrantType>('catalog');
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   // Reset form when modal opens
   useEffect(() => {

@@ -21,13 +21,19 @@ export async function GET(
 
     const response = await authenticatedFetch(url, 'GET', authHeader, request);
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to fetch principals for principal role',
+          type: 'FetchError',
+          code: response.status
+        }
+      }));
       console.error('Error fetching principals for principal role:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error('Principals for principal role proxy error:', error);

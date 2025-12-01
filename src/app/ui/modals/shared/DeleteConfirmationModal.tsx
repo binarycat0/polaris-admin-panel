@@ -1,7 +1,7 @@
 'use client'
 import {Alert, Button, Modal, Space, Typography} from 'antd'
 import {DeleteOutlined} from '@ant-design/icons'
-import {useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 
 const {Text} = Typography
 
@@ -26,6 +26,14 @@ export default function DeleteConfirmationModal({
                                                 }: DeleteConfirmationModalProps) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleConfirm = async () => {
     if (!entityName) return;
@@ -35,16 +43,22 @@ export default function DeleteConfirmationModal({
 
     try {
       await onConfirm(entityName);
-      onClose();
+      if (isMountedRef.current) {
+        onClose();
+      }
     } catch (error) {
       console.error(`Error deleting ${entityType.toLowerCase()}:`, error);
-      setErrorMessage(
-          error instanceof Error
-              ? error.message
-              : `Failed to delete ${entityType.toLowerCase()}. Please try again.`
-      );
+      if (isMountedRef.current) {
+        setErrorMessage(
+            error instanceof Error
+                ? error.message
+                : `Failed to delete ${entityType.toLowerCase()}. Please try again.`
+        );
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

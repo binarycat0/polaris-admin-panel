@@ -2,7 +2,7 @@
 import {Button, Divider, Form, Input, message, Modal, Space} from 'antd'
 import {DeleteOutlined, EditOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface EditCatalogRoleModalProps {
   visible: boolean;
@@ -31,7 +31,7 @@ export default function EditCatalogRoleModal({
                                               }: EditCatalogRoleModalProps) {
   const [form] = Form.useForm<CatalogRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   useEffect(() => {
     if (visible && currentCatalogRole) {

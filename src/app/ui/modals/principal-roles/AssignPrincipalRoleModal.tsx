@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {TeamOutlined, UserAddOutlined} from '@ant-design/icons'
 import {useCallback, useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface AssignPrincipalRoleModalProps {
   visible: boolean;
@@ -36,7 +36,7 @@ export default function AssignPrincipalRoleModal({
   const [loading, setLoading] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<PrincipalRole[]>([]);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const fetchAvailableRoles = useCallback(async () => {
     setRolesLoading(true);

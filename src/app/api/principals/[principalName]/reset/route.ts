@@ -25,13 +25,19 @@ export async function POST(
 
     const response = await authenticatedFetch(url, 'POST', authHeader, request, body);
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to reset credentials',
+          type: 'ResetError',
+          code: response.status
+        }
+      }));
       console.error('Backend error response:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
+    const data = await response.json();
     console.log('Credentials reset successfully');
     return NextResponse.json(data);
   } catch (error) {

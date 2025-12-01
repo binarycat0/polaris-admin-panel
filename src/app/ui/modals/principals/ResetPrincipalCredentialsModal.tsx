@@ -2,7 +2,7 @@
 import {Alert, Button, Form, Input, message, Modal, Space, Typography} from 'antd'
 import {KeyOutlined, ReloadOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 import PrincipalCredentialsModal from './PrincipalCredentialsModal'
 import type {PrincipalWithCredentials} from '@/app/ui/types/principal'
 
@@ -31,7 +31,7 @@ export default function ResetPrincipalCredentialsModal({
   const [showCredentials, setShowCredentials] = useState(false);
   const [resetPrincipal, setResetPrincipal] = useState<PrincipalWithCredentials | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: ResetFormValues) => {
     if (!principalName) return;

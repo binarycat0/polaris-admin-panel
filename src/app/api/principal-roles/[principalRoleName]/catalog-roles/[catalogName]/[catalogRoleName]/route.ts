@@ -33,7 +33,7 @@ export async function DELETE(
     }
 
     console.log('Catalog role revoked successfully');
-    return NextResponse.json({success: true}, {status: 204});
+    return new NextResponse(null, {status: 204});
   } catch (error) {
     console.error('Revoke catalog role proxy error:', error);
     return NextResponse.json(

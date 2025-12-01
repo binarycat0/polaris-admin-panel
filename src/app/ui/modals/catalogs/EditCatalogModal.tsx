@@ -14,7 +14,7 @@ import {
 } from 'antd'
 import {DeleteOutlined, EditOutlined, FolderOutlined, PlusOutlined} from '@ant-design/icons'
 import {useEffect, useState, type ReactNode} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 const {Text} = Typography;
 
@@ -97,7 +97,7 @@ export default function EditCatalogModal({
   const [form] = Form.useForm<CatalogFormValues>();
   const [loading, setLoading] = useState(false);
   const [storageType, setStorageType] = useState<'S3' | 'AZURE' | 'GCS' | 'FILE'>('S3');
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   useEffect(() => {
     if (visible && currentCatalog) {

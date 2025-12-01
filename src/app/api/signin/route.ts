@@ -26,12 +26,18 @@ export async function POST(request: NextRequest) {
       body: formData.toString(),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Authentication failed',
+          type: 'AuthError',
+          code: response.status
+        }
+      }));
       return NextResponse.json(data, { status: response.status });
     }
 
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error('Auth proxy error:', error);

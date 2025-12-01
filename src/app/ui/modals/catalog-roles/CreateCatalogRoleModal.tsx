@@ -10,7 +10,7 @@ import {
 } from 'antd'
 import {DeleteOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface CreateCatalogRoleModalProps {
   visible: boolean;
@@ -27,7 +27,7 @@ interface CatalogRoleFormValues {
 export default function CreateCatalogRoleModal({visible, catalogName, onClose, onSuccess}: CreateCatalogRoleModalProps) {
   const [form] = Form.useForm<CatalogRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: CatalogRoleFormValues) => {
     if (!catalogName) {

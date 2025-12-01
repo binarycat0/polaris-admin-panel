@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {DeleteOutlined, FolderOutlined, TeamOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 import {Grant} from '@/app/ui/tables/Grants'
 
 interface RemovePrivilegeModalProps {
@@ -30,7 +30,7 @@ export default function RemovePrivilegeModal({
   const [form] = Form.useForm<RemovePrivilegeFormValues>();
   const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<string | undefined>(undefined);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   // Reset form when modal opens
   useEffect(() => {

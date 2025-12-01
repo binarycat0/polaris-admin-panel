@@ -1,7 +1,6 @@
 'use client'
 
 import {usePathname, useRouter} from 'next/navigation';
-import {useEffect, useState} from 'react';
 import {Layout, Menu, type MenuProps} from 'antd';
 import {
   FolderOpenOutlined,
@@ -11,7 +10,8 @@ import {
   TeamOutlined,
   UserOutlined
 } from '@ant-design/icons';
-import {type AuthStatus, checkAuthStatus} from '@/utils/auth';
+import {useSession} from 'next-auth/react';
+import {isSessionValid} from '@/utils/authNextAuth';
 
 const {Sider} = Layout;
 
@@ -20,51 +20,9 @@ type MenuItem = Required<MenuProps>['items'][number];
 export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
-  const [authStatus, setAuthStatus] = useState<AuthStatus>({
-    isAuthenticated: false,
-    isExpired: false
-  });
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    const status = checkAuthStatus();
-    setAuthStatus(status);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const newStatus = checkAuthStatus();
-        setAuthStatus(newStatus);
-      }
-    };
-
-    const handleFocus = () => {
-      const newStatus = checkAuthStatus();
-      setAuthStatus(newStatus);
-    };
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'access_token' || e.key === null) {
-        const newStatus = checkAuthStatus();
-        setAuthStatus(newStatus);
-      }
-    };
-
-    const handleAuthStateChange = () => {
-      const newStatus = checkAuthStatus();
-      setAuthStatus(newStatus);
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('auth-state-changed', handleAuthStateChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('auth-state-changed', handleAuthStateChange);
-    };
-  }, []);
+  const isAuthenticated = status === 'authenticated' && isSessionValid(session);
 
   const getSelectedKey = () => {
     if (pathname === '/') return 'home';
@@ -105,14 +63,14 @@ export default function Navigation() {
       icon: <HomeOutlined/>,
       label: 'Home',
     },
-    ...(!authStatus.isAuthenticated || authStatus.isExpired ? [
+    ...(!isAuthenticated ? [
       {
         key: 'signin',
         icon: <LoginOutlined/>,
         label: 'Sign In',
       },
     ] : []),
-    ...(authStatus.isAuthenticated && !authStatus.isExpired ? [
+    ...(isAuthenticated ? [
       {
         key: 'catalogs',
         icon: <FolderOpenOutlined/>,

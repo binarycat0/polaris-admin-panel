@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {FolderOutlined, UserAddOutlined} from '@ant-design/icons'
 import {useCallback, useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface AssignCatalogRoleModalProps {
   visible: boolean;
@@ -41,7 +41,7 @@ export default function AssignCatalogRoleModal({
   const [loading, setLoading] = useState(false);
   const [availablePrincipalRoles, setAvailablePrincipalRoles] = useState<PrincipalRole[]>([]);
   const [principalRolesLoading, setPrincipalRolesLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const fetchAvailablePrincipalRoles = useCallback(async () => {
     setPrincipalRolesLoading(true);

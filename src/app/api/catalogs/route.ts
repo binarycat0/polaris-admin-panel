@@ -5,6 +5,7 @@ import {handleAuthenticatedRequest} from "@/utils/auth";
 
 export async function GET(request: NextRequest) {
   console.log('Fetching catalogs from:', apiManagementCatalogUrl);
+  console.log('Request headers:', Object.fromEntries(request.headers.entries()));
   return handleAuthenticatedRequest(request, apiManagementCatalogUrl, 'GET');
 }
 

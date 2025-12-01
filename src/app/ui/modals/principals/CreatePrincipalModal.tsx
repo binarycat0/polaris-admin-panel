@@ -2,7 +2,7 @@
 import {Button, Divider, Form, Input, message, Modal, Space, Switch} from 'antd'
 import {DeleteOutlined, PlusOutlined, UserOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 import PrincipalCredentialsModal from './PrincipalCredentialsModal'
 import type {PrincipalWithCredentials} from '@/app/ui/types/principal'
 
@@ -27,7 +27,7 @@ export default function CreatePrincipalModal({
   const [loading, setLoading] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [createdPrincipal, setCreatedPrincipal] = useState<PrincipalWithCredentials | null>(null);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: PrincipalFormValues) => {
 

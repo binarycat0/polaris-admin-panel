@@ -247,11 +247,15 @@ export async function handleAuthenticatedRequest(
 
   try {
     const authHeader = validateAuthHeader(request);
+    console.log('Auth header:', authHeader ? 'Present' : 'Missing');
+
     if (!authHeader) {
+      console.error('No authorization header found');
       return NextResponse.json(getUnauthorizedError(), { status: 401 });
     }
 
     const url = typeof urlOrFactory === 'function' ? await urlOrFactory() : urlOrFactory;
+    console.log('Target URL:', url);
 
     let body: unknown = undefined;
     const shouldParseBody = options?.parseBody ?? (method !== 'GET');
@@ -264,21 +268,31 @@ export async function handleAuthenticatedRequest(
       }
     }
 
+    console.log('Making authenticated fetch to:', url);
     const response = await authenticatedFetch(url, method, authHeader, request, body);
+    console.log('Response status:', response.status);
+
+    // Handle 204 No Content responses (no body to parse)
+    if (response.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
 
     const data = await response.json();
+    console.log('Response data:', data);
 
     if (!response.ok) {
+      console.error('Backend returned error:', response.status, data);
       return NextResponse.json(data, { status: response.status });
     }
 
     return NextResponse.json(data);
   } catch (error) {
     console.error('Authenticated request error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
       {
         error: {
-          message: 'Internal server error',
+          message: error instanceof Error ? error.message : 'Internal server error',
           type: 'InternalServerError',
           code: 500
         }

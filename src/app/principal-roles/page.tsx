@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {Button, message, Space, Spin, Typography} from 'antd';
 import {TeamOutlined, UsergroupAddOutlined} from '@ant-design/icons';
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth';
 import PrincipalRolesList, {PrincipalItem, PrincipalRoleItem} from '@/app/ui/tables/PrincipalRolesList';
 import CreatePrincipalRoleModal from '@/app/ui/modals/principal-roles/CreatePrincipalRoleModal';
 import EditPrincipalRoleModal from '@/app/ui/modals/principal-roles/EditPrincipalRoleModal';
@@ -25,7 +25,7 @@ export default function Page() {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedPrincipalRoleForEdit, setSelectedPrincipalRoleForEdit] = useState<PrincipalRoleItem | null>(null);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const getPrincipalRoles = useCallback(async (): Promise<PrincipalRoleItem[]> => {
     try {

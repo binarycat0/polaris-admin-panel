@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {DeleteOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface RemovePrincipalRoleModalProps {
   visible: boolean;
@@ -25,7 +25,7 @@ export default function RemovePrincipalRoleModal({
                                                  }: RemovePrincipalRoleModalProps) {
   const [form] = Form.useForm<RemoveRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: RemoveRoleFormValues) => {
     if (!principalName) {

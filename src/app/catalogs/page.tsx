@@ -21,7 +21,7 @@ import {
   PlusOutlined,
   UsergroupAddOutlined
 } from '@ant-design/icons';
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch';
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth';
 
 const {Title} = Typography;
 
@@ -59,7 +59,7 @@ export default function Page() {
   const [removeCatalogRoleModalVisible, setRemoveCatalogRoleModalVisible] = useState(false);
   const [addPrivilegeModalVisible, setAddPrivilegeModalVisible] = useState(false);
   const [removePrivilegeModalVisible, setRemovePrivilegeModalVisible] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const getCatalogs = useCallback(async (): Promise<CatalogEntity[]> => {
     try {

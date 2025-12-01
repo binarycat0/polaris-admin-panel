@@ -2,7 +2,7 @@
 import {Button, Divider, Form, Input, message, Modal, Space} from 'antd'
 import {DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined} from '@ant-design/icons'
 import {useEffect, useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface EditPrincipalModalProps {
   visible: boolean;
@@ -29,7 +29,7 @@ export default function EditPrincipalModal({
                                            }: EditPrincipalModalProps) {
   const [form] = Form.useForm<PrincipalFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   useEffect(() => {
     if (visible && currentPrincipal) {

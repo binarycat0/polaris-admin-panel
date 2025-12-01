@@ -2,7 +2,7 @@
 import {Form, Input, message, Modal, Select, Space} from 'antd'
 import {DeleteOutlined, FolderOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface RemoveCatalogRoleModalProps {
   visible: boolean;
@@ -27,7 +27,7 @@ export default function RemoveCatalogRoleModal({
                                                 }: RemoveCatalogRoleModalProps) {
   const [form] = Form.useForm<RemoveRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: RemoveRoleFormValues) => {
     if (!catalogName || !catalogRoleName) {

@@ -2,7 +2,7 @@
 import {Button, Divider, Form, Input, message, Modal, Space, Switch} from 'antd'
 import {DeleteOutlined, PlusOutlined, TeamOutlined} from '@ant-design/icons'
 import {useState} from 'react'
-import {useAuthenticatedFetch} from '@/hooks/useAuthenticatedFetch'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 interface CreatePrincipalRoleModalProps {
   visible: boolean;
@@ -23,7 +23,7 @@ export default function CreatePrincipalRoleModal({
                                                  }: CreatePrincipalRoleModalProps) {
   const [form] = Form.useForm<PrincipalRoleFormValues>();
   const [loading, setLoading] = useState(false);
-  const {authenticatedFetch} = useAuthenticatedFetch();
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: PrincipalRoleFormValues) => {
     setLoading(true);

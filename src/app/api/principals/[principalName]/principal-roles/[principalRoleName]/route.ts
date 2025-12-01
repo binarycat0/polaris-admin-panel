@@ -34,7 +34,7 @@ export async function DELETE(
     }
 
     console.log('Principal role removed from principal successfully');
-    return NextResponse.json({success: true}, {status: 204});
+    return new NextResponse(null, {status: 204});
   } catch (error) {
     console.error('Remove principal role from principal proxy error:', error);
     return NextResponse.json(

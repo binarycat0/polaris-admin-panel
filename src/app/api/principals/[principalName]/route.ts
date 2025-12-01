@@ -23,13 +23,19 @@ export async function PUT(
 
     const response = await authenticatedFetch(url, 'PUT', authHeader, request, body);
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({
+        error: {
+          message: 'Failed to update principal',
+          type: 'UpdateError',
+          code: response.status
+        }
+      }));
       console.error('Backend error response:', data);
       return NextResponse.json(data, {status: response.status});
     }
 
+    const data = await response.json();
     console.log('Principal updated successfully:', data);
     return NextResponse.json(data);
   } catch (error) {
@@ -72,6 +78,12 @@ export async function DELETE(
     }
 
     console.log('Principal deleted successfully');
+
+    // Handle 204 No Content response from backend
+    if (response.status === 204) {
+      return new NextResponse(null, {status: 204});
+    }
+
     return NextResponse.json({success: true}, {status: 200});
   } catch (error) {
     console.error('Delete principal proxy error:', error);

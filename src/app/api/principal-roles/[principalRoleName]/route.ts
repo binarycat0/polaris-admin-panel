@@ -79,6 +79,12 @@ export async function DELETE(
     }
 
     console.log('Principal role deleted successfully');
+
+    // Handle 204 No Content response from backend
+    if (response.status === 204) {
+      return new NextResponse(null, {status: 204});
+    }
+
     return NextResponse.json({success: true}, {status: 200});
   } catch (error) {
     console.error('Delete principal role proxy error:', error);

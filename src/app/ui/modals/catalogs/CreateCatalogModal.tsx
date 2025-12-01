@@ -17,6 +17,7 @@ import {
 } from 'antd'
 import {CloudOutlined, FolderOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons'
 import {useState, type ReactNode} from 'react'
+import {useFetchNextAuth} from '@/hooks/useFetchNextAuth'
 
 const {Text} = Typography;
 
@@ -111,6 +112,7 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
   const [storageType, setStorageType] = useState<'S3' | 'AZURE' | 'GCS' | 'FILE'>('S3');
   const [connectionType, setConnectionType] = useState<'ICEBERG_REST' | 'HADOOP' | 'HIVE'>('ICEBERG_REST');
   const [authenticationType, setAuthenticationType] = useState<'OAUTH' | 'BEARER' | 'SIGV4' | 'IMPLICIT'>('IMPLICIT');
+  const {authenticatedFetch} = useFetchNextAuth();
 
   const handleSubmit = async (values: CatalogFormValues) => {
     console.log('Form submitted with values:', values);
@@ -195,33 +197,13 @@ export default function CreateCatalogModal({visible, onClose, onSuccess}: Create
         catalog,
       };
 
-      const token: string | null = localStorage.getItem('access_token');
-      const realmHeaderName: string | null = localStorage.getItem('realm_header_name');
-      const realmHeaderValue: string | null = localStorage.getItem('realm_header_value');
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      if (realmHeaderName && realmHeaderValue) {
-        headers[realmHeaderName] = realmHeaderValue;
-      }
-
-      const response = await fetch('/api/catalogs', {
+      const data = await authenticatedFetch('/api/catalogs', {
         method: 'POST',
-        headers,
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.error?.message || errorData || 'Failed to create catalog';
-        message.error(errorMessage);
-        throw new Error(errorMessage);
+      if (!data) {
+        return;
       }
 
       // Success
