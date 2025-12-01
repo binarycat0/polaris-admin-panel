@@ -56,10 +56,15 @@ helm upgrade --install apache-polaris-ui oci://ghcr.io/binarycat0/apache-polaris
 
 You can configure the app through ENV variables or .env file.
 
-| Name                       | Description             | Default                                 |
-|----------------------------|-------------------------|-----------------------------------------|
-| POLARIS_MANAGEMENT_API_URL | Management Endpoint URL | http://localhost:8181/api/management/v1 |
-| POLARIS_CATALOG_API_URL    | Catalog Endpoint URL    | http://localhost:8181/api/catalog/v1    |
+| Name                       | Description                       | Default/Example                                                    |
+|----------------------------|-----------------------------------|--------------------------------------------------------------------|
+| POLARIS_MANAGEMENT_API_URL | Management Endpoint URL           | http://localhost:8181/api/management/v1                            |
+| POLARIS_CATALOG_API_URL    | Catalog Endpoint URL              | http://localhost:8181/api/catalog/v1                               |
+| NEXTAUTH_URL               |                                   | http://localhost:4000                                              |
+| NEXTAUTH_SECRET            | Random string                     |                                                                    |
+| KEYCLOAK_CLIENT_ID         | Client Id in Keycloak for Polaris |                                                                    |
+| KEYCLOAK_CLIENT_SECRET     | Client Secret if configured       |                                                                    |
+| KEYCLOAK_TOKEN_URL         |                                   | http://keycloak:8080/realms/EXTERNAL/protocol/openid-connect/token |
 
 ## Development
 
@@ -93,6 +98,23 @@ npm run dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Keycloak Experiment
+The current implementation is only configured for Authentication flow - Direct access grants.
+In this scenario UI application passing the provided username/password and retrieving access_token by itself.
+
+Specify necessary ENV variables for keycloak and restart the application.
+`KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` 
+
+Example: 
+```bash
+NEXTAUTH_URL=http://localhost:4000
+NEXTAUTH_SECRET=your-secret-random-string
+
+KEYCLOAK_CLIENT_ID=kc-polaris-client
+KEYCLOAK_CLIENT_SECRET=kc-poalris-client-secret
+KEYCLOAK_TOKEN_URL=http://keycloak:8080/realms/EXTERNAL/protocol/openid-connect/token
+```
 
 ### Build for Production
 
