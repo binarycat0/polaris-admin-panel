@@ -1,4 +1,8 @@
-# [NOT OFFICIAL] Apache Polaris Management UI
+# ⚠️ [DEPRECATED] ⚠️
+## Check [apache/polaris-tools console](https://github.com/apache/polaris-tools/tree/main/console) for Apache Polaris UI experience
+
+
+## [NOT OFFICIAL] Apache Polaris Management UI
 
 [NOT OFFICIAL] This is a simple UI to manage your Apache Polaris Instance.
 It is not official and is not supported by the Apache Polaris team.
